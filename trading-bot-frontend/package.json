@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "nuxt build --port=3001",
-    "dev": "nuxt dev -o --port=3001", 
+    "dev": "nuxt dev -o --port=3001",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -18,7 +18,11 @@
     "@pinia/nuxt": "^0.4.11",
     "axios": "^1.4.0",
     "chart.js": "^4.3.0",
+    "chartjs-chart-financial": "^0.1.1",
+    "lightweight-charts": "^4.0.1",
     "pinia": "^2.1.4",
-    "vue-chartjs": "^5.2.0"
+    "technicalindicators": "^3.1.0",
+    "vue-chartjs": "^5.2.0",
+    "vue3-chart-v2": "^0.8.3"
   }
 }

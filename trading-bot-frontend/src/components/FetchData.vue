@@ -7,7 +7,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
-import { useDataStore } from '../store/dataStore';
+import { useDataStore } from '../stores/dataStore';
 
 // const dataStore = useDataStore();
 
@@ -23,7 +23,7 @@ onMounted(() => {
         } catch (error) {
             console.error(error);
         }
-    }, 1000);
+    }, 1 * 1000);
 });
 
 onUnmounted(() => {

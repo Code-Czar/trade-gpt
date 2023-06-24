@@ -1055,6 +1055,13 @@
     "@tufjs/canonical-json" "1.0.0"
     minimatch "^9.0.0"
 
+"@types/chart.js@^2.9.29":
+  version "2.9.37"
+  resolved "https://registry.yarnpkg.com/@types/chart.js/-/chart.js-2.9.37.tgz#8af70862b154fedf938b5b87debdb3a70f6e3208"
+  integrity sha512-9bosRfHhkXxKYfrw94EmyDQcdjMaQPkU1fH2tDxu8DWXxf1mjzWQAV4laJF51ZbC2ycYwNDvIm1rGez8Bug0vg==
+  dependencies:
+    moment "^2.10.2"
+
 "@types/estree@*", "@types/estree@^1.0.0":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-1.0.1.tgz#aa22750962f3bf0e79d753d3cc067f010c95f194"
@@ -1076,6 +1083,11 @@
   version "18.16.18"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.16.18.tgz#85da09bafb66d4bc14f7c899185336d0c1736390"
   integrity sha512-/aNaQZD0+iSBAGnvvN2Cx92HqE5sZCPZtx2TsK+4nvV23fFe09jVDvpArXr2j9DnYlzuU9WuoykDDc6wqvpNcw==
+
+"@types/node@^6.0.96":
+  version "6.14.13"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-6.14.13.tgz#b6649578fc0b5dac88c4ef48a46cab33c50a6c72"
+  integrity sha512-J1F0XJ/9zxlZel5ZlbeSuHW2OpabrUAqpFuC2sm2I3by8sERQ8+KCjNKUcq8QHuzpGMWiJpo9ZxeHrqrP2KzQw==
 
 "@types/resolve@1.20.2":
   version "1.20.2"
@@ -1821,12 +1833,40 @@ chardet@^0.7.0:
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-0.7.0.tgz#90094849f0937f2eedc2425d0d28a9e5f0cbad9e"
   integrity sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==
 
+chart.js@^2.9.4:
+  version "2.9.4"
+  resolved "https://registry.yarnpkg.com/chart.js/-/chart.js-2.9.4.tgz#0827f9563faffb2dc5c06562f8eb10337d5b9684"
+  integrity sha512-B07aAzxcrikjAPyV+01j7BmOpxtQETxTSlQ26BEYJ+3iUkbNKaOJ/nDbT6JjyqYxseM0ON12COHYdU2cTIjC7A==
+  dependencies:
+    chartjs-color "^2.1.0"
+    moment "^2.10.2"
+
 chart.js@^4.3.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/chart.js/-/chart.js-4.3.0.tgz#ac363030ab3fec572850d2d872956f32a46326a1"
   integrity sha512-ynG0E79xGfMaV2xAHdbhwiPLczxnNNnasrmPEXriXsPJGjmhOBYzFVEsB65w2qMDz+CaBJJuJD0inE/ab/h36g==
   dependencies:
     "@kurkle/color" "^0.3.0"
+
+chartjs-chart-financial@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/chartjs-chart-financial/-/chartjs-chart-financial-0.1.1.tgz#9cd285da460a92886537ea6c4b2bf19cd13fa7af"
+  integrity sha512-NTmUi48efAs5PT2OwM0PsM3izxMRA5Pv9lpEB5kWhClyiGMcZTq4/wsBZTr/HYMDdmkYcBD9Lm1Nlo/jyT2Dyg==
+
+chartjs-color-string@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/chartjs-color-string/-/chartjs-color-string-0.6.0.tgz#1df096621c0e70720a64f4135ea171d051402f71"
+  integrity sha512-TIB5OKn1hPJvO7JcteW4WY/63v6KwEdt6udfnDE9iCAZgy+V4SrbSxoIbTw/xkUIapjEI4ExGtD0+6D3KyFd7A==
+  dependencies:
+    color-name "^1.0.0"
+
+chartjs-color@^2.1.0:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/chartjs-color/-/chartjs-color-2.4.1.tgz#6118bba202fe1ea79dd7f7c0f9da93467296c3b0"
+  integrity sha512-haqOg1+Yebys/Ts/9bLo/BqUcONQOdr/hoEr2LLTRl6C5LXctUdHxsCYfvQVg5JIxITrfCNUDr4ntqmQk9+/0w==
+  dependencies:
+    chartjs-color-string "^0.6.0"
+    color-convert "^1.9.3"
 
 chokidar@^3.5.1, chokidar@^3.5.3:
   version "3.5.3"
@@ -1918,7 +1958,7 @@ cluster-key-slot@^1.1.0:
   resolved "https://registry.yarnpkg.com/cluster-key-slot/-/cluster-key-slot-1.1.2.tgz#88ddaa46906e303b5de30d3153b7d9fe0a0c19ac"
   integrity sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==
 
-color-convert@^1.9.0:
+color-convert@^1.9.0, color-convert@^1.9.3:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/color-convert/-/color-convert-1.9.3.tgz#bb71850690e1f136567de629d2d5471deda4c1e8"
   integrity sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg==
@@ -1937,7 +1977,7 @@ color-name@1.1.3:
   resolved "https://registry.yarnpkg.com/color-name/-/color-name-1.1.3.tgz#a7d0558bd89c42f795dd42328f740831ca53bc25"
   integrity sha512-72fSenhMw2HZMTVHeCA9KCmpEIbzWiQsjN+BHcBbS9vr1mtt+vJjPdksIBNUmKAW8TFUDPJK5SUU3QhE9NEXDw==
 
-color-name@~1.1.4:
+color-name@^1.0.0, color-name@~1.1.4:
   version "1.1.4"
   resolved "https://registry.yarnpkg.com/color-name/-/color-name-1.1.4.tgz#c2a09a87acbde69543de6f63fa3995c826c536a2"
   integrity sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==
@@ -2018,6 +2058,11 @@ cookie-es@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/cookie-es/-/cookie-es-1.0.0.tgz#4759684af168dfc54365b2c2dda0a8d7ee1e4865"
   integrity sha512-mWYvfOLrfEc996hlKcdABeIiPHUPC6DM2QYZdGGOvhOTbA3tjm2eBwqlJpoFdjC89NI4Qt6h0Pu06Mp+1Pj5OQ==
+
+core-js@^3.6.5:
+  version "3.31.0"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.31.0.tgz#4471dd33e366c79d8c0977ed2d940821719db344"
+  integrity sha512-NIp2TQSGfR6ba5aalZD+ZQ1fSxGhDo/s1w0nx3RYzf2pnJxt7YynxFlFScP6eV7+GZsKO95NSjGxyJsU3DZgeQ==
 
 core-util-is@~1.0.0:
   version "1.0.3"
@@ -2643,6 +2688,11 @@ externality@^1.0.2:
     mlly "^1.3.0"
     pathe "^1.1.1"
     ufo "^1.1.2"
+
+fancy-canvas@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/fancy-canvas/-/fancy-canvas-2.1.0.tgz#44b40e40419ad8ef8304df365e4276767e918552"
+  integrity sha512-nifxXJ95JNLFR2NgRV4/MxVP45G9909wJTEKz5fg/TZS20JJZA6hfgRVh/bC9bwl2zBtBNcYPjiBE4njQHVBwQ==
 
 fast-folder-size@^2.1.0:
   version "2.1.0"
@@ -3609,6 +3659,13 @@ lazystream@^1.0.0:
   dependencies:
     readable-stream "^2.0.5"
 
+lightweight-charts@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/lightweight-charts/-/lightweight-charts-4.0.1.tgz#cb66f98f5e81eaa0a937e3b75928108491fa5622"
+  integrity sha512-p+j6w41PVzf9Vn7IrmpmCJacunpN0kKsl0IZoxMOySSkDcSagZ7Is9pb6pclIfN/usHdta0aYm9FktkYpAQe0g==
+  dependencies:
+    fancy-canvas "2.1.0"
+
 lilconfig@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/lilconfig/-/lilconfig-2.1.0.tgz#78e23ac89ebb7e1bfbf25b18043de756548e7f52"
@@ -3982,6 +4039,11 @@ mlly@^1.2.0, mlly@^1.3.0, mlly@^1.4.0:
     pathe "^1.1.1"
     pkg-types "^1.0.3"
     ufo "^1.1.2"
+
+moment@^2.10.2:
+  version "2.29.4"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
+  integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
 
 mri@^1.2.0:
   version "1.2.0"
@@ -4871,6 +4933,11 @@ postcss@^8.1.10, postcss@^8.4.23, postcss@^8.4.24:
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
 
+prettier@^2.2.1:
+  version "2.8.8"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.8.8.tgz#e8c5d7e98a4305ffe3de2e1fc4aca1a71c28b1da"
+  integrity sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==
+
 pretty-bytes@^6.1.0:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/pretty-bytes/-/pretty-bytes-6.1.0.tgz#1d1cc9aae1939012c74180b679da6684616bf804"
@@ -5555,6 +5622,13 @@ tar@^6.1.11, tar@^6.1.13, tar@^6.1.2:
     mkdirp "^1.0.3"
     yallist "^4.0.0"
 
+technicalindicators@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/technicalindicators/-/technicalindicators-3.1.0.tgz#a275d36c6d478dda55e002deddcb42aa5cc33f4e"
+  integrity sha512-f16mOc+Y05hNy/of+UbGxhxQQmxUztCiluhsqC5QLUYz4WowUgKde9m6nIjK1Kay0wGHigT0IkOabpp0+22UfA==
+  dependencies:
+    "@types/node" "^6.0.96"
+
 terser@^5.17.4:
   version "5.18.1"
   resolved "https://registry.yarnpkg.com/terser/-/terser-5.18.1.tgz#6d8642508ae9fb7b48768e48f16d675c89a78460"
@@ -6018,7 +6092,18 @@ vue-router@^4.2.2:
   dependencies:
     "@vue/devtools-api" "^6.5.0"
 
-vue@^3.3.4:
+vue3-chart-v2@^0.8.3:
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/vue3-chart-v2/-/vue3-chart-v2-0.8.3.tgz#bbd5ac1f65508dc56fbe47466ae0a18c59890c50"
+  integrity sha512-261Od//f5mQiFzGe01wmid0GZuC9g3NkULGOPHvhSMXFFFrvsZFcmv9eMcQ0bXbEh+YkzWSQuLpquZjIOEg+EQ==
+  dependencies:
+    "@types/chart.js" "^2.9.29"
+    chart.js "^2.9.4"
+    core-js "^3.6.5"
+    prettier "^2.2.1"
+    vue "^3.0.0"
+
+vue@^3.0.0, vue@^3.3.4:
   version "3.3.4"
   resolved "https://registry.yarnpkg.com/vue/-/vue-3.3.4.tgz#8ed945d3873667df1d0fcf3b2463ada028f88bd6"
   integrity sha512-VTyEYn3yvIeY1Py0WaYGZsXnz3y5UnGi62GjVEqvEGPl6nxbOrCXbVOTQWBEJUqAyTUk2uJ5JLVnYJ6ZzGbrSw==

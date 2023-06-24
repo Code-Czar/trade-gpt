@@ -9,7 +9,7 @@ const { TradingBot } = require('./src/bot');
 const bot = new TradingBot('binance');
 
 const symbol = 'BTC/USDT';
-const timeframe = '1d'; // 1 day
+const timeframe = '1m'; // 1 day
 
 const app = express();
 
@@ -17,7 +17,7 @@ const app = express();
 app.use(cors());
 
 // Data store
-let ohlcvData = [];
+let ohlcvData = null;
 
 // Fetch new data every 1 minute
 let count = 0;
@@ -25,13 +25,13 @@ setInterval(async () => {
     try {
         const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
         console.log("🚀 ~ file: server.ts:19 ~ setInterval ~ ohlcv:", ohlcv)
-        ohlcvData.push(ohlcv);
+        ohlcvData = ohlcv;
         count++;
         console.log(`Fetched ${count} data`);
     } catch (error) {
         console.error(error);
     }
-}, 100);  // 1 seconds
+}, 1 * 1000);  // 1 seconds
 
 app.get('/api/data', (req, res) => {
     res.json(ohlcvData);

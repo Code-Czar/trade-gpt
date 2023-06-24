@@ -6,7 +6,7 @@ export const useDataStore = defineStore('data', {
     }),
     actions: {
         addData(newData) {
-            this.data.push(newData);
+            this.data = newData;
         },
     },
 });

@@ -2,6 +2,7 @@
   <div>
 
     <FetchData />
+    <TradingChart />
     <!-- <VisualizeData /> -->
     <!-- <NuxtWelcome /> -->
   </div>
@@ -10,6 +11,8 @@
 
 <script setup>
 import FetchData from './components/FetchData.vue';
+import TradingChart from './components/TradingChart.vue';
+
 // import VisualizeData from './components/VisualizeData.vue';
 </script>
 

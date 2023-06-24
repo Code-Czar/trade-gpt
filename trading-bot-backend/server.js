@@ -14,7 +14,7 @@ const { TradingBot } = require('./src/bot');
 // import { TradingBot } from './bot';
 const bot = new TradingBot('binance');
 const symbol = 'BTC/USDT';
-const timeframe = '1d'; // 1 day
+const timeframe = '1m'; // 1 day
 const app = express();
 // Enable CORS
 app.use(cors());
@@ -33,7 +33,7 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
     catch (error) {
         console.error(error);
     }
-}), 100); // 1 seconds
+}), 1 * 1000); // 1 seconds
 app.get('/api/data', (req, res) => {
     res.json(ohlcvData);
 });
