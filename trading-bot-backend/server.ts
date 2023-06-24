@@ -23,7 +23,7 @@ let ohlcvData = null;
 let count = 0;
 setInterval(async () => {
     try {
-        const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
+        const ohlcv = await bot.fetchOHLCV(symbol, timeframe)[0];
         console.log("🚀 ~ file: server.ts:19 ~ setInterval ~ ohlcv:", ohlcv)
         ohlcvData = ohlcv;
         count++;
