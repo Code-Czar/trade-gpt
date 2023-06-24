@@ -18,7 +18,7 @@ onMounted(() => {
     intervalId = setInterval(async () => {
         try {
             const response = await axios.get('http://localhost:3000/api/data');
-            dataStore.addData(response.data.slice(0, 100));
+            dataStore.addData(response.data.slice(0, 500));
             console.log("🚀 ~ file: FetchData.vue:22 ~ intervalId=setInterval ~ response.data:", response.data)
         } catch (error) {
             console.error(error);

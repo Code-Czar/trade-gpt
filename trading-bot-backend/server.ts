@@ -23,11 +23,12 @@ let ohlcvData = null;
 let count = 0;
 setInterval(async () => {
     try {
-        const ohlcv = await bot.fetchOHLCV(symbol, timeframe)[0];
-        console.log("🚀 ~ file: server.ts:19 ~ setInterval ~ ohlcv:", ohlcv)
+        const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
+        // console.log("🚀 ~ file: server.ts:19 ~ setInterval ~ ohlcv:", ohlcv)
         ohlcvData = ohlcv;
         count++;
         console.log(`Fetched ${count} data`);
+        console.log(`Size ${ohlcvData.length} data`);
     } catch (error) {
         console.error(error);
     }

@@ -19,16 +19,17 @@ const app = express();
 // Enable CORS
 app.use(cors());
 // Data store
-let ohlcvData = [];
+let ohlcvData = null;
 // Fetch new data every 1 minute
 let count = 0;
 setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const ohlcv = yield bot.fetchOHLCV(symbol, timeframe);
-        console.log("🚀 ~ file: server.ts:19 ~ setInterval ~ ohlcv:", ohlcv);
-        ohlcvData.push(ohlcv);
+        // console.log("🚀 ~ file: server.ts:19 ~ setInterval ~ ohlcv:", ohlcv)
+        ohlcvData = ohlcv;
         count++;
         console.log(`Fetched ${count} data`);
+        console.log(`Size ${ohlcvData.length} data`);
     }
     catch (error) {
         console.error(error);

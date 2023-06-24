@@ -117,7 +117,7 @@ watchEffect(async () => {
     // const newData = newDataValues[newDataValues.length - 1];
     // if (!newData) return;
     const seriesValues = Object.values(store.data);
-    const firstSerie = seriesValues[seriesValues.length - 1];
+    const firstSerie = seriesValues;
     if (!firstSerie || !chart) return;
     console.log('🚀 ~ file: TradingChart.vue:26 ~ watch ~ newData:', firstSerie);
 
