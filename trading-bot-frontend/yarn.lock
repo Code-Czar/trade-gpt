@@ -4075,6 +4075,11 @@ mute-stream@1.0.0:
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-1.0.0.tgz#e31bd9fe62f0aed23520aa4324ea6671531e013e"
   integrity sha512-avsJQhyd+680gKXyG/sQc0nXaC6rBkPOfyHYcFb9+hdkqQkR9bdnkJ0AMZhke0oesPqIO+mFFJ+IdBc7mst4IA==
 
+nan@^2.17.0:
+  version "2.17.0"
+  resolved "https://registry.yarnpkg.com/nan/-/nan-2.17.0.tgz#c0150a2368a182f033e9aa5195ec76ea41a199cb"
+  integrity sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ==
+
 nanoid@^3.3.6:
   version "3.3.6"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.6.tgz#443380c856d6e9f9824267d960b4236ad583ea4c"
@@ -5575,6 +5580,13 @@ svgo@^3.0.2:
     css-tree "^2.2.1"
     csso "^5.0.5"
     picocolors "^1.0.0"
+
+talib@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/talib/-/talib-1.1.5.tgz#b0922dbb3108cd74e6bd72f2b7b5ac9912a35d84"
+  integrity sha512-at8OQzwnAt5h/6d28/rL6xEO6d7/WzkKNd7NUtNVNewFGPwazAeglXo/sqTNLBZ0zUtZ8w4sXwpapKzH3eIX6A==
+  dependencies:
+    nan "^2.17.0"
 
 tapable@^1.0.0:
   version "1.1.3"

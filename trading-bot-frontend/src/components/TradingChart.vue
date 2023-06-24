@@ -1,7 +1,7 @@
 <template>
     <div ref="chartContainer" style="width: 100%; height: 500px;"></div>
     <div ref="rsiChartContainer" style="width: 100%; height: 200px;"></div>
-    <div ref="volumeChartContainer" style="width: 100%; height: 100px;"></div>
+    <div ref="volumeChartContainer" style="width: 100%; height: 300px;"></div>
 
     <button @click="toggleBollingerBands">{{ showBollingerBands.value ? 'Hide' : 'Show' }} Bollinger Bands</button>
     <button @click="toggleRSI">{{ showRSI.value ? 'Hide' : 'Show' }} RSI</button>
@@ -15,6 +15,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { createChart } from 'lightweight-charts';
 import { useDataStore } from '~/stores/dataStore';
 import { SMA, EMA, RSI } from 'technicalindicators';
+
 let rsiSeries = null;
 const showRSI = ref(false);
 
@@ -62,6 +63,7 @@ const toggleBollingerBands = () => {
 
 const toggleVolumes = () => {
     showVolume.value = !showVolume.value;
+    console.log("🚀 ~ file: TradingChart.vue:66 ~ toggleVolumes ~ showVolume.value:", showVolume.value)
 };
 
 const formatChartData = (data) => {
@@ -72,6 +74,7 @@ const formatChartData = (data) => {
         high: datum[2],
         low: datum[3],
         close: datum[4],
+        volume: datum[5],
     }));
 };
 
@@ -105,7 +108,8 @@ watchEffect(async () => {
     if (!firstSerie || !chart) return;
     console.log("🚀 ~ file: TradingChart.vue:26 ~ watch ~ newData:", firstSerie)
 
-    const formattedData = formatChartData(firstSerie);
+    let formattedData = formatChartData(firstSerie)
+
     console.log("🚀 ~ file: TradingChart.vue:108 ~ watchEffect ~ formattedData:", formattedData)
     if (candlestickSeries) {
         candlestickSeries.setData(formattedData);
@@ -225,22 +229,14 @@ watchEffect(async () => {
         }
     }
 
+
     if (showVolume.value) {
         let volumeData = formattedData.map((data) => ({ time: data.time / 1000, value: data.volume, color: data.open > data.close ? 'rgba(255, 82, 82, 0.8)' : 'rgba(4, 232, 36, 0.8)' }));
-
-        if (volumeSeries) {
-            volumeSeries.setData(volumeData);
-        } else {
-            volumeSeries = volumeChart.addHistogramSeries({ color: 'rgba(4, 232, 36, 0.8)', priceFormat: { type: 'volume' } });
-            volumeSeries.setData(volumeData);
-        }
+        console.log("🚀 ~ file: TradingChart.vue:250 ~ watchEffect ~ volumeData:", volumeData)
+        volumeSeries.setData(volumeData);
     } else {
-        if (volumeSeries) {
-            volumeChart.removeSeries(volumeSeries);
-            volumeSeries = null;
-        }
+        volumeSeries.setData([]); // set data to an empty array to clear the volume data
     }
-
 });
 
 onMounted(() => {
@@ -249,7 +245,9 @@ onMounted(() => {
         height: chartContainer.value.offsetHeight,
     });
     rsiChart = createChart(rsiChartContainer.value, { width: rsiChartContainer.value.offsetWidth, height: rsiChartContainer.value.offsetHeight });
+
     volumeChart = createChart(volumeChartContainer.value, { width: volumeChartContainer.value.offsetWidth, height: volumeChartContainer.value.offsetHeight });
+    volumeSeries = volumeChart.addHistogramSeries({ color: 'rgba(4, 232, 36, 0.8)', priceFormat: { type: 'volume' } });
 
     candlestickSeries = chart.addCandlestickSeries();
 });
@@ -261,13 +259,5 @@ onUnmounted(() => {
     }
 });
 
-// window.addEventListener('resize', () => {
-//     if (chart) {
-//         chart.resize(
-//             chartContainer.value.offsetWidth,
-//             chartContainer.value.offsetHeight,
-//         );
-//     }
-// });
 </script>
   
