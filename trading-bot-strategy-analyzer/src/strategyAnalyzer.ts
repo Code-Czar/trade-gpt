@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 
 import { sendSignalEmail } from './email';
+const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
@@ -102,6 +103,54 @@ async function completeAnalysis(symbol, timeframe) {
     return [data, { buySignal, sellSignal }];
 }
 
+
+async function openLongPosition(symbol, price) {
+    try {
+        const res = await fetch(`${positionManagerAPI}/position`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                symbol: symbol,
+                buyPrice: price,
+                quantity: 1, // TODO: adjust the quantity based on your strategy
+                type: 'long' // this is a long position
+            })
+        });
+
+        const data = await res.json();
+
+        console.log(`Opened new long position with ID ${data.id}`);
+    } catch (err) {
+        console.error(`Failed to open long position: ${err}`);
+    }
+}
+
+async function openShortPosition(symbol, price) {
+    try {
+        const res = await fetch(`${positionManagerAPI}/position`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                symbol: symbol,
+                sellPrice: price,
+                quantity: 1, // TODO: adjust the quantity based on your strategy
+                type: 'short' // this is a short position
+            })
+        });
+
+        const data = await res.json();
+        console.log("🚀 ~ file: strategyAnalyzer.ts:146 ~ openShortPosition ~ data:", data)
+
+        console.log(`Opened new short position with ID ${data.id}`);
+    } catch (err) {
+        console.error(`Failed to open short position: ${err}`);
+    }
+}
+
 export async function analyzeData(symbol, timeframe, analysisType, signalStatus) {
     // Fetch data
     const data = await fetchData(symbol, timeframe);
@@ -115,10 +164,15 @@ export async function analyzeData(symbol, timeframe, analysisType, signalStatus)
                 await sendSignalEmail(symbol, timeframe, 'RSI', 'Buy');
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].buySignal = true;
+                // Open a new long position
+                openLongPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
+
             } else if (analysisResult.sellSignal && !signalStatus[key]?.sellSignal) {
                 await sendSignalEmail(symbol, timeframe, 'RSI', 'Sell');
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].sellSignal = true;
+                // Open a new short position
+                openShortPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
             } else {
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].buySignal = analysisResult.buySignal;
@@ -134,10 +188,12 @@ export async function analyzeData(symbol, timeframe, analysisType, signalStatus)
                 await sendSignalEmail(symbol, timeframe, 'Complete', 'Buy');
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].buySignal = true;
+                openLongPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
             } else if (analysisResult.sellSignal && !signalStatus[key]?.sellSignal) {
                 await sendSignalEmail(symbol, timeframe, 'Complete', 'Sell');
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].sellSignal = true;
+                openShortPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
             } else {
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].buySignal = analysisResult.buySignal;
@@ -152,32 +208,6 @@ export async function analyzeData(symbol, timeframe, analysisType, signalStatus)
 
     return [data, analysisResult];
 }
-
-
-// export async function analyzeData(symbol, timeframe, analysisType) {
-//     // Fetch data
-//     const data = await fetchData(symbol, timeframe);
-//     let analysisResult;
-
-//     switch (analysisType) {
-//         case 'RSI':
-//             analysisResult = analyzeRSI(data);
-//             break;
-//         // Add cases for other analysis types here...
-
-
-//         case "COMPLETE_ANALYSIS":
-//             analysisResult = await completeAnalysis(symbol, timeframe);
-//             break;
-
-
-//         default:
-//             console.log(`Unknown analysis type: ${analysisType}`);
-//             return;
-//     }
-
-//     return [data, analysisResult];
-// }
 
 
 

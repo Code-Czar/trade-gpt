@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.analyzeData = void 0;
 const fetch = require('node-fetch');
 const email_1 = require("./email");
+const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
     // Identify if the last candlestick's price touched the lower Bollinger Band
@@ -101,6 +102,53 @@ function completeAnalysis(symbol, timeframe) {
         return [data, { buySignal, sellSignal }];
     });
 }
+function openLongPosition(symbol, price) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const res = yield fetch(`${positionManagerAPI}/position`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    symbol: symbol,
+                    buyPrice: price,
+                    quantity: 1,
+                    type: 'long' // this is a long position
+                })
+            });
+            const data = yield res.json();
+            console.log(`Opened new long position with ID ${data.id}`);
+        }
+        catch (err) {
+            console.error(`Failed to open long position: ${err}`);
+        }
+    });
+}
+function openShortPosition(symbol, price) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const res = yield fetch(`${positionManagerAPI}/position`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    symbol: symbol,
+                    sellPrice: price,
+                    quantity: 1,
+                    type: 'short' // this is a short position
+                })
+            });
+            const data = yield res.json();
+            console.log("🚀 ~ file: strategyAnalyzer.ts:146 ~ openShortPosition ~ data:", data);
+            console.log(`Opened new short position with ID ${data.id}`);
+        }
+        catch (err) {
+            console.error(`Failed to open short position: ${err}`);
+        }
+    });
+}
 function analyzeData(symbol, timeframe, analysisType, signalStatus) {
     var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
@@ -116,12 +164,16 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus) {
                     if (!signalStatus[key])
                         signalStatus[key] = {};
                     signalStatus[key].buySignal = true;
+                    // Open a new long position
+                    openLongPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
                 }
                 else if (analysisResult.sellSignal && !((_b = signalStatus[key]) === null || _b === void 0 ? void 0 : _b.sellSignal)) {
                     yield (0, email_1.sendSignalEmail)(symbol, timeframe, 'RSI', 'Sell');
                     if (!signalStatus[key])
                         signalStatus[key] = {};
                     signalStatus[key].sellSignal = true;
+                    // Open a new short position
+                    openShortPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
                 }
                 else {
                     if (!signalStatus[key])
@@ -138,12 +190,14 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus) {
                     if (!signalStatus[key])
                         signalStatus[key] = {};
                     signalStatus[key].buySignal = true;
+                    openLongPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
                 }
                 else if (analysisResult.sellSignal && !((_d = signalStatus[key]) === null || _d === void 0 ? void 0 : _d.sellSignal)) {
                     yield (0, email_1.sendSignalEmail)(symbol, timeframe, 'Complete', 'Sell');
                     if (!signalStatus[key])
                         signalStatus[key] = {};
                     signalStatus[key].sellSignal = true;
+                    openShortPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
                 }
                 else {
                     if (!signalStatus[key])
@@ -160,21 +214,3 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus) {
     });
 }
 exports.analyzeData = analyzeData;
-// export async function analyzeData(symbol, timeframe, analysisType) {
-//     // Fetch data
-//     const data = await fetchData(symbol, timeframe);
-//     let analysisResult;
-//     switch (analysisType) {
-//         case 'RSI':
-//             analysisResult = analyzeRSI(data);
-//             break;
-//         // Add cases for other analysis types here...
-//         case "COMPLETE_ANALYSIS":
-//             analysisResult = await completeAnalysis(symbol, timeframe);
-//             break;
-//         default:
-//             console.log(`Unknown analysis type: ${analysisType}`);
-//             return;
-//     }
-//     return [data, analysisResult];
-// }
