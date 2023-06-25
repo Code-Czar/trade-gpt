@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const express = require('express');
 const cors = require('cors');
 const { TradingBot } = require('./src/bot');
-// import { TradingBot } from './bot';
 const bot = new TradingBot('binance');
 const symbol = 'BTC/USDT';
 const timeframe = '1m'; // 1 day
@@ -25,7 +24,6 @@ let count = 0;
 setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const ohlcv = yield bot.fetchOHLCV(symbol, timeframe);
-        // console.log("🚀 ~ file: server.ts:19 ~ setInterval ~ ohlcv:", ohlcv)
         ohlcvData = ohlcv;
         count++;
         console.log(`Fetched ${count} data`);
@@ -35,9 +33,60 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
         console.error(error);
     }
 }), 1 * 1000); // 1 seconds
-app.get('/api/data', (req, res) => {
-    res.json(ohlcvData);
-});
+app.get('/api/data/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    try {
+        const ohlcvs = yield bot.fetchOHLCV(symbol, timeframe);
+        res.json(ohlcvs);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching data' });
+    }
+}));
+app.get('/bollinger-bands/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcv = yield bot.fetchOHLCV(symbol, timeframe);
+    const bollingerBands = bot.calculateBollingerBands(ohlcv);
+    res.send(bollingerBands);
+}));
+app.get('/rsi/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcv = yield bot.fetchOHLCV(symbol, timeframe);
+    const rsi = bot.calculateRSI(ohlcv);
+    res.send(rsi);
+}));
+app.get('/macd/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcv = yield bot.fetchOHLCV(symbol, timeframe);
+    const macd = bot.calculateMACD(ohlcv);
+    res.send(macd);
+}));
+app.get('/volumes/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcv = yield bot.fetchOHLCV(symbol, timeframe);
+    const volumes = bot.calculateVolumes(ohlcv);
+    res.send(volumes);
+}));
+app.get('/api/support/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcvs = yield bot.fetchOHLCV(symbol, timeframe);
+    const support = yield bot.findSupport(ohlcvs);
+    res.json({ support });
+}));
+app.get('/api/resistance/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcvs = yield bot.fetchOHLCV(symbol, timeframe);
+    const resistance = yield bot.findResistance(ohlcvs);
+    res.json({ resistance });
+}));
 app.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');
 });

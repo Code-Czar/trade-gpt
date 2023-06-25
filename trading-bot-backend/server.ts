@@ -2,10 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const { TradingBot } = require('./src/bot');
 
-
-
-// import { TradingBot } from './bot';
-
 const bot = new TradingBot('binance');
 
 const symbol = 'BTC/USDT';
@@ -24,7 +20,6 @@ let count = 0;
 setInterval(async () => {
     try {
         const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
-        // console.log("🚀 ~ file: server.ts:19 ~ setInterval ~ ohlcv:", ohlcv)
         ohlcvData = ohlcv;
         count++;
         console.log(`Fetched ${count} data`);
@@ -34,8 +29,64 @@ setInterval(async () => {
     }
 }, 1 * 1000);  // 1 seconds
 
-app.get('/api/data', (req, res) => {
-    res.json(ohlcvData);
+app.get('/api/data/:symbol/:timeframe', async (req, res) => {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    try {
+        const ohlcvs = await bot.fetchOHLCV(symbol, timeframe);
+        res.json(ohlcvs);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching data' });
+    }
+});
+
+app.get('/bollinger-bands/:symbol/:timeframe', async (req, res) => {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
+    const bollingerBands = bot.calculateBollingerBands(ohlcv);
+    res.send(bollingerBands);
+});
+
+app.get('/rsi/:symbol/:timeframe', async (req, res) => {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
+    const rsi = bot.calculateRSI(ohlcv);
+    res.send(rsi);
+});
+
+app.get('/macd/:symbol/:timeframe', async (req, res) => {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
+    const macd = bot.calculateMACD(ohlcv);
+    res.send(macd);
+});
+
+app.get('/volumes/:symbol/:timeframe', async (req, res) => {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
+    const volumes = bot.calculateVolumes(ohlcv);
+    res.send(volumes);
+});
+
+app.get('/api/support/:symbol/:timeframe', async (req, res) => {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcvs = await bot.fetchOHLCV(symbol, timeframe);
+    const support = await bot.findSupport(ohlcvs);
+    res.json({ support });
+});
+
+app.get('/api/resistance/:symbol/:timeframe', async (req, res) => {
+    let { symbol, timeframe } = req.params;
+    symbol = symbol.replace('-', '/');
+    const ohlcvs = await bot.fetchOHLCV(symbol, timeframe);
+    const resistance = await bot.findResistance(ohlcvs);
+    res.json({ resistance });
 });
 
 app.listen(3000, () => {

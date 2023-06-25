@@ -10,6 +10,8 @@
     <button @click="toggleEMA">{{ showEMA.value ? 'Hide' : 'Show' }} EMA</button>
     <button @click="toggleVolumes">Toggle Volume</button>
     <button @click="toggleMACD">{{ showMACD.value ? 'Hide' : 'Show' }} MACD</button>
+    <button @click="toggleSupport">{{ showSupport.value ? 'Hide' : 'Show' }} Support</button>
+    <button @click="toggleResistance">{{ showResistance.value ? 'Hide' : 'Show' }} Resistance</button>
 </template>
 
 <script setup>
@@ -57,6 +59,25 @@ const showMACD = ref(false);
 const macdChartContainer = ref(null);
 let macdChart = null;
 const chartWidth = ref(null);
+
+const supportData = store.supportData[0];
+const resistanceData = store.resistanceData[0];
+let supportLineSeries;
+let resistanceLineSeries;
+let supportLine;
+let resistanceLine;
+
+const showSupport = ref(false);
+const showResistance = ref(false);
+
+const toggleSupport = () => {
+    showSupport.value = !showSupport.value;
+};
+
+const toggleResistance = () => {
+    showResistance.value = !showResistance.value;
+};
+
 
 const toggleSMA = () => {
     showSMA.value = !showSMA.value;
@@ -337,6 +358,47 @@ watchEffect(async () => {
             macdHistogramSeries = null;
         }
     }
+
+    const firstTimeValue = formattedData[0].time;
+    if (showSupport.value) {
+
+
+        // if (supportLine) {
+        //     supportLine.setData([{ time: formattedData[0].time / 1000, value: supportData }, { time: formattedData[formattedData.length - 1].time / 1000, value: supportData }]);
+        // } else {
+        //     supportLine = chart.addLineSeries({ color: 'green', lineWidth: 20 });
+        //     supportLine.setData([{ time: formattedData[0].time / 1000, value: supportData }, { time: formattedData[formattedData.length - 1].time / 1000, value: supportData }]);
+        // }
+        const supportLineData = formattedData.map((value) => ({
+            time: value.time,
+            value: store.supportData[0],
+            color: 'green',
+            lineWidth: 2,
+        }));
+        supportLineSeries.setData(supportLineData);
+
+
+    } else {
+
+    }
+
+    if (showResistance.value) {
+
+
+        const resistanceLineData = formattedData.map((value) => ({
+            time: value.time,
+            value: store.resistanceData[0],
+            color: 'red',
+            lineWidth: 2,
+        }));;
+        resistanceLineSeries.setData(resistanceLineData);
+    } else {
+        // if (resistanceLine) {
+        //     chart.removeSeries(resistanceLine);
+        //     resistanceLine = null;
+        // }
+    }
+
 });
 
 onMounted(async () => {
@@ -426,6 +488,14 @@ onMounted(async () => {
     volumeSeries = volumeChart.addHistogramSeries({ color: 'rgba(4, 232, 36, 0.8)', priceFormat: { type: 'volume' } });
 
     candlestickSeries = chart.addCandlestickSeries();
+    supportLineSeries = chart.addLineSeries({
+        color: "green",
+        lineWidth: 5,
+    });
+    resistanceLineSeries = chart.addLineSeries({
+        color: "red",
+        lineWidth: 5,
+    });
 });
 
 onUnmounted(() => {

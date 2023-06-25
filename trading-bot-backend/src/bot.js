@@ -34,6 +34,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TradingBot = void 0;
 const ccxt = __importStar(require("ccxt"));
+const technicalindicators_1 = require("technicalindicators");
 class TradingBot {
     constructor(exchangeId) {
         this.exchange = new ccxt[exchangeId]();
@@ -42,6 +43,50 @@ class TradingBot {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.exchange.loadMarkets();
             return this.exchange.fetchOHLCV(symbol, timeframe);
+        });
+    }
+    calculateBollingerBands(ohlcv) {
+        const closeValues = ohlcv.map(x => x[4]);
+        return technicalindicators_1.BollingerBands.calculate({ period: 20, values: closeValues, stdDev: 2 });
+    }
+    calculateRSI(ohlcv) {
+        const closeValues = ohlcv.map(x => x[4]);
+        return technicalindicators_1.RSI.calculate({ values: closeValues, period: 14 });
+    }
+    calculateMACD(ohlcv) {
+        const closeValues = ohlcv.map(x => x[4]);
+        return technicalindicators_1.MACD.calculate({
+            values: closeValues,
+            fastPeriod: 12,
+            slowPeriod: 26,
+            signalPeriod: 9,
+            SimpleMAOscillator: false,
+            SimpleMASignal: false
+        });
+    }
+    calculateVolumes(ohlcv) {
+        return ohlcv.map(x => x[5]);
+    }
+    findSupport(ohlcvs) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let lowest = ohlcvs[0][3];
+            for (let i = 1; i < ohlcvs.length; i++) {
+                if (ohlcvs[i][3] < lowest) {
+                    lowest = ohlcvs[i][3];
+                }
+            }
+            return lowest;
+        });
+    }
+    findResistance(ohlcvs) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let highest = ohlcvs[0][2];
+            for (let i = 1; i < ohlcvs.length; i++) {
+                if (ohlcvs[i][2] > highest) {
+                    highest = ohlcvs[i][2];
+                }
+            }
+            return highest;
         });
     }
 }
