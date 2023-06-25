@@ -1,9 +1,4 @@
 <template>
-    <div ref="chartContainer" style="width: 100%; height: 500px"></div>
-    <div ref="rsiChartContainer" style="width: 100%; height: 200px"></div>
-    <div ref="volumeChartContainer" style="width: 100%; height: 300px"></div>
-    <div ref="macdChartContainer" style="width: 100%; height: 300px"></div>
-
     <button @click="toggleBollingerBands">{{ showBollingerBands.value ? 'Hide' : 'Show' }} Bollinger Bands</button>
     <button @click="toggleRSI">{{ showRSI.value ? 'Hide' : 'Show' }} RSI</button>
     <button @click="toggleSMA">{{ showSMA.value ? 'Hide' : 'Show' }} SMA</button>
@@ -12,6 +7,10 @@
     <button @click="toggleMACD">{{ showMACD.value ? 'Hide' : 'Show' }} MACD</button>
     <button @click="toggleSupport">{{ showSupport.value ? 'Hide' : 'Show' }} Support</button>
     <button @click="toggleResistance">{{ showResistance.value ? 'Hide' : 'Show' }} Resistance</button>
+    <div ref="chartContainer" style="width: 100%; height: 500px"></div>
+    <div ref="rsiChartContainer" style="width: 100%; height: 200px"></div>
+    <div ref="volumeChartContainer" style="width: 100%; height: 300px"></div>
+    <div ref="macdChartContainer" style="width: 100%; height: 300px"></div>
 </template>
 
 <script setup>
@@ -225,7 +224,7 @@ watchEffect(async () => {
     if (showSMA.value) {
         let inputSMA = {
             values: formattedData.map((data) => data.close),
-            period: 14,
+            period: 200,
         };
         let sma = SMA.calculate(inputSMA);
 
@@ -234,7 +233,7 @@ watchEffect(async () => {
         if (smaSeries) {
             smaSeries.setData(smaData);
         } else {
-            smaSeries = chart.addLineSeries({ color: 'rgba(0, 123, 255, 1)', lineWidth: 1 });
+            smaSeries = chart.addLineSeries({ color: 'rgba(0, 255, 255, 1)', lineWidth: 1 });
             smaSeries.setData(smaData);
         }
     } else {
@@ -256,7 +255,7 @@ watchEffect(async () => {
         if (emaSeries) {
             emaSeries.setData(emaData);
         } else {
-            emaSeries = chart.addLineSeries({ color: 'rgba(255, 193, 7, 1)', lineWidth: 1 });
+            emaSeries = chart.addLineSeries({ color: 'rgba(255, 0, 7, 1)', lineWidth: 1 });
             emaSeries.setData(emaData);
         }
     } else {
@@ -369,13 +368,18 @@ watchEffect(async () => {
         //     supportLine = chart.addLineSeries({ color: 'green', lineWidth: 20 });
         //     supportLine.setData([{ time: formattedData[0].time / 1000, value: supportData }, { time: formattedData[formattedData.length - 1].time / 1000, value: supportData }]);
         // }
-        const supportLineData = formattedData.map((value) => ({
-            time: value.time,
-            value: store.supportData[0],
-            color: 'green',
-            lineWidth: 2,
-        }));
-        supportLineSeries.setData(supportLineData);
+
+        store.supportData.forEach((support) => {
+            console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ support:", support[4])
+
+            const supportLineData = formattedData.map((value) => ({
+                time: value.time,
+                value: Object.values(support)[3],
+                color: 'green',
+                lineWidth: 2,
+            }));
+            supportLineSeries.setData(supportLineData);
+        })
 
 
     } else {
@@ -385,13 +389,19 @@ watchEffect(async () => {
     if (showResistance.value) {
 
 
-        const resistanceLineData = formattedData.map((value) => ({
-            time: value.time,
-            value: store.resistanceData[0],
-            color: 'red',
-            lineWidth: 2,
-        }));;
-        resistanceLineSeries.setData(resistanceLineData);
+        console.log("🚀 ~ file: TradingChart.vue:399 ~ store.resistanceData.resistance.forEach ~ store.resistanceData:", store.resistanceData)
+        store.resistanceData.forEach((resistance) => {
+            console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ resistance:", resistance[4])
+
+            const resistanceLineData = formattedData.map((value) => ({
+                time: value.time,
+                value: Object.values(resistance)[3],
+                color: 'red',
+                lineWidth: 2,
+            }));;
+            resistanceLineSeries.setData(resistanceLineData);
+        })
+
     } else {
         // if (resistanceLine) {
         //     chart.removeSeries(resistanceLine);
@@ -490,11 +500,11 @@ onMounted(async () => {
     candlestickSeries = chart.addCandlestickSeries();
     supportLineSeries = chart.addLineSeries({
         color: "green",
-        lineWidth: 5,
+        lineWidth: 3,
     });
     resistanceLineSeries = chart.addLineSeries({
         color: "red",
-        lineWidth: 5,
+        lineWidth: 3,
     });
 });
 

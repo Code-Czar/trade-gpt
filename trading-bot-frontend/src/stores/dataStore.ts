@@ -27,12 +27,10 @@ export const useDataStore = defineStore('data', {
             this.data = newData;
         },
         addSupportData(newSupportData: number[]) {
-            this.supportData.push(newSupportData);
-            this.supportData.flat();
+            this.supportData = newSupportData;
         },
         addResistanceData(newResistanceData: number[]) {
-            this.resistanceData.push(newResistanceData);
-            this.resistanceData.flat();
+            this.resistanceData = newResistanceData;
         },
     },
 });

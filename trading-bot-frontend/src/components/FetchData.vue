@@ -11,7 +11,7 @@ import { useDataStore } from '../stores/dataStore';
 
 let intervalId;
 let symbol = 'BTC-USDT'; // Change to your default symbol
-let timeframe = '1h'; // Change to your default timeframe
+let timeframe = '1m'; // Change to your default timeframe
 
 onMounted(() => {
     const dataStore = useDataStore();

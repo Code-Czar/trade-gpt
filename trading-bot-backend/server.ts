@@ -77,7 +77,7 @@ app.get('/api/support/:symbol/:timeframe', async (req, res) => {
     let { symbol, timeframe } = req.params;
     symbol = symbol.replace('-', '/');
     const ohlcvs = await bot.fetchOHLCV(symbol, timeframe);
-    const support = await bot.findSupport(ohlcvs);
+    const support = await bot.findLowestSupport(ohlcvs);
     res.json({ support });
 });
 
@@ -85,7 +85,7 @@ app.get('/api/resistance/:symbol/:timeframe', async (req, res) => {
     let { symbol, timeframe } = req.params;
     symbol = symbol.replace('-', '/');
     const ohlcvs = await bot.fetchOHLCV(symbol, timeframe);
-    const resistance = await bot.findResistance(ohlcvs);
+    const resistance = await bot.findTopResistance(ohlcvs);
     res.json({ resistance });
 });
 

@@ -67,7 +67,7 @@ class TradingBot {
     calculateVolumes(ohlcv) {
         return ohlcv.map(x => x[5]);
     }
-    findSupport(ohlcvs) {
+    findLowestSupport(ohlcvs) {
         return __awaiter(this, void 0, void 0, function* () {
             let lowest = ohlcvs[0][3];
             for (let i = 1; i < ohlcvs.length; i++) {
@@ -75,10 +75,54 @@ class TradingBot {
                     lowest = ohlcvs[i][3];
                 }
             }
-            return lowest;
+            return [0, 0, 0, lowest];
         });
     }
-    findResistance(ohlcvs) {
+    findSupport(ohlcvs, tolerance = 0.0001) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const supports = [];
+            let potentialSupport = null;
+            ohlcvs.forEach((ohlc, index) => {
+                if (index === 0)
+                    return;
+                const prevOhlc = ohlcvs[index - 1];
+                // If we're not currently tracking a support level
+                if (!potentialSupport) {
+                    // And the current price is lower than the previous one, start tracking a potential support level
+                    if (ohlc.low < prevOhlc.low) {
+                        potentialSupport = {
+                            level: ohlc.low,
+                            hits: [],
+                            start: prevOhlc.time,
+                            end: null
+                        };
+                    }
+                }
+                else {
+                    // If the current price is lower than the potential support level, update it
+                    if (ohlc.low < potentialSupport.level) {
+                        potentialSupport.level = ohlc.low;
+                        potentialSupport.end = ohlc.time;
+                    }
+                    else {
+                        // If the price is within the tolerance of the potential support level, register a hit
+                        if (ohlc.low <= potentialSupport.level * (1 + tolerance)) {
+                            potentialSupport.hits.push(ohlc);
+                        }
+                        else if (ohlc.low > potentialSupport.level * (1 + tolerance)) {
+                            // If the price rises above the tolerance of the potential support level, finish tracking it
+                            if (potentialSupport.hits.length > 1) {
+                                supports.push(potentialSupport);
+                            }
+                            potentialSupport = null;
+                        }
+                    }
+                }
+            });
+            return supports;
+        });
+    }
+    findTopResistance(ohlcvs) {
         return __awaiter(this, void 0, void 0, function* () {
             let highest = ohlcvs[0][2];
             for (let i = 1; i < ohlcvs.length; i++) {
@@ -86,7 +130,51 @@ class TradingBot {
                     highest = ohlcvs[i][2];
                 }
             }
-            return highest;
+            return [0, 0, 0, highest];
+        });
+    }
+    findResistance(ohlcvs, tolerance = 0.0001) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const resistances = [];
+            let potentialResistance = null;
+            ohlcvs.forEach((ohlc, index) => {
+                if (index === 0)
+                    return;
+                const prevOhlc = ohlcvs[index - 1];
+                // If we're not currently tracking a resistance level
+                if (!potentialResistance) {
+                    // And the current price is higher than the previous one, start tracking a potential resistance level
+                    if (ohlc.high > prevOhlc.high) {
+                        potentialResistance = {
+                            level: ohlc.high,
+                            hits: [],
+                            start: prevOhlc.time,
+                            end: null
+                        };
+                    }
+                }
+                else {
+                    // If the current price is higher than the potential resistance level, update it
+                    if (ohlc.high > potentialResistance.level) {
+                        potentialResistance.level = ohlc.high;
+                        potentialResistance.end = ohlc.time;
+                    }
+                    else {
+                        // If the price is within the tolerance of the potential resistance level, register a hit
+                        if (ohlc.high >= potentialResistance.level * (1 - tolerance)) {
+                            potentialResistance.hits.push(ohlc);
+                        }
+                        else if (ohlc.high < potentialResistance.level * (1 - tolerance)) {
+                            // If the price drops below the tolerance of the potential resistance level, finish tracking it
+                            if (potentialResistance.hits.length > 1) {
+                                resistances.push(potentialResistance);
+                            }
+                            potentialResistance = null;
+                        }
+                    }
+                }
+            });
+            return resistances;
         });
     }
 }

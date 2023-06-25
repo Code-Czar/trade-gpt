@@ -77,14 +77,14 @@ app.get('/api/support/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 
     let { symbol, timeframe } = req.params;
     symbol = symbol.replace('-', '/');
     const ohlcvs = yield bot.fetchOHLCV(symbol, timeframe);
-    const support = yield bot.findSupport(ohlcvs);
+    const support = yield bot.findLowestSupport(ohlcvs);
     res.json({ support });
 }));
 app.get('/api/resistance/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let { symbol, timeframe } = req.params;
     symbol = symbol.replace('-', '/');
     const ohlcvs = yield bot.fetchOHLCV(symbol, timeframe);
-    const resistance = yield bot.findResistance(ohlcvs);
+    const resistance = yield bot.findTopResistance(ohlcvs);
     res.json({ resistance });
 }));
 app.listen(3000, () => {
