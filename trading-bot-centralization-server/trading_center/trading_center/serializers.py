@@ -8,8 +8,8 @@ class PositionSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "symbol",
-            "buy_price",
-            "sell_price",
+            "buyPrice",
+            "sellPrice",
             "quantity",
             "type",
             "status",

@@ -9,16 +9,17 @@ const positionManager = new PositionManager();
 
 app.use(bodyParser.json());
 
-app.post('/position', (req, res) => {
+app.post('/position', async (req, res) => {
     const positionProps: PositionProps = req.body;
 
     try {
-        const position = positionManager.createPosition(positionProps);
+        const position = await positionManager.createPosition(positionProps);
         res.status(201).send({ message: 'Position created', position });
     } catch (error) {
         res.status(400).send({ message: `Failed to create position: ${error}` });
     }
 });
+
 
 app.patch('/position/:symbol', (req, res) => {
     const { symbol } = req.params;

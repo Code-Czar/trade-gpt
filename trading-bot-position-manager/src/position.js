@@ -1,6 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Position = exports.PositionType = void 0;
+exports.Position = exports.PositionType = exports.PositionStatus = void 0;
+var PositionStatus;
+(function (PositionStatus) {
+    PositionStatus["OPEN"] = "OPEN";
+    PositionStatus["CLOSED"] = "CLOSED";
+})(PositionStatus || (exports.PositionStatus = PositionStatus = {}));
 // position.ts
 var PositionType;
 (function (PositionType) {

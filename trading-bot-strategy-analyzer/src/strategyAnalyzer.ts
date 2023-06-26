@@ -1,7 +1,10 @@
 const fetch = require('node-fetch');
 
 import { sendSignalEmail } from './email';
-const positionManagerAPI = 'http://localhost:3005'; // adjust to your setup
+const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
+
+const RSIUpperThreshold = 51;
+const RSILowerThreshold = 50;
 
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
@@ -12,7 +15,7 @@ const generateBuySignal = (data) => {
 
     // Check if RSI is below 30
     const lastRSI = rsi[rsi.length - 1];
-    const isRSIOverSold = lastRSI.value < 30;
+    const isRSIOverSold = lastRSI.value < RSILowerThreshold;
 
     // Check if MACD crossed above the signal line
     const lastMACD = macd[macd.length - 1];
@@ -31,7 +34,7 @@ const generateSellSignal = (data) => {
 
     // Check if RSI is above 70
     const lastRSI = rsi[rsi.length - 1];
-    const isRSIOverBought = lastRSI.value > 70;
+    const isRSIOverBought = lastRSI.value > RSILowerThreshold;
 
     // Check if MACD crossed below the signal line
     const lastMACD = macd[macd.length - 1];
@@ -52,14 +55,14 @@ function analyzeRSI(data) {
         sellSignal: false
     }
 
-    if (latestRSI < 30) {
+    if (latestRSI < RSILowerThreshold) {
         signals.buySignal = {
             price: ohlcvData[length - 1][5],
             time: ohlcvData[length - 1][0],
             indicatorValue: latestRSI,
             signal: 'Buy',
         }
-    } else if (latestRSI > 70) {
+    } else if (latestRSI > RSILowerThreshold) {
         signals.sellSignal = {
             price: ohlcvData[length - 1][5],
             time: ohlcvData[length - 1][0],
@@ -105,41 +108,43 @@ async function completeAnalysis(symbol, timeframe) {
 
 
 async function openLongPosition(symbol, price) {
+    const position = JSON.stringify({
+        symbol: symbol,
+        buyPrice: price,
+        quantity: 1, // TODO: adjust the quantity based on your strategy
+        type: 'long' // this is a long position
+    })
     try {
         const res = await fetch(`${positionManagerAPI}/position`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                symbol: symbol,
-                buyPrice: price,
-                quantity: 1, // TODO: adjust the quantity based on your strategy
-                type: 'long' // this is a long position
-            })
+            body: position
         });
 
         const data = await res.json();
 
         console.log(`Opened new long position with ID ${data.id}`);
     } catch (err) {
-        console.error(`Failed to open long position: ${err}`);
+        console.error(`Failed to open long position: ${position} ${err}`);
     }
 }
 
 async function openShortPosition(symbol, price) {
+    const position = JSON.stringify({
+        symbol: symbol,
+        sellPrice: price,
+        quantity: 1, // TODO: adjust the quantity based on your strategy
+        type: 'short' // this is a short position
+    })
     try {
         const res = await fetch(`${positionManagerAPI}/position`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                symbol: symbol,
-                sellPrice: price,
-                quantity: 1, // TODO: adjust the quantity based on your strategy
-                type: 'short' // this is a short position
-            })
+            body: position
         });
 
         const data = await res.json();
@@ -147,7 +152,7 @@ async function openShortPosition(symbol, price) {
 
         console.log(`Opened new short position with ID ${data.id}`);
     } catch (err) {
-        console.error(`Failed to open short position: ${err}`);
+        console.error(`Failed to open short position: ${position} ${err}`);
     }
 }
 

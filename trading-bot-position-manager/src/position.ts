@@ -6,6 +6,12 @@ export interface PositionProps {
     type: PositionType;
 }
 
+export enum PositionStatus {
+    OPEN = 'OPEN',
+    CLOSED = 'CLOSED'
+}
+
+
 
 // position.ts
 

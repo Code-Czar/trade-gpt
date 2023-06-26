@@ -11,7 +11,7 @@ components=("trading-bot-backend"  "trading-bot-position-manager" "trading-bot-s
 
 # Start the Django server in a new screen window
 screen -S $session -X screen -t "trading-bot-centralization-server" bash -c "cd trading-bot-centralization-server/trading_center && python manage.py runserver; read"
-wait 10
+wait 5
 
 # Start each component in a new screen window
 for component in "${components[@]}"

@@ -15,12 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendSignalEmail = void 0;
 // const nodemailer = require('nodemailer');
 const mail_1 = __importDefault(require("@sendgrid/mail"));
-const key = "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";
-mail_1.default.setApiKey(key);
+const dotenv_1 = __importDefault(require("dotenv"));
+// Load environment variables from .env file
+dotenv_1.default.config();
+mail_1.default.setApiKey(process.env.SENDGRID_API_KEY);
 function sendSignalEmail(signal, symbol, timeframe) {
     return __awaiter(this, void 0, void 0, function* () {
         const msg = {
-            to: 'benjamintourrettepro@gmail.com',
+            to: 'contact@benjamintourrette.com',
             from: 'contact@benjamintourrette.com',
             subject: `Trading signal for ${symbol} on ${timeframe}`,
             text: `A ${signal} signal was generated for ${symbol} on ${timeframe}.`,

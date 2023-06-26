@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 
 class Position(models.Model):
@@ -16,14 +17,14 @@ class Position(models.Model):
         (CLOSED, "Closed"),
     ]
 
-    id = models.UUIDField(primary_key=True, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     status = models.CharField(
         max_length=10, choices=(("open", "open"), ("closed", "closed")), default="open"
     )
 
     symbol = models.CharField(max_length=255)
-    buy_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
-    sell_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    buyPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True)
+    sellPrice = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     quantity = models.IntegerField()
     type = models.CharField(max_length=5, choices=POSITION_TYPE_CHOICES)
     status = models.CharField(

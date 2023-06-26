@@ -12,7 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.analyzeData = void 0;
 const fetch = require('node-fetch');
 const email_1 = require("./email");
-const positionManagerAPI = 'http://localhost:3005'; // adjust to your setup
+const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
+const RSIUpperThreshold = 51;
+const RSILowerThreshold = 50;
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
     // Identify if the last candlestick's price touched the lower Bollinger Band
@@ -21,7 +23,7 @@ const generateBuySignal = (data) => {
     const isPriceTouchedLowerBand = lastCandle.low <= lastBB.lower;
     // Check if RSI is below 30
     const lastRSI = rsi[rsi.length - 1];
-    const isRSIOverSold = lastRSI.value < 30;
+    const isRSIOverSold = lastRSI.value < RSILowerThreshold;
     // Check if MACD crossed above the signal line
     const lastMACD = macd[macd.length - 1];
     const previousMACD = macd[macd.length - 2];
@@ -36,7 +38,7 @@ const generateSellSignal = (data) => {
     const isPriceTouchedUpperBand = lastCandle.high >= lastBB.upper;
     // Check if RSI is above 70
     const lastRSI = rsi[rsi.length - 1];
-    const isRSIOverBought = lastRSI.value > 70;
+    const isRSIOverBought = lastRSI.value > RSILowerThreshold;
     // Check if MACD crossed below the signal line
     const lastMACD = macd[macd.length - 1];
     const previousMACD = macd[macd.length - 2];
@@ -53,7 +55,7 @@ function analyzeRSI(data) {
         buySignal: false,
         sellSignal: false
     };
-    if (latestRSI < 30) {
+    if (latestRSI < RSILowerThreshold) {
         signals.buySignal = {
             price: ohlcvData[length - 1][5],
             time: ohlcvData[length - 1][0],
@@ -61,7 +63,7 @@ function analyzeRSI(data) {
             signal: 'Buy',
         };
     }
-    else if (latestRSI > 70) {
+    else if (latestRSI > RSILowerThreshold) {
         signals.sellSignal = {
             price: ohlcvData[length - 1][5],
             time: ohlcvData[length - 1][0],
@@ -104,48 +106,50 @@ function completeAnalysis(symbol, timeframe) {
 }
 function openLongPosition(symbol, price) {
     return __awaiter(this, void 0, void 0, function* () {
+        const position = JSON.stringify({
+            symbol: symbol,
+            buyPrice: price,
+            quantity: 1,
+            type: 'long' // this is a long position
+        });
         try {
             const res = yield fetch(`${positionManagerAPI}/position`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    symbol: symbol,
-                    buyPrice: price,
-                    quantity: 1,
-                    type: 'long' // this is a long position
-                })
+                body: position
             });
             const data = yield res.json();
             console.log(`Opened new long position with ID ${data.id}`);
         }
         catch (err) {
-            console.error(`Failed to open long position: ${err}`);
+            console.error(`Failed to open long position: ${position} ${err}`);
         }
     });
 }
 function openShortPosition(symbol, price) {
     return __awaiter(this, void 0, void 0, function* () {
+        const position = JSON.stringify({
+            symbol: symbol,
+            sellPrice: price,
+            quantity: 1,
+            type: 'short' // this is a short position
+        });
         try {
             const res = yield fetch(`${positionManagerAPI}/position`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    symbol: symbol,
-                    sellPrice: price,
-                    quantity: 1,
-                    type: 'short' // this is a short position
-                })
+                body: position
             });
             const data = yield res.json();
             console.log("🚀 ~ file: strategyAnalyzer.ts:146 ~ openShortPosition ~ data:", data);
             console.log(`Opened new short position with ID ${data.id}`);
         }
         catch (err) {
-            console.error(`Failed to open short position: ${err}`);
+            console.error(`Failed to open short position: ${position} ${err}`);
         }
     });
 }

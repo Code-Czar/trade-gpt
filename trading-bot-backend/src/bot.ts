@@ -12,8 +12,20 @@ export class TradingBot {
     }
 
     async fetchOHLCV(symbol: string, timeframe: string) {
-        await this.exchange.loadMarkets();
-        return this.exchange.fetchOHLCV(symbol, timeframe);
+        while (true) {
+            try {
+                await this.exchange.loadMarkets();
+                return this.exchange.fetchOHLCV(symbol, timeframe);
+            } catch (error) {
+                if (error instanceof ccxt.DDoSProtection) {
+                    console.log('Rate limit hit, waiting before retrying...');
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // wait for 1 second
+                } else {
+                    throw error; // re-throw the error if it's not a rate limit error
+                }
+            }
+        }
+
     }
 
     calculateBollingerBands(ohlcv: any[]) {
