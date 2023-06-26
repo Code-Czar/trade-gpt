@@ -13,8 +13,8 @@ exports.analyzeData = void 0;
 const fetch = require('node-fetch');
 const email_1 = require("./email");
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
-const RSIUpperThreshold = 75;
-const RSILowerThreshold = 25;
+const RSIUpperThreshold = 50;
+const RSILowerThreshold = 50;
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
     // Identify if the last candlestick's price touched the lower Bollinger Band
@@ -164,7 +164,7 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus) {
             case 'RSI':
                 analysisResult = analyzeRSI(data);
                 if (analysisResult.buySignal && !((_a = signalStatus[key]) === null || _a === void 0 ? void 0 : _a.buySignal)) {
-                    yield (0, email_1.sendSignalEmail)("long", symbol, timeframe, 'RSI', 'Buy');
+                    yield (0, email_1.sendSignalEmail)("long", symbol, timeframe, 'RSI');
                     if (!signalStatus[key])
                         signalStatus[key] = {};
                     signalStatus[key].buySignal = true;
@@ -172,7 +172,7 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus) {
                     openLongPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
                 }
                 else if (analysisResult.sellSignal && !((_b = signalStatus[key]) === null || _b === void 0 ? void 0 : _b.sellSignal)) {
-                    yield (0, email_1.sendSignalEmail)("short", symbol, timeframe, 'RSI', 'Sell');
+                    yield (0, email_1.sendSignalEmail)("short", symbol, timeframe, 'RSI');
                     if (!signalStatus[key])
                         signalStatus[key] = {};
                     signalStatus[key].sellSignal = true;
@@ -190,14 +190,14 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus) {
             case "COMPLETE_ANALYSIS":
                 analysisResult = yield completeAnalysis(symbol, timeframe);
                 if (analysisResult.buySignal && !((_c = signalStatus[key]) === null || _c === void 0 ? void 0 : _c.buySignal)) {
-                    yield (0, email_1.sendSignalEmail)("buy", symbol, timeframe, 'Complete', 'Buy');
+                    yield (0, email_1.sendSignalEmail)("buy", symbol, timeframe, 'Complete');
                     if (!signalStatus[key])
                         signalStatus[key] = {};
                     signalStatus[key].buySignal = true;
                     openLongPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
                 }
                 else if (analysisResult.sellSignal && !((_d = signalStatus[key]) === null || _d === void 0 ? void 0 : _d.sellSignal)) {
-                    yield (0, email_1.sendSignalEmail)("sell", symbol, timeframe, 'Complete', 'Sell');
+                    yield (0, email_1.sendSignalEmail)("sell", symbol, timeframe, 'Complete');
                     if (!signalStatus[key])
                         signalStatus[key] = {};
                     signalStatus[key].sellSignal = true;

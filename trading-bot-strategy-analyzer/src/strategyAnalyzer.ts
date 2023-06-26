@@ -166,14 +166,14 @@ export async function analyzeData(symbol, timeframe, analysisType, signalStatus)
         case 'RSI':
             analysisResult = analyzeRSI(data);
             if (analysisResult.buySignal && !signalStatus[key]?.buySignal) {
-                await sendSignalEmail("long", symbol, timeframe, 'RSI', 'Buy');
+                await sendSignalEmail("long", symbol, timeframe, 'RSI');
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].buySignal = true;
                 // Open a new long position
                 openLongPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
 
             } else if (analysisResult.sellSignal && !signalStatus[key]?.sellSignal) {
-                await sendSignalEmail("short", symbol, timeframe, 'RSI', 'Sell');
+                await sendSignalEmail("short", symbol, timeframe, 'RSI');
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].sellSignal = true;
                 // Open a new short position
@@ -190,12 +190,12 @@ export async function analyzeData(symbol, timeframe, analysisType, signalStatus)
         case "COMPLETE_ANALYSIS":
             analysisResult = await completeAnalysis(symbol, timeframe);
             if (analysisResult.buySignal && !signalStatus[key]?.buySignal) {
-                await sendSignalEmail("buy", symbol, timeframe, 'Complete', 'Buy');
+                await sendSignalEmail("buy", symbol, timeframe, 'Complete');
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].buySignal = true;
                 openLongPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
             } else if (analysisResult.sellSignal && !signalStatus[key]?.sellSignal) {
-                await sendSignalEmail("sell", symbol, timeframe, 'Complete', 'Sell');
+                await sendSignalEmail("sell", symbol, timeframe, 'Complete');
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].sellSignal = true;
                 openShortPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
