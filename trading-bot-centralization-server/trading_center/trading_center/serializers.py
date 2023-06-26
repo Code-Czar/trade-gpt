@@ -13,4 +13,7 @@ class PositionSerializer(serializers.ModelSerializer):
             "quantity",
             "type",
             "status",
+            "openingTime",
+            "closingTime",
+            "PnL",
         ]

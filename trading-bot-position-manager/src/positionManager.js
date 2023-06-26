@@ -53,7 +53,23 @@ class PositionManager {
             for (let id in this.positions) {
                 const position = this.positions[id];
                 const currentPrice = yield this.getCurrentPrice(position.symbol);
-                const pnl = this.calculatePnL(id, currentPrice);
+                let pnl = this.calculatePnL(id, currentPrice);
+                pnl = parseFloat(pnl.toFixed(5));
+                // Update the PnL in the Django backend
+                const response = yield (0, node_fetch_1.default)(`${this.backendUrl}/positions/${id}/`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        PnL: pnl,
+                    }),
+                });
+                if (!response.ok) {
+                    const responseBody = yield response.text();
+                    console.error(`Failed to update PnL for position ${id}: ${response.status} ${response.statusText} - ${responseBody}`);
+                    continue;
+                }
                 if (position.type === position_1.PositionType.LONG) {
                     console.log(`PnL for position LONG ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`);
                 }
@@ -63,14 +79,6 @@ class PositionManager {
             }
         });
     }
-    // Get all open positions from the Django backend
-    // async getOpenPositionsFromBackend() {
-    //     const url = `${this.backendUrl}/positions/open_positions/`;
-    //     console.log("🚀 ~ file: positionManager.ts:53 ~ PositionManager ~ getOpenPositionsFromBackend ~ url:", url)
-    //     const response = await fetch(`${url}`);
-    //     const positions = await response.json();
-    //     return positions;
-    // }
     getOpenPositionsFromBackend() {
         return __awaiter(this, void 0, void 0, function* () {
             const url = `${this.backendUrl}/positions/open_positions/`;
@@ -88,17 +96,24 @@ class PositionManager {
                 if (!buyPrice) {
                     throw new Error('A buyPrice is required to create a long position');
                 }
-                position = this.createLongPosition(symbol, buyPrice, quantity);
+                position = yield this.createLongPosition(symbol, buyPrice, quantity);
             }
             else if (type === position_1.PositionType.SHORT) {
                 if (!sellPrice) {
                     throw new Error('A sellPrice is required to create a short position');
                 }
-                position = this.createShortPosition(symbol, sellPrice, quantity);
+                position = yield this.createShortPosition(symbol, sellPrice, quantity);
             }
             else {
                 throw new Error(`Invalid position type: ${type}. Allowed values are 'long' and 'short'`);
             }
+            this.positions[position.id] = position;
+            return position;
+        });
+    }
+    createLongPosition(symbol, buyPrice, quantity) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const position = new position_1.Position((0, uuid_1.v4)(), symbol, buyPrice, null, quantity, position_1.PositionType.LONG, position_1.PositionStatus.OPEN);
             // Create the position in the Django backend
             const response = yield (0, node_fetch_1.default)(`${this.backendUrl}/positions/`, {
                 method: 'POST',
@@ -115,58 +130,38 @@ class PositionManager {
                     status: position.status,
                 }),
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            else {
-                const responseBody = yield response.json();
-                console.log("🚀 ~ file: positionManager.ts:115 ~ PositionManager ~ createPosition ~ position:", position);
-                console.log(`Response status: ${response.status}, message: ${responseBody.message}`);
-            }
-            return position;
+            const data = yield response.json();
+            position.id = data.id;
+            console.log("🚀 ~ file: positionManager.ts:127 ~ PositionManager ~ createLongPosition ~ data:", data);
+            this.positions[position.id] = position;
+            return data;
         });
-    }
-    createLongPosition(symbol, buyPrice, quantity) {
-        const position = new position_1.Position((0, uuid_1.v4)(), symbol, buyPrice, null, quantity, position_1.PositionType.LONG, position_1.PositionStatus.OPEN);
-        this.positions[position.id] = position;
-        // Create the position in the Django backend
-        (0, node_fetch_1.default)(`${this.backendUrl}/positions/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id: position.id,
-                symbol: position.symbol,
-                buyPrice: position.buyPrice,
-                sellPrice: position.sellPrice,
-                quantity: position.quantity,
-                type: position.type,
-                status: position.status,
-            }),
-        });
-        return position;
     }
     createShortPosition(symbol, sellPrice, quantity) {
-        const position = new position_1.Position((0, uuid_1.v4)(), symbol, null, sellPrice, quantity, position_1.PositionType.SHORT, position_1.PositionStatus.OPEN);
-        this.positions[position.id] = position;
-        // Create the position in the Django backend
-        (0, node_fetch_1.default)(`${this.backendUrl}/positions/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id: position.id,
-                symbol: position.symbol,
-                buyPrice: position.buyPrice,
-                sellPrice: position.sellPrice,
-                quantity: position.quantity,
-                type: position.type,
-                status: position.status,
-            }),
+        return __awaiter(this, void 0, void 0, function* () {
+            const position = new position_1.Position((0, uuid_1.v4)(), symbol, null, sellPrice, quantity, position_1.PositionType.SHORT, position_1.PositionStatus.OPEN);
+            // Create the position in the Django backend
+            const response = yield (0, node_fetch_1.default)(`${this.backendUrl}/positions/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: position.id,
+                    symbol: position.symbol,
+                    buyPrice: position.buyPrice,
+                    sellPrice: position.sellPrice,
+                    quantity: position.quantity,
+                    type: position.type,
+                    status: position.status,
+                }),
+            });
+            const data = yield response.json();
+            console.log("🚀 ~ file: positionManager.ts:153 ~ PositionManager ~ createShortPosition ~ data:", data);
+            position.id = data.id;
+            this.positions[position.id] = position;
+            return data;
         });
-        return position;
     }
     closePosition(id, closingPrice) {
         const position = this.positions[id];

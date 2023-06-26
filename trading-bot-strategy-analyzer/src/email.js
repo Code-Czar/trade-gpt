@@ -13,28 +13,29 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendSignalEmail = void 0;
-// const nodemailer = require('nodemailer');
-const mail_1 = __importDefault(require("@sendgrid/mail"));
 const dotenv_1 = __importDefault(require("dotenv"));
-// Load environment variables from .env file
+const nodemailer_1 = __importDefault(require("nodemailer"));
 dotenv_1.default.config();
-mail_1.default.setApiKey(process.env.SENDGRID_API_KEY);
-function sendSignalEmail(signal, symbol, timeframe) {
+function sendSignalEmail(positionType, symbol, timeFrame, analysisType) {
     return __awaiter(this, void 0, void 0, function* () {
-        const msg = {
-            to: 'contact@benjamintourrette.com',
-            from: 'contact@benjamintourrette.com',
-            subject: `Trading signal for ${symbol} on ${timeframe}`,
-            text: `A ${signal} signal was generated for ${symbol} on ${timeframe}.`,
-            html: `<p>A <strong>${signal}</strong> signal was generated for <strong>${symbol}</strong> on <strong>${timeframe}</strong>.</p>`,
+        const credentials = {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PASS // your Gmail App Password
         };
-        try {
-            yield mail_1.default.send(msg);
-            console.log(`Email sent to ${msg.to}`);
-        }
-        catch (error) {
-            console.error(`Failed to send email:`, error);
-        }
+        let transporter = nodemailer_1.default.createTransport({
+            service: 'gmail',
+            auth: credentials
+        });
+        console.log("🚀 ~ file: email.ts:14 ~ sendSignalEmail ~ auth:", credentials);
+        // send mail with defined transport object
+        let info = yield transporter.sendMail({
+            from: `"Benjamin Tourrette" <${process.env.GMAIL_USER}>`,
+            to: process.env.GMAIL_USER,
+            subject: `Trading signal for ${timeFrame} on ${analysisType}`,
+            text: `A ${symbol} | ${positionType}signal was generated for ${timeFrame} on ${analysisType}.`,
+            html: `<p>A <strong>${symbol} | ${positionType} </strong> signal was generated for <strong>${timeFrame}</strong> on <strong>${analysisType}</strong>.</p>`, // html body
+        });
+        console.log('Message sent: %s', info.messageId);
     });
 }
 exports.sendSignalEmail = sendSignalEmail;
