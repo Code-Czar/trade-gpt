@@ -17,17 +17,17 @@ let ohlcvData = null;
 
 // Fetch new data every 1 minute
 let count = 0;
-setInterval(async () => {
-    try {
-        const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
-        ohlcvData = ohlcv;
-        count++;
-        console.log(`Fetched ${count} data`);
-        console.log(`Size ${ohlcvData.length} data`);
-    } catch (error) {
-        console.error(error);
-    }
-}, 1 * 1000);  // 1 seconds
+// setInterval(async () => {
+//     try {
+//         const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
+//         ohlcvData = ohlcv;
+//         count++;
+//         console.log(`Fetched ${count} data`);
+//         console.log(`Size ${ohlcvData.length} data`);
+//     } catch (error) {
+//         console.error(error);
+//     }
+// }, 2 * 1000);  // 1 seconds
 
 app.get('/api/data/:symbol/:timeframe', async (req, res) => {
     let { symbol, timeframe } = req.params;

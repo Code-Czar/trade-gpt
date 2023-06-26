@@ -1,12 +1,47 @@
 import { Position, PositionProps, PositionStatus, PositionType } from './position';
 import { v4 as uuidv4 } from 'uuid';
+import fetch from 'node-fetch';
+import ccxt from 'ccxt';
+let exchange = new ccxt.binance();
+
+
 
 export class PositionManager {
     private positions: { [key: string]: Position };
 
     constructor() {
         this.positions = {};
+        this.startPnLCheck();
     }
+
+    startPnLCheck() {
+        setInterval(() => {
+            this.checkPnL();
+        }, 1000);
+    }
+
+    async getCurrentPrice(symbol: string): Promise<number> {
+        symbol = symbol.replace('-', '/');
+        let ticker = await exchange.fetchTicker(symbol);
+        return ticker.last;
+    }
+
+    async checkPnL() {
+        for (let id in this.positions) {
+            const position = this.positions[id];
+            const currentPrice = await this.getCurrentPrice(position.symbol); // This function is to be implemented
+            const pnl = this.calculatePnL(id, currentPrice);
+            if (position.type === PositionType.LONG) {
+                console.log(`PnL for position LONG ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`);
+            }
+            else if (position.type === PositionType.SHORT) {
+                console.log(`PnL for position SHORT ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`);
+            }
+        }
+    }
+
+
+
     createPosition(positionProps: PositionProps): Position {
         let position: Position;
         const { symbol, buyPrice, sellPrice, quantity, type } = positionProps;
@@ -55,15 +90,16 @@ export class PositionManager {
         return position;
     }
 
-    calculatePnL(id: string) {
+    calculatePnL(id: string, currentPrice: number) {
         const position = this.positions[id];
         if (!position) {
-            throw new Error(`Position ${id} does not exist.`);
+            console.log(`Position ${id} does not exist.`);
+            return null;
         }
         if (position.type === PositionType.LONG) {
-            return (position.sellPrice - position.buyPrice) * position.quantity;
+            return (currentPrice - position.buyPrice) * position.quantity;
         } else {
-            return (position.buyPrice - position.sellPrice) * position.quantity;
+            return (position.sellPrice - currentPrice) * position.quantity;
         }
     }
 
@@ -86,4 +122,5 @@ export class PositionManager {
     getClosedPositions() {
         return Object.values(this.positions).filter(position => position.status === PositionStatus.CLOSED);
     }
+
 }

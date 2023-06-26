@@ -21,18 +21,17 @@ app.use(cors());
 let ohlcvData = null;
 // Fetch new data every 1 minute
 let count = 0;
-setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const ohlcv = yield bot.fetchOHLCV(symbol, timeframe);
-        ohlcvData = ohlcv;
-        count++;
-        console.log(`Fetched ${count} data`);
-        console.log(`Size ${ohlcvData.length} data`);
-    }
-    catch (error) {
-        console.error(error);
-    }
-}), 1 * 1000); // 1 seconds
+// setInterval(async () => {
+//     try {
+//         const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
+//         ohlcvData = ohlcv;
+//         count++;
+//         console.log(`Fetched ${count} data`);
+//         console.log(`Size ${ohlcvData.length} data`);
+//     } catch (error) {
+//         console.error(error);
+//     }
+// }, 2 * 1000);  // 1 seconds
 app.get('/api/data/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let { symbol, timeframe } = req.params;
     symbol = symbol.replace('-', '/');

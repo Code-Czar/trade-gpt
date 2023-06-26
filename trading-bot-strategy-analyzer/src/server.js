@@ -61,7 +61,7 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
             }
         }
     }
-}), 3 * 1000);
+}), 5 * 1000);
 // Route to serve the latest data and signals
 app.get('/api/:analysisType/data-and-signals', (req, res) => {
     const analysisType = req.params.analysisType;
