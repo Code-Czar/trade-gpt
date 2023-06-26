@@ -17,6 +17,10 @@ class Position(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, editable=False)
+    status = models.CharField(
+        max_length=10, choices=(("open", "open"), ("closed", "closed")), default="open"
+    )
+
     symbol = models.CharField(max_length=255)
     buy_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     sell_price = models.DecimalField(max_digits=10, decimal_places=2, null=True)

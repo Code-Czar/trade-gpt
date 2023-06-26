@@ -1,7 +1,7 @@
 const fetch = require('node-fetch');
 
 import { sendSignalEmail } from './email';
-const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
+const positionManagerAPI = 'http://localhost:3005'; // adjust to your setup
 
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;

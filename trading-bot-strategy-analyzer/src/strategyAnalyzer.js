@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.analyzeData = void 0;
 const fetch = require('node-fetch');
 const email_1 = require("./email");
-const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
+const positionManagerAPI = 'http://localhost:3005'; // adjust to your setup
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
     // Identify if the last candlestick's price touched the lower Bollinger Band
