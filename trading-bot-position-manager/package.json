@@ -29,6 +29,7 @@
     "start": "tsc; pm2 start src/server.js --no-daemon"
   },
   "devDependencies": {
+    "dotenv": "^16.3.1",
     "pm2": "^5.3.0"
   }
 }

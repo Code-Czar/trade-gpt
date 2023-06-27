@@ -2,22 +2,25 @@ import { Position, PositionProps, PositionStatus, PositionType } from './positio
 import { v4 as uuidv4 } from 'uuid';
 import fetch from 'node-fetch';
 import axios from 'axios';
+import { BybitManager } from './BybitManager';
 
 import ccxt from 'ccxt';
 let exchange = new ccxt.binance();
 
 export class PositionManager {
     private positions: { [key: string]: Position };
-    private backendUrl = 'http://127.0.0.1:8000';  // URL of your Django backend
+    private backendUrl = 'http://127.0.0.1:8000'; // URL of your Django backend
+    private bybitManager: BybitManager;
 
     constructor() {
         this.positions = {};
+        this.bybitManager = new BybitManager();
         this.init();
     }
 
     async init() {
         const positions = await this.getOpenPositionsFromBackend();
-        positions.forEach(positionData => {
+        positions.forEach((positionData) => {
             const { id, symbol, buyPrice, sellPrice, quantity, type, status } = positionData;
             const position = new Position(id, symbol, buyPrice, sellPrice, quantity, type, status);
             this.positions[id] = position;
@@ -57,22 +60,54 @@ export class PositionManager {
 
             if (!response.ok) {
                 const responseBody = await response.text();
-                console.error(`Failed to update PnL for position ${id}: ${response.status} ${response.statusText} - ${responseBody}`);
+                console.error(
+                    `Failed to update PnL for position ${id}: ${response.status} ${response.statusText} - ${responseBody}`,
+                );
                 continue;
             }
 
             if (position.type === PositionType.LONG) {
-                console.log(`PnL for position LONG ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`);
+                console.log(
+                    `PnL for position LONG ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`,
+                );
+            } else if (position.type === PositionType.SHORT) {
+                console.log(
+                    `PnL for position SHORT ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`,
+                );
             }
-            else if (position.type === PositionType.SHORT) {
-                console.log(`PnL for position SHORT ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`);
-            }
+        }
+    }
+
+    private async createPositionInBackend(position: Position) {
+        const response = await fetch(`${this.backendUrl}/positions/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id: position.id,
+                symbol: position.symbol,
+                buyPrice: position.buyPrice,
+                sellPrice: position.sellPrice,
+                quantity: position.quantity,
+                type: position.type,
+                status: position.status,
+                bybitOrderId: position.bybitOrderId,
+            }),
+        });
+
+        if (!response.ok) {
+            const responseBody = await response.text();
+            console.error(
+                `Failed to create position in backend: ${response.status} ${response.statusText} - ${responseBody}`,
+            );
+            throw new Error(responseBody);
         }
     }
 
     async getOpenPositionsFromBackend() {
         const url = `${this.backendUrl}/positions/open_positions/`;
-        console.log("🚀 ~ file: positionManager.ts:53 ~ PositionManager ~ getOpenPositionsFromBackend ~ url:", url)
+        console.log('🚀 ~ file: positionManager.ts:53 ~ PositionManager ~ getOpenPositionsFromBackend ~ url:', url);
         const response = await axios.get(url);
         const positions = response.data;
         return positions;
@@ -96,69 +131,32 @@ export class PositionManager {
         }
         this.positions[position.id] = position;
 
+        return position;
+    }
 
+    private async createLongPosition(symbol: string, buyPrice: number, quantity: number): Promise<Position> {
+        const position = new Position(uuidv4(), symbol, buyPrice, null, quantity, PositionType.LONG, PositionStatus.OPEN);
+        this.positions[position.id] = position;
+
+        position.bybitOrderId = await this.bybitManager.createOrder('Buy', symbol, buyPrice, quantity);
+
+        // Create the position in the Django backend
+        await this.createPositionInBackend(position);
 
         return position;
     }
 
-
-    async createLongPosition(symbol: string, buyPrice: number, quantity: number): Promise<Position> {
-        const position = new Position(uuidv4(), symbol, buyPrice, null, quantity, PositionType.LONG, PositionStatus.OPEN);
-
-
-        // Create the position in the Django backend
-        const response = await fetch(`${this.backendUrl}/positions/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id: position.id,
-                symbol: position.symbol,
-                buyPrice: position.buyPrice,
-                sellPrice: position.sellPrice,
-                quantity: position.quantity,
-                type: position.type,
-                status: position.status,
-            }),
-        });
-
-        const data = await response.json();
-        position.id = data.id;
-        console.log("🚀 ~ file: positionManager.ts:127 ~ PositionManager ~ createLongPosition ~ data:", data)
-        this.positions[position.id] = position;
-        return data;
-    }
-
-    async createShortPosition(symbol: string, sellPrice: number, quantity: number): Promise<Position> {
+    private async createShortPosition(symbol: string, sellPrice: number, quantity: number): Promise<Position> {
         const position = new Position(uuidv4(), symbol, null, sellPrice, quantity, PositionType.SHORT, PositionStatus.OPEN);
+        this.positions[position.id] = position;
 
+        position.bybitOrderId = await this.bybitManager.createOrder('Sell', symbol, sellPrice, quantity);
 
         // Create the position in the Django backend
-        const response = await fetch(`${this.backendUrl}/positions/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id: position.id,
-                symbol: position.symbol,
-                buyPrice: position.buyPrice,
-                sellPrice: position.sellPrice,
-                quantity: position.quantity,
-                type: position.type,
-                status: position.status,
-            }),
-        });
+        await this.createPositionInBackend(position);
 
-        const data = await response.json();
-        console.log("🚀 ~ file: positionManager.ts:153 ~ PositionManager ~ createShortPosition ~ data:", data)
-        position.id = data.id;
-        this.positions[position.id] = position;
-        return data;
+        return position;
     }
-
-
 
     closePosition(id: string, closingPrice: number) {
         const position = this.positions[id];

@@ -20,7 +20,7 @@ class Position(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     status = models.CharField(
-        max_length=10, choices=(("open", "open"), ("closed", "closed")), default="open"
+        max_length=10, choices=POSITION_STATUS_CHOICES, default=OPEN
     )
     openingTime = models.DateTimeField(default=timezone.now)
     closingTime = models.DateTimeField(null=True, blank=True)
@@ -31,6 +31,6 @@ class Position(models.Model):
     sellPrice = models.DecimalField(max_digits=50, decimal_places=20, null=True)
     quantity = models.IntegerField()
     type = models.CharField(max_length=5, choices=POSITION_TYPE_CHOICES)
-    status = models.CharField(
-        max_length=6, choices=POSITION_STATUS_CHOICES, default=OPEN
-    )
+
+    # New field for Bybit order ID
+    bybitOrderId = models.CharField(max_length=100, null=True, blank=True)

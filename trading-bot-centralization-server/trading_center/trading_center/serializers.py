@@ -16,4 +16,5 @@ class PositionSerializer(serializers.ModelSerializer):
             "openingTime",
             "closingTime",
             "PnL",
+            "bybitOrderId",
         ]

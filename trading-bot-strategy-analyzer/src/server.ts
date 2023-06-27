@@ -66,7 +66,7 @@ const symbols = [
     'ZIL-USDT',
     'ZRX-USDT'
 ];
-const timeframes = ['5m', '1h', '4h', '1d', '1w'];
+const timeframes = ['1m', '5m', '1h', '4h', '1d', '1w'];
 
 // Global store for the latest data and signals
 let latestDataAndSignals = {};
