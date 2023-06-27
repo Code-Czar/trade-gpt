@@ -22,13 +22,54 @@ let Complete_latestDataAndSignals = null;
 const symbols = [
     'BTC-USDT',
     'ETH-USDT',
+    'LTC-USDT',
+    'XRP-USDT',
     'BNB-USDT',
-    // 'USDT-XRP',
+    'AAVE-USDT',
+    'ADA-USDT',
+    'ALGO-USDT',
+    'ATOM-USDT',
+    'AVAX-USDT',
+    'AXS-USDT',
+    'BAT-USDT',
+    'CHZ-USDT',
+    'COMP-USDT',
+    'CRV-USDT',
     'DOGE-USDT',
     'DOT-USDT',
-    'UNI-USDT',
-    'BCH-USDT',
+    'EGLD-USDT',
+    'EOS-USDT',
+    'ETC-USDT',
+    'FIL-USDT',
+    'LINK-USDT',
+    'LRC-USDT',
     'LTC-USDT',
+    'MATIC-USDT',
+    'MKR-USDT',
+    'NEO-USDT',
+    'OMG-USDT',
+    'ONE-USDT',
+    'QTUM-USDT',
+    'REN-USDT',
+    'RSR-USDT',
+    'RVN-USDT',
+    'SAND-USDT',
+    'SHIB-USDT',
+    'SNX-USDT',
+    'SOL-USDT',
+    'SUSHI-USDT',
+    'SXP-USDT',
+    'TRX-USDT',
+    'UNI-USDT',
+    'VET-USDT',
+    'XLM-USDT',
+    'XMR-USDT',
+    'XTZ-USDT',
+    'YFI-USDT',
+    'ZEC-USDT',
+    'ZEN-USDT',
+    'ZIL-USDT',
+    'ZRX-USDT'
 ];
 const timeframes = ['5m', '1h', '4h', '1d', '1w'];
 // Global store for the latest data and signals
@@ -61,7 +102,7 @@ setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
             }
         }
     }
-}), 10 * 1000);
+}), 20 * 1000);
 // Route to serve the latest data and signals
 app.get('/api/:analysisType/data-and-signals', (req, res) => {
     const analysisType = req.params.analysisType;

@@ -13,8 +13,8 @@ exports.analyzeData = void 0;
 const fetch = require('node-fetch');
 const email_1 = require("./email");
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
-const RSIUpperThreshold = 50;
-const RSILowerThreshold = 50;
+const RSIUpperThreshold = 75;
+const RSILowerThreshold = 25;
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
     // Identify if the last candlestick's price touched the lower Bollinger Band

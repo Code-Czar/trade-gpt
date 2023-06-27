@@ -6,5 +6,6 @@ alias killServers="screen -d; ps -ax | grep -i manage.py | cut -d ' ' -f 1 | xar
 alias killAll="killServers; killScreens"
 alias restart="killAll; ./startScreen.sh"
 alias deploy="rsync -avz -e 'ssh -p 2233' . beniben@$ipserver:/var/www/trading-chatgpt"
+alias deployPI1="rsync -avz --exclude=node_modules --exclude=env --exclude .git -e 'ssh -p 2233' . beniben@$rpi1:/var/www/trading-chatgpt"
 
 alias recreateDB="cd trading-bot-centralization-server/trading_center && rm -rf db.sqlite3 && python manage.py makemigrations && python manage.py migrate && cd ../.."
