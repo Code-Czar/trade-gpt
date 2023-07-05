@@ -10,7 +10,7 @@ screen -dmS $session
 components=("trading-bot-backend"  "trading-bot-position-manager" "trading-bot-strategy-analyzer")
 
 # Start the Django server in a new screen window
-screen -S $session -X screen -t "trading-bot-centralization-server" bash -c "cd trading-bot-centralization-server/trading_center && python manage.py runserver; read"
+# screen -S $session -X screen -t "trading-bot-centralization-server" bash -c "cd trading-bot-centralization-server/trading_center && python manage.py runserver; read"
 # wait 5
 
 # Start each component in a new screen window

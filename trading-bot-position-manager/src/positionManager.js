@@ -53,6 +53,7 @@ class PositionManager {
     checkPnL() {
         return __awaiter(this, void 0, void 0, function* () {
             for (let id in this.positions) {
+                console.log("🚀 ~ file: positionManager.ts:45 ~ PositionManager ~ checkPnL ~ this.positions:", id);
                 const position = this.positions[id];
                 const currentPrice = yield this.getCurrentPrice(position.symbol);
                 let pnl = this.calculatePnL(id, currentPrice);
@@ -73,10 +74,14 @@ class PositionManager {
                     continue;
                 }
                 if (position.type === position_1.PositionType.LONG) {
-                    console.log(`PnL for position LONG ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`);
+                    // console.log(
+                    // `PnL for position LONG ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`,
+                    // );
                 }
                 else if (position.type === position_1.PositionType.SHORT) {
-                    console.log(`PnL for position SHORT ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`);
+                    // console.log(
+                    // `PnL for position SHORT ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`,
+                    // );
                 }
             }
         });
@@ -99,17 +104,21 @@ class PositionManager {
                     bybitOrderId: position.bybitOrderId,
                 }),
             });
-            if (!response.ok) {
+            // console.log("🚀 ~ file: positionManager.ts:84 ~ PositionManager ~ createPositionInBackend ~ response:", response)
+            if (response.status !== 201) {
                 const responseBody = yield response.text();
                 console.error(`Failed to create position in backend: ${response.status} ${response.statusText} - ${responseBody}`);
                 throw new Error(responseBody);
             }
+            const responseJson = yield response.json();
+            console.log("🚀 ~ file: positionManager.ts:107 ~ PositionManager ~ createPositionInBackend ~ response.data:", responseJson.data.id);
+            return responseJson.data.id;
         });
     }
     getOpenPositionsFromBackend() {
         return __awaiter(this, void 0, void 0, function* () {
             const url = `${this.backendUrl}/positions/open_positions/`;
-            console.log('🚀 ~ file: positionManager.ts:53 ~ PositionManager ~ getOpenPositionsFromBackend ~ url:', url);
+            // console.log('🚀 ~ file: positionManager.ts:53 ~ PositionManager ~ getOpenPositionsFromBackend ~ url:', url);
             const response = yield axios_1.default.get(url);
             const positions = response.data;
             return positions;
@@ -119,17 +128,22 @@ class PositionManager {
         return __awaiter(this, void 0, void 0, function* () {
             let position;
             const { symbol, buyPrice, sellPrice, quantity, type } = positionProps;
-            if (type === position_1.PositionType.LONG) {
+            console.log("🚀 ~ file: positionManager.ts:124 ~ PositionManager ~ createPosition ~ positionProps:", type, type == 'long');
+            if (type == 'long') {
+                console.log("🚀 ~ file: positionManager.ts:127 ~ PositionManager ~ createPosition ~ type:", type);
                 if (!buyPrice) {
                     throw new Error('A buyPrice is required to create a long position');
                 }
                 position = yield this.createLongPosition(symbol, buyPrice, quantity);
+                console.log("🚀 ~ file: positionManager.ts:131 ~ PositionManager ~ createPosition ~ position:", position);
             }
-            else if (type === position_1.PositionType.SHORT) {
+            else if (type == 'short') {
+                console.log("🚀 ~ file: positionManager.ts:134 ~ PositionManager ~ createPosition ~ type:", type);
                 if (!sellPrice) {
                     throw new Error('A sellPrice is required to create a short position');
                 }
                 position = yield this.createShortPosition(symbol, sellPrice, quantity);
+                console.log("🚀 ~ file: positionManager.ts:137 ~ PositionManager ~ createPosition ~ position:", position);
             }
             else {
                 throw new Error(`Invalid position type: ${type}. Allowed values are 'long' and 'short'`);
@@ -141,20 +155,25 @@ class PositionManager {
     createLongPosition(symbol, buyPrice, quantity) {
         return __awaiter(this, void 0, void 0, function* () {
             const position = new position_1.Position((0, uuid_1.v4)(), symbol, buyPrice, null, quantity, position_1.PositionType.LONG, position_1.PositionStatus.OPEN);
-            this.positions[position.id] = position;
-            position.bybitOrderId = yield this.bybitManager.createOrder('Buy', symbol, buyPrice, quantity);
+            position.bybitOrderId = yield this.bybitManager.createOrder('Buy', symbol, buyPrice, quantity, position);
             // Create the position in the Django backend
-            yield this.createPositionInBackend(position);
+            const positionID = yield this.createPositionInBackend(position);
+            console.log("🚀 ~ file: positionManager.ts:148 ~ PositionManager ~ createLongPosition ~ positionID:", positionID);
+            position.id = positionID;
+            this.positions[positionID] = position;
+            // console.log("🚀 ~ file: positionManager.ts:152 ~ PositionManager ~ createLongPosition ~ this.positions[positionID]:", this.positions[positionID])
             return position;
         });
     }
     createShortPosition(symbol, sellPrice, quantity) {
         return __awaiter(this, void 0, void 0, function* () {
             const position = new position_1.Position((0, uuid_1.v4)(), symbol, null, sellPrice, quantity, position_1.PositionType.SHORT, position_1.PositionStatus.OPEN);
-            this.positions[position.id] = position;
-            position.bybitOrderId = yield this.bybitManager.createOrder('Sell', symbol, sellPrice, quantity);
+            position.bybitOrderId = yield this.bybitManager.createOrder('Sell', symbol, sellPrice, quantity, position);
             // Create the position in the Django backend
-            yield this.createPositionInBackend(position);
+            const positionID = yield this.createPositionInBackend(position);
+            console.log("🚀 ~ file: positionManager.ts:159 ~ PositionManager ~ createShortPosition ~ positionID:", positionID);
+            position.id = positionID;
+            this.positions[positionID] = position;
             return position;
         });
     }

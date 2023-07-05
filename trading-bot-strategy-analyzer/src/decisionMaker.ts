@@ -18,7 +18,7 @@ export class DecisionMaker {
     makeDecision(symbol: string, buySignal: boolean, sellSignal: boolean) {
         const currentRiskedCapital = this.getCurrentRiskedCapital();
         if (currentRiskedCapital >= this.totalRiskedCapital) {
-            console.log('Total risked capital has been invested, no new trades will be initiated.');
+            // console.log('Total risked capital has been invested, no new trades will be initiated.');
             return;
         }
 
@@ -37,7 +37,7 @@ export class DecisionMaker {
 
     handleShortDCA(symbol: string) {
         if (this.dcaCounter[symbol] > 2) {
-            console.log('DCA limit reached, not buying more');
+            // console.log('DCA limit reached, not buying more');
             return;
         }
         let riskPerTrade = this.initialRiskPerTrade * (this.dcaCounter[symbol] + 1) * this.dcaFactor;
@@ -47,7 +47,7 @@ export class DecisionMaker {
 
     handleLongDCA(symbol: string) {
         if (this.dcaCounter[symbol] > 2) {
-            console.log('DCA limit reached, not selling more');
+            // console.log('DCA limit reached, not selling more');
             return;
         }
         let riskPerTrade = this.initialRiskPerTrade * (this.dcaCounter[symbol] + 1) * this.dcaFactor;

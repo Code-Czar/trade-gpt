@@ -36,42 +36,52 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BybitManager = void 0;
-const node_fetch_1 = __importDefault(require("node-fetch"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const crypto = __importStar(require("crypto"));
+const { RestClientV5 } = require('bybit-api');
 dotenv_1.default.config();
 class BybitManager {
     constructor() {
-        this.bybitApiKey = process.env.BYBIT_API_KEY;
-        this.bybitApiSecret = process.env.BYBIT_API_SECRET;
-        if (process.env.BYBIT_TEST_MODE === 'true')
-            this.bybitUrl = process.env.BYBIT_PROD_URL; // Use 'https://api-testnet.bybit.com' for testnet
-        else
-            this.bybitUrl = process.env.BYBIT_TEST_URL;
-    }
-    createOrder(side, symbol, price, quantity) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const path = '/v2/private/order/create';
-            const params = {
-                api_key: this.bybitApiKey,
-                side: side,
-                symbol: symbol,
-                order_type: 'Limit',
-                qty: quantity,
-                price: price,
-                time_in_force: 'GoodTillCancel',
-                timestamp: Date.now()
-            };
-            params['sign'] = this.generateSignature(params, this.bybitApiSecret);
-            const response = yield (0, node_fetch_1.default)(this.bybitUrl + path, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(params),
+        if (process.env.BYBIT_TEST_MODE === 'true') {
+            this.client = new RestClientV5({
+                testnet: true,
+                key: process.env.BYBIT_T_KEY,
+                secret: process.env.BYBIT_T_SECRET
             });
-            const data = yield response.json();
-            return data.result.order_id;
+        }
+        else {
+            this.client = new RestClientV5({
+                testnet: false,
+                key: process.env.BYBIT_P_KEY,
+                secret: process.env.BYBIT_P_SECRET
+            });
+        }
+    }
+    createOrder(side, symbol, price, quantity, position) {
+        return __awaiter(this, void 0, void 0, function* () {
+            symbol = symbol.replace('-', '');
+            const params = {
+                category: 'spot',
+                symbol: symbol,
+                side: side,
+                orderType: 'Market',
+                qty: quantity,
+                // price: '15600',
+                orderLinkId: position.id,
+                isLeverage: 0,
+                // orderFilter: 'Order',
+            };
+            console.log("🚀 ~ file: ByBitManager.ts:51 ~ BybitManager ~ createOrder ~ params:", params);
+            this.client
+                .submitOrder(params)
+                .then((response) => {
+                console.log("🚀 ~ file: ByBitManager.ts:102 ~ BybitManager ~ .then ~ response:", response);
+                console.log(response);
+            })
+                .catch((error) => {
+                console.error(error);
+            });
+            // return response.result.orderId;
         });
     }
     generateSignature(params, apiSecret) {

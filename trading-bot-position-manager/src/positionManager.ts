@@ -42,6 +42,7 @@ export class PositionManager {
 
     async checkPnL() {
         for (let id in this.positions) {
+            console.log("🚀 ~ file: positionManager.ts:45 ~ PositionManager ~ checkPnL ~ this.positions:", id)
             const position = this.positions[id];
             const currentPrice = await this.getCurrentPrice(position.symbol);
             let pnl = this.calculatePnL(id, currentPrice);
@@ -67,13 +68,13 @@ export class PositionManager {
             }
 
             if (position.type === PositionType.LONG) {
-                console.log(
-                    `PnL for position LONG ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`,
-                );
+                // console.log(
+                // `PnL for position LONG ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`,
+                // );
             } else if (position.type === PositionType.SHORT) {
-                console.log(
-                    `PnL for position SHORT ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`,
-                );
+                // console.log(
+                // `PnL for position SHORT ${position.id} (${position.symbol}): ${pnl} - Current price: ${currentPrice}`,
+                // );
             }
         }
     }
@@ -95,19 +96,23 @@ export class PositionManager {
                 bybitOrderId: position.bybitOrderId,
             }),
         });
+        // console.log("🚀 ~ file: positionManager.ts:84 ~ PositionManager ~ createPositionInBackend ~ response:", response)
 
-        if (!response.ok) {
+        if (response.status !== 201) {
             const responseBody = await response.text();
             console.error(
                 `Failed to create position in backend: ${response.status} ${response.statusText} - ${responseBody}`,
             );
             throw new Error(responseBody);
         }
+        const responseJson = await response.json();
+        console.log("🚀 ~ file: positionManager.ts:107 ~ PositionManager ~ createPositionInBackend ~ response.data:", responseJson.data.id)
+        return responseJson.data.id
     }
 
     async getOpenPositionsFromBackend() {
         const url = `${this.backendUrl}/positions/open_positions/`;
-        console.log('🚀 ~ file: positionManager.ts:53 ~ PositionManager ~ getOpenPositionsFromBackend ~ url:', url);
+        // console.log('🚀 ~ file: positionManager.ts:53 ~ PositionManager ~ getOpenPositionsFromBackend ~ url:', url);
         const response = await axios.get(url);
         const positions = response.data;
         return positions;
@@ -116,16 +121,22 @@ export class PositionManager {
     async createPosition(positionProps: PositionProps): Promise<Position> {
         let position: Position;
         const { symbol, buyPrice, sellPrice, quantity, type } = positionProps;
-        if (type === PositionType.LONG) {
+        console.log("🚀 ~ file: positionManager.ts:124 ~ PositionManager ~ createPosition ~ positionProps:", type, type == 'long');
+
+        if (type == 'long') {
+            console.log("🚀 ~ file: positionManager.ts:127 ~ PositionManager ~ createPosition ~ type:", type)
             if (!buyPrice) {
                 throw new Error('A buyPrice is required to create a long position');
             }
             position = await this.createLongPosition(symbol, buyPrice, quantity);
-        } else if (type === PositionType.SHORT) {
+            console.log("🚀 ~ file: positionManager.ts:131 ~ PositionManager ~ createPosition ~ position:", position)
+        } else if (type == 'short') {
+            console.log("🚀 ~ file: positionManager.ts:134 ~ PositionManager ~ createPosition ~ type:", type)
             if (!sellPrice) {
                 throw new Error('A sellPrice is required to create a short position');
             }
             position = await this.createShortPosition(symbol, sellPrice, quantity);
+            console.log("🚀 ~ file: positionManager.ts:137 ~ PositionManager ~ createPosition ~ position:", position)
         } else {
             throw new Error(`Invalid position type: ${type}. Allowed values are 'long' and 'short'`);
         }
@@ -135,25 +146,31 @@ export class PositionManager {
     }
 
     private async createLongPosition(symbol: string, buyPrice: number, quantity: number): Promise<Position> {
-        const position = new Position(uuidv4(), symbol, buyPrice, null, quantity, PositionType.LONG, PositionStatus.OPEN);
-        this.positions[position.id] = position;
 
-        position.bybitOrderId = await this.bybitManager.createOrder('Buy', symbol, buyPrice, quantity);
+        const position = new Position(uuidv4(), symbol, buyPrice, null, quantity, PositionType.LONG, PositionStatus.OPEN);
+
+        position.bybitOrderId = await this.bybitManager.createOrder('Buy', symbol, buyPrice, quantity, position);
 
         // Create the position in the Django backend
-        await this.createPositionInBackend(position);
+        const positionID = await this.createPositionInBackend(position);
+        console.log("🚀 ~ file: positionManager.ts:148 ~ PositionManager ~ createLongPosition ~ positionID:", positionID)
+        position.id = positionID;
+        this.positions[positionID] = position;
+        // console.log("🚀 ~ file: positionManager.ts:152 ~ PositionManager ~ createLongPosition ~ this.positions[positionID]:", this.positions[positionID])
 
         return position;
     }
 
     private async createShortPosition(symbol: string, sellPrice: number, quantity: number): Promise<Position> {
         const position = new Position(uuidv4(), symbol, null, sellPrice, quantity, PositionType.SHORT, PositionStatus.OPEN);
-        this.positions[position.id] = position;
 
-        position.bybitOrderId = await this.bybitManager.createOrder('Sell', symbol, sellPrice, quantity);
+        position.bybitOrderId = await this.bybitManager.createOrder('Sell', symbol, sellPrice, quantity, position);
 
         // Create the position in the Django backend
-        await this.createPositionInBackend(position);
+        const positionID = await this.createPositionInBackend(position);
+        console.log("🚀 ~ file: positionManager.ts:159 ~ PositionManager ~ createShortPosition ~ positionID:", positionID)
+        position.id = positionID;
+        this.positions[positionID] = position;
 
         return position;
     }

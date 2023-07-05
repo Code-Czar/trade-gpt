@@ -3,12 +3,25 @@ from .models import Position
 from .serializers import PositionSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import status
+
 import requests
 
 
 class PositionViewSet(viewsets.ModelViewSet):
     queryset = Position.objects.all()
     serializer_class = PositionSerializer
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            {"id": serializer.data["id"]},
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
 
     @action(detail=True, methods=["post"])
     def close(self, request, pk=None):

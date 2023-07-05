@@ -2,9 +2,12 @@ import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 
 dotenv.config();
+const sendSignal = false;
 const tradingViewUrl = "https://www.tradingview.com/chart/?symbol=";
 
+
 export async function sendSignalEmail(positionType: string, symbol: string, timeFrame: string, analysisType: string, exchange: string = "BINANCE") {
+    if (!sendSignal) return;
     const credentials = {
         user: process.env.GMAIL_USER, // your Gmail account 
         pass: process.env.GMAIL_PASS // your Gmail App Password
@@ -13,7 +16,7 @@ export async function sendSignalEmail(positionType: string, symbol: string, time
         service: 'gmail',
         auth: credentials
     });
-    console.log("🚀 ~ file: email.ts:14 ~ sendSignalEmail ~ auth:", credentials)
+    // console.log("🚀 ~ file: email.ts:14 ~ sendSignalEmail ~ auth:", credentials)
     const formattedSymbol = symbol.replace("/", "").replace("-", "");
 
 
@@ -26,5 +29,5 @@ export async function sendSignalEmail(positionType: string, symbol: string, time
         html: `<p>A <strong>${symbol} | ${positionType} </strong> signal was generated for <strong>${timeFrame}</strong> on <strong>${analysisType}</strong>.</p><br/> <a href="${tradingViewUrl}${exchange}:${formattedSymbol}"> View on trading view </a>`, // html body
     });
 
-    console.log('Message sent: %s', info.messageId);
+    // console.log('Message sent: %s', info.messageId);
 }

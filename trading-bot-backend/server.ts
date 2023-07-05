@@ -22,8 +22,8 @@ let count = 0;
 //         const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
 //         ohlcvData = ohlcv;
 //         count++;
-//         console.log(`Fetched ${count} data`);
-//         console.log(`Size ${ohlcvData.length} data`);
+//         // console.log(`Fetched ${count} data`);
+//         // console.log(`Size ${ohlcvData.length} data`);
 //     } catch (error) {
 //         console.error(error);
 //     }
@@ -90,5 +90,5 @@ app.get('/api/resistance/:symbol/:timeframe', async (req, res) => {
 });
 
 app.listen(3000, () => {
-    console.log('Server is running on http://localhost:3000');
+    // console.log('Server is running on http://localhost:3000');
 });

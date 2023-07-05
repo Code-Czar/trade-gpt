@@ -7,6 +7,7 @@
     "@types/node": "^20.3.1",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.60.0",
+    "bybit-api": "^3.7.1",
     "ccxt": "^3.1.51",
     "cors": "^2.8.5",
     "eslint": "^8.0.1",

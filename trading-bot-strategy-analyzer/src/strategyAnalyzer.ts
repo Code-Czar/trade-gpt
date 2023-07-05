@@ -3,8 +3,8 @@ const fetch = require('node-fetch');
 import { sendSignalEmail } from './email';
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 
-const RSIUpperThreshold = 75;
-const RSILowerThreshold = 25;
+const RSIUpperThreshold = 50;
+const RSILowerThreshold = 50;
 
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
@@ -44,7 +44,7 @@ const generateSellSignal = (data) => {
     return isPriceTouchedUpperBand && isRSIOverBought && isMACDBearish;
 }
 function analyzeRSI(data) {
-    // console.log("🚀 ~ file: strategyAnalyzer.ts:41 ~ analyzeRSI ~ data:", data)
+    // // console.log("🚀 ~ file: strategyAnalyzer.ts:41 ~ analyzeRSI ~ data:", data)
     const { rsi } = data;
     const { ohlcvData } = data;
     const length = rsi.length;
@@ -125,7 +125,7 @@ async function openLongPosition(symbol, price) {
 
         const data = await res.json();
 
-        console.log(`Opened new long position with ID ${data.id}`);
+        // console.log(`Opened new long position with ID ${data.id}`);
     } catch (err) {
         console.error(`Failed to open long position: ${position} ${err}`);
     }
@@ -148,9 +148,9 @@ async function openShortPosition(symbol, price) {
         });
 
         const data = await res.json();
-        console.log("🚀 ~ file: strategyAnalyzer.ts:146 ~ openShortPosition ~ data:", data)
+        // console.log("🚀 ~ file: strategyAnalyzer.ts:146 ~ openShortPosition ~ data:", data)
 
-        console.log(`Opened new short position with ID ${data.id}`);
+        // console.log(`Opened new short position with ID ${data.id}`);
     } catch (err) {
         console.error(`Failed to open short position: ${position} ${err}`);
     }
@@ -207,7 +207,7 @@ export async function analyzeData(symbol, timeframe, analysisType, signalStatus)
             break;
 
         default:
-            console.log(`Unknown analysis type: ${analysisType}`);
+            // console.log(`Unknown analysis type: ${analysisType}`);
             return;
     }
 

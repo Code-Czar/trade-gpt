@@ -1,6 +1,8 @@
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import * as crypto from 'crypto';
+const { RestClientV5 } = require('bybit-api');
+
 
 dotenv.config();
 
@@ -8,40 +10,58 @@ export class BybitManager {
     private bybitApiKey: string;
     private bybitApiSecret: string;
     private bybitUrl: string;
+    private client: any;
 
     constructor() {
-        this.bybitApiKey = process.env.BYBIT_API_KEY;
-        this.bybitApiSecret = process.env.BYBIT_API_SECRET;
-        if (process.env.BYBIT_TEST_MODE === 'true')
-            this.bybitUrl = process.env.BYBIT_PROD_URL; // Use 'https://api-testnet.bybit.com' for testnet
-        else
-            this.bybitUrl = process.env.BYBIT_TEST_URL;
+
+        if (process.env.BYBIT_TEST_MODE === 'true') {
+            this.client = new RestClientV5({
+                testnet: true,
+                key: process.env.BYBIT_T_KEY,
+                secret: process.env.BYBIT_T_SECRET
+            });
+
+        }
+        else {
+            this.client = new RestClientV5({
+                testnet: false,
+                key: process.env.BYBIT_P_KEY,
+                secret: process.env.BYBIT_P_SECRET
+            });
+
+        }
     }
 
-    async createOrder(side: string, symbol: string, price: number, quantity: number) {
-        const path = '/v2/private/order/create';
-        const params = {
-            api_key: this.bybitApiKey,
-            side: side,
-            symbol: symbol,
-            order_type: 'Limit',
-            qty: quantity,
-            price: price,
-            time_in_force: 'GoodTillCancel',
-            timestamp: Date.now()
-        };
-        params['sign'] = this.generateSignature(params, this.bybitApiSecret);
 
-        const response = await fetch(this.bybitUrl + path, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(params),
-        });
+    async createOrder(side: string, symbol: string, price: number, quantity: number, position: Position) {
+        symbol = symbol.replace('-', '');
 
-        const data = await response.json();
-        return data.result.order_id;
+
+
+
+        this.client
+            .submitOrder({
+                category: 'spot',
+                symbol: 'USDTETH',
+                side: 'Sell',
+                orderType: 'Market',
+                qty: '10',
+                // price: '15600',
+                orderLinkId: position.id,
+                isLeverage: 0,
+                // orderFilter: 'Order',
+            })
+            .then((response) => {
+                console.log("🚀 ~ file: ByBitManager.ts:102 ~ BybitManager ~ .then ~ response:", response)
+                console.log(response);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+
+
+        // return response.result.orderId;
+
     }
 
     generateSignature(params, apiSecret) {

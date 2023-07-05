@@ -16,7 +16,7 @@ const timeframe = '1d'; // 1 day
 function startBot() {
     return __awaiter(this, void 0, void 0, function* () {
         // const data = await bot.fetchOHLCV(symbol, timeframe);
-        // console.log(data);
+        // // console.log(data);
     });
 }
 startBot().catch(console.error);

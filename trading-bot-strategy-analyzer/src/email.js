@@ -16,9 +16,12 @@ exports.sendSignalEmail = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 dotenv_1.default.config();
+const sendSignal = false;
 const tradingViewUrl = "https://www.tradingview.com/chart/?symbol=";
 function sendSignalEmail(positionType, symbol, timeFrame, analysisType, exchange = "BINANCE") {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!sendSignal)
+            return;
         const credentials = {
             user: process.env.GMAIL_USER,
             pass: process.env.GMAIL_PASS // your Gmail App Password
@@ -27,7 +30,7 @@ function sendSignalEmail(positionType, symbol, timeFrame, analysisType, exchange
             service: 'gmail',
             auth: credentials
         });
-        console.log("🚀 ~ file: email.ts:14 ~ sendSignalEmail ~ auth:", credentials);
+        // console.log("🚀 ~ file: email.ts:14 ~ sendSignalEmail ~ auth:", credentials)
         const formattedSymbol = symbol.replace("/", "").replace("-", "");
         // send mail with defined transport object
         let info = yield transporter.sendMail({
@@ -37,7 +40,7 @@ function sendSignalEmail(positionType, symbol, timeFrame, analysisType, exchange
             text: `A ${symbol} | ${positionType}signal was generated for ${timeFrame} on ${analysisType}.`,
             html: `<p>A <strong>${symbol} | ${positionType} </strong> signal was generated for <strong>${timeFrame}</strong> on <strong>${analysisType}</strong>.</p><br/> <a href="${tradingViewUrl}${exchange}:${formattedSymbol}"> View on trading view </a>`, // html body
         });
-        console.log('Message sent: %s', info.messageId);
+        // console.log('Message sent: %s', info.messageId);
     });
 }
 exports.sendSignalEmail = sendSignalEmail;

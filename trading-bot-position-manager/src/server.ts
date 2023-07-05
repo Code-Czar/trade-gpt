@@ -49,5 +49,5 @@ app.get('/position/closed', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Position manager server is running at http://localhost:${port}`);
+    // console.log(`Position manager server is running at http://localhost:${port}`);
 });

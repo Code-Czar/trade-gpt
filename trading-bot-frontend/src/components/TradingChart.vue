@@ -92,7 +92,7 @@ const toggleBollingerBands = () => {
 
 const toggleVolumes = () => {
     showVolume.value = !showVolume.value;
-    console.log('🚀 ~ file: TradingChart.vue:66 ~ toggleVolumes ~ showVolume.value:', showVolume.value);
+    // console.log('🚀 ~ file: TradingChart.vue:66 ~ toggleVolumes ~ showVolume.value:', showVolume.value);
 };
 
 const toggleMACD = () => {
@@ -139,11 +139,11 @@ watchEffect(async () => {
     const seriesValues = Object.values(store.data);
     const firstSerie = seriesValues;
     if (!firstSerie || !chart) return;
-    console.log('🚀 ~ file: TradingChart.vue:26 ~ watch ~ newData:', firstSerie);
+    // console.log('🚀 ~ file: TradingChart.vue:26 ~ watch ~ newData:', firstSerie);
 
     let formattedData = formatChartData(firstSerie);
 
-    console.log('🚀 ~ file: TradingChart.vue:108 ~ watchEffect ~ formattedData:', formattedData);
+    // console.log('🚀 ~ file: TradingChart.vue:108 ~ watchEffect ~ formattedData:', formattedData);
     if (candlestickSeries) {
         candlestickSeries.setData(formattedData);
     }
@@ -271,7 +271,7 @@ watchEffect(async () => {
             value: data.volume,
             color: data.open > data.close ? 'rgba(255, 82, 82, 0.8)' : 'rgba(4, 232, 36, 0.8)',
         }));
-        console.log('🚀 ~ file: TradingChart.vue:250 ~ watchEffect ~ volumeData:', volumeData);
+        // console.log('🚀 ~ file: TradingChart.vue:250 ~ watchEffect ~ volumeData:', volumeData);
         volumeSeries.setData(volumeData);
     } else {
         volumeSeries.setData([]); // set data to an empty array to clear the volume data
@@ -287,7 +287,7 @@ watchEffect(async () => {
             SimpleMASignal: false,
         };
         let macd = MACD.calculate(inputMACD);
-        console.log("🚀 ~ file: TradingChart.vue:270 ~ watchEffect ~ macd:", macd, inputMACD)
+        // console.log("🚀 ~ file: TradingChart.vue:270 ~ watchEffect ~ macd:", macd, inputMACD)
 
         let macdData = macd.map((value, index) => {
             const period = index + inputMACD.slowPeriod + inputMACD.signalPeriod - 2;
@@ -370,7 +370,7 @@ watchEffect(async () => {
         // }
 
         store.supportData.forEach((support) => {
-            console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ support:", support[4])
+            // console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ support:", support[4])
 
             const supportLineData = formattedData.map((value) => ({
                 time: value.time,
@@ -389,9 +389,9 @@ watchEffect(async () => {
     if (showResistance.value) {
 
 
-        console.log("🚀 ~ file: TradingChart.vue:399 ~ store.resistanceData.resistance.forEach ~ store.resistanceData:", store.resistanceData)
+        // console.log("🚀 ~ file: TradingChart.vue:399 ~ store.resistanceData.resistance.forEach ~ store.resistanceData:", store.resistanceData)
         store.resistanceData.forEach((resistance) => {
-            console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ resistance:", resistance[4])
+            // console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ resistance:", resistance[4])
 
             const resistanceLineData = formattedData.map((value) => ({
                 time: value.time,

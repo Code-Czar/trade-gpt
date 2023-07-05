@@ -48,7 +48,7 @@ class TradingBot {
                 }
                 catch (error) {
                     if (error instanceof ccxt.DDoSProtection) {
-                        console.log('Rate limit hit, waiting before retrying...');
+                        // console.log('Rate limit hit, waiting before retrying...');
                         yield new Promise(resolve => setTimeout(resolve, 1000)); // wait for 1 second
                     }
                     else {

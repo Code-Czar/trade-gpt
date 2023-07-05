@@ -25,9 +25,9 @@ onMounted(() => {
             dataStore.addSupportData(supportResponse.data.support);
             dataStore.addResistanceData(resistanceResponse.data.resistance);
 
-            console.log("🚀 ~ file: FetchData.vue ~ intervalId=setInterval ~ data:", response.data);
-            console.log("🚀 ~ file: FetchData.vue ~ intervalId=setInterval ~ support data:", supportResponse.data);
-            console.log("🚀 ~ file: FetchData.vue ~ intervalId=setInterval ~ resistance data:", resistanceResponse.data);
+            // console.log("🚀 ~ file: FetchData.vue ~ intervalId=setInterval ~ data:", response.data);
+            // console.log("🚀 ~ file: FetchData.vue ~ intervalId=setInterval ~ support data:", supportResponse.data);
+            // console.log("🚀 ~ file: FetchData.vue ~ intervalId=setInterval ~ resistance data:", resistanceResponse.data);
         } catch (error) {
             console.error(error);
         }

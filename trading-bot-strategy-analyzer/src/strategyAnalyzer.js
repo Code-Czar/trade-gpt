@@ -13,8 +13,8 @@ exports.analyzeData = void 0;
 const fetch = require('node-fetch');
 const email_1 = require("./email");
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
-const RSIUpperThreshold = 75;
-const RSILowerThreshold = 25;
+const RSIUpperThreshold = 50;
+const RSILowerThreshold = 50;
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
     // Identify if the last candlestick's price touched the lower Bollinger Band
@@ -46,7 +46,7 @@ const generateSellSignal = (data) => {
     return isPriceTouchedUpperBand && isRSIOverBought && isMACDBearish;
 };
 function analyzeRSI(data) {
-    // console.log("🚀 ~ file: strategyAnalyzer.ts:41 ~ analyzeRSI ~ data:", data)
+    // // console.log("🚀 ~ file: strategyAnalyzer.ts:41 ~ analyzeRSI ~ data:", data)
     const { rsi } = data;
     const { ohlcvData } = data;
     const length = rsi.length;
@@ -121,7 +121,7 @@ function openLongPosition(symbol, price) {
                 body: position
             });
             const data = yield res.json();
-            console.log(`Opened new long position with ID ${data.id}`);
+            // console.log(`Opened new long position with ID ${data.id}`);
         }
         catch (err) {
             console.error(`Failed to open long position: ${position} ${err}`);
@@ -145,8 +145,8 @@ function openShortPosition(symbol, price) {
                 body: position
             });
             const data = yield res.json();
-            console.log("🚀 ~ file: strategyAnalyzer.ts:146 ~ openShortPosition ~ data:", data);
-            console.log(`Opened new short position with ID ${data.id}`);
+            // console.log("🚀 ~ file: strategyAnalyzer.ts:146 ~ openShortPosition ~ data:", data)
+            // console.log(`Opened new short position with ID ${data.id}`);
         }
         catch (err) {
             console.error(`Failed to open short position: ${position} ${err}`);
@@ -211,7 +211,7 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus) {
                 }
                 break;
             default:
-                console.log(`Unknown analysis type: ${analysisType}`);
+                // console.log(`Unknown analysis type: ${analysisType}`);
                 return;
         }
         return [data, analysisResult];

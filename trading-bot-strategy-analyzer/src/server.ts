@@ -90,14 +90,14 @@ setInterval(async () => {
             latestDataAndSignals[symbol][timeframe]['COMPLETE_ANALYSIS'] = Complete_latestDataAndSignals;
 
             if (RSI_latestDataAndSignals[1].buySignal) {
-                console.log(`RSI : Buy signal for ${symbol} on ${timeframe} timeframe!`);
+                // console.log(`RSI : Buy signal for ${symbol} on ${timeframe} timeframe!`);
             } else if (RSI_latestDataAndSignals[1].sellSignal) {
-                console.log(`RSI : Sell signal for ${symbol} on ${timeframe} timeframe!`);
+                // console.log(`RSI : Sell signal for ${symbol} on ${timeframe} timeframe!`);
             }
             if (Complete_latestDataAndSignals[1].buySignal) {
-                console.log(`Complete : Buy signal for ${symbol} on ${timeframe} timeframe!`);
+                // console.log(`Complete : Buy signal for ${symbol} on ${timeframe} timeframe!`);
             } else if (Complete_latestDataAndSignals[1].sellSignal) {
-                console.log(`Complete : Sell signal for ${symbol} on ${timeframe} timeframe!`);
+                // console.log(`Complete : Sell signal for ${symbol} on ${timeframe} timeframe!`);
             }
         }
     }
@@ -195,5 +195,5 @@ app.get('/api/:symbol/:timeframe/:analysisType/data-and-signals', (req, res) => 
 });
 
 app.listen(3002, () => {
-    console.log('Analyzer server is running on http://localhost:3002');
+    // console.log('Analyzer server is running on http://localhost:3002');
 });
