@@ -15,6 +15,7 @@ const email_1 = require("./email");
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 const RSIUpperThreshold = 50;
 const RSILowerThreshold = 50;
+const positionUSDTAmount = 10;
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
     // Identify if the last candlestick's price touched the lower Bollinger Band
@@ -109,7 +110,7 @@ function openLongPosition(symbol, price) {
         const position = JSON.stringify({
             symbol: symbol,
             buyPrice: price,
-            quantity: 1,
+            quantity: positionUSDTAmount,
             type: 'long' // this is a long position
         });
         try {
@@ -133,7 +134,7 @@ function openShortPosition(symbol, price) {
         const position = JSON.stringify({
             symbol: symbol,
             sellPrice: price,
-            quantity: 1,
+            quantity: positionUSDTAmount,
             type: 'short' // this is a short position
         });
         try {

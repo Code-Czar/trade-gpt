@@ -33,24 +33,49 @@ export class BybitManager {
     }
 
 
-    async createOrder(side: string, symbol: string, price: number, quantity: number, position: Position) {
+    async createOrder(side: string, symbol: string, price: number, quantity: number | string, position: Position) {
+        // const pair = symbol.split('-');
         symbol = symbol.replace('-', '');
+        // const bybitPair = []
 
+        // // Put USDT first
+        // if (pair[0] !== 'USDT') {
+        //     bybitPair.push(pair[1])
+        //     bybitPair.push(pair[0])
+        // }
+        // else {
+        //     bybitPair.push(pair[0])
+        //     bybitPair.push(pair[1])
+        // }
+        // symbol = bybitPair.join('')
+        quantity = quantity.toString()
 
+        const params = {
+            category: 'spot',
+            symbol: 'USDTETH',
+            side: 'Sell',
+            orderType: 'Market',
+            qty: '10',
+            // price: '15600',
+            orderLinkId: position.id,
+            isLeverage: 0,
+            // orderFilter: 'Order',
+        }
+        const params2 = {
+            category: 'spot',
+            symbol: symbol,
+            side: side,
+            orderType: 'Market',
+            qty: quantity,
+            // price: '15600',
+            orderLinkId: position.id,
+            isLeverage: 0,
+        }
+        console.log("🚀 ~ file: ByBitManager.ts:50 ~ BybitManager ~ createOrder ~ params:", params, params2)
 
 
         this.client
-            .submitOrder({
-                category: 'spot',
-                symbol: 'USDTETH',
-                side: 'Sell',
-                orderType: 'Market',
-                qty: '10',
-                // price: '15600',
-                orderLinkId: position.id,
-                isLeverage: 0,
-                // orderFilter: 'Order',
-            })
+            .submitOrder(params2)
             .then((response) => {
                 console.log("🚀 ~ file: ByBitManager.ts:102 ~ BybitManager ~ .then ~ response:", response)
                 console.log(response);
