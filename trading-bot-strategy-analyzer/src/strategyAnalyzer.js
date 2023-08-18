@@ -13,7 +13,7 @@ exports.analyzeData = void 0;
 const fetch = require('node-fetch');
 const email_1 = require("./email");
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
-const RSIUpperThreshold = 50;
+const RSIUpperThreshold = 51;
 const RSILowerThreshold = 50;
 const positionUSDTAmount = 10;
 const generateBuySignal = (data) => {
@@ -154,7 +154,7 @@ function openShortPosition(symbol, price) {
         }
     });
 }
-function analyzeData(symbol, timeframe, analysisType, signalStatus) {
+function analyzeData(symbol, timeframe, analysisType, signalStatus, autoOpenPosition = true) {
     var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         // Fetch data
@@ -170,7 +170,8 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus) {
                         signalStatus[key] = {};
                     signalStatus[key].buySignal = true;
                     // Open a new long position
-                    openLongPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
+                    if (autoOpenPosition)
+                        openLongPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
                 }
                 else if (analysisResult.sellSignal && !((_b = signalStatus[key]) === null || _b === void 0 ? void 0 : _b.sellSignal)) {
                     yield (0, email_1.sendSignalEmail)("short", symbol, timeframe, 'RSI');
@@ -178,7 +179,8 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus) {
                         signalStatus[key] = {};
                     signalStatus[key].sellSignal = true;
                     // Open a new short position
-                    openShortPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
+                    if (autoOpenPosition)
+                        openShortPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
                 }
                 else {
                     if (!signalStatus[key])
@@ -195,14 +197,16 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus) {
                     if (!signalStatus[key])
                         signalStatus[key] = {};
                     signalStatus[key].buySignal = true;
-                    openLongPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
+                    if (autoOpenPosition)
+                        openLongPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
                 }
                 else if (analysisResult.sellSignal && !((_d = signalStatus[key]) === null || _d === void 0 ? void 0 : _d.sellSignal)) {
                     yield (0, email_1.sendSignalEmail)("sell", symbol, timeframe, 'Complete');
                     if (!signalStatus[key])
                         signalStatus[key] = {};
                     signalStatus[key].sellSignal = true;
-                    openShortPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
+                    if (autoOpenPosition)
+                        openShortPosition(symbol, data === null || data === void 0 ? void 0 : data.ohlcvData[(data === null || data === void 0 ? void 0 : data.ohlcvData.length) - 1][4]);
                 }
                 else {
                     if (!signalStatus[key])

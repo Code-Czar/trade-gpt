@@ -3,8 +3,8 @@ const fetch = require('node-fetch');
 import { sendSignalEmail } from './email';
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 
-const RSIUpperThreshold = 75;
-const RSILowerThreshold = 25;
+const RSIUpperThreshold = 51;
+const RSILowerThreshold = 50;
 const positionUSDTAmount = 10;
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
@@ -156,7 +156,7 @@ async function openShortPosition(symbol, price) {
     }
 }
 
-export async function analyzeData(symbol, timeframe, analysisType, signalStatus) {
+export async function analyzeData(symbol, timeframe, analysisType, signalStatus, autoOpenPosition = true) {
     // Fetch data
     const data = await fetchData(symbol, timeframe);
     let analysisResult;
@@ -170,14 +170,16 @@ export async function analyzeData(symbol, timeframe, analysisType, signalStatus)
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].buySignal = true;
                 // Open a new long position
-                openLongPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
+                if (autoOpenPosition)
+                    openLongPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
 
             } else if (analysisResult.sellSignal && !signalStatus[key]?.sellSignal) {
                 await sendSignalEmail("short", symbol, timeframe, 'RSI');
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].sellSignal = true;
                 // Open a new short position
-                openShortPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
+                if (autoOpenPosition)
+                    openShortPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
             } else {
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].buySignal = analysisResult.buySignal;
@@ -193,12 +195,14 @@ export async function analyzeData(symbol, timeframe, analysisType, signalStatus)
                 await sendSignalEmail("buy", symbol, timeframe, 'Complete');
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].buySignal = true;
-                openLongPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
+                if (autoOpenPosition)
+                    openLongPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
             } else if (analysisResult.sellSignal && !signalStatus[key]?.sellSignal) {
                 await sendSignalEmail("sell", symbol, timeframe, 'Complete');
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].sellSignal = true;
-                openShortPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
+                if (autoOpenPosition)
+                    openShortPosition(symbol, data?.ohlcvData[data?.ohlcvData.length - 1][4]);
             } else {
                 if (!signalStatus[key]) signalStatus[key] = {};
                 signalStatus[key].buySignal = analysisResult.buySignal;

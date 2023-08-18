@@ -27,7 +27,7 @@
     "uuid": "^9.0.0"
   },
   "scripts": {
-    "start": "tsc; pm2 start src/server.js --no-daemon"
+    "start": "tsc; pm2 start src/positionManagerServer.js --no-daemon"
   },
   "devDependencies": {
     "dotenv": "^16.3.1",

@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
+
 const { TradingBot } = require('./src/bot');
 
 const bot = new TradingBot('binance');
@@ -8,6 +10,9 @@ const symbol = 'BTC/USDT';
 const timeframe = '1m'; // 1 day
 
 const app = express();
+
+app.use(bodyParser.json());
+
 
 // Enable CORS
 app.use(cors());
@@ -56,6 +61,18 @@ app.get('/rsi/:symbol/:timeframe', async (req, res) => {
     const rsi = bot.calculateRSI(ohlcv);
     res.send(rsi);
 });
+// Setup POST route
+app.post('/rsi', async (req, res) => {
+    const { ohlcv } = req.body;
+
+    // Ensure symbol and timeframe are provided
+    if (!ohlcv) {
+        return res.status(400).send({ error: 'OHLCV are required.' });
+    }
+    const rsi = bot.calculateRSI(ohlcv);
+    res.send({ rsi });
+});
+
 
 app.get('/macd/:symbol/:timeframe', async (req, res) => {
     let { symbol, timeframe } = req.params;

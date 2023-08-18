@@ -35,11 +35,55 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TradingBot = void 0;
 const ccxt = __importStar(require("ccxt"));
 const technicalindicators_1 = require("technicalindicators");
+const fs = require('fs');
+const path = require('path');
+const MAJOR_CURRENCIES = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "NZD"];
+const FOREX_API_KEY = 'IUQ1W2DHSATKLZY9';
+const forexPairs = [
+    "EUR-USD", "USD-JPY", "GBP-USD", "USD-CHF", "USD-CAD", "AUD-USD", "NZD-USD",
+    "EUR-GBP", "EUR-AUD", "GBP-JPY", "CHF-JPY", "EUR-CAD", "AUD-CAD", "CAD-JPY", "NZD-JPY",
+    "GBP-CAD", "GBP-NZD", "GBP-AUD", "EUR-NZD", "AUD-NZD", "AUD-JPY", "USD-SGD", "USD-HKD",
+    "USD-TRY", "EUR-TRY", "USD-INR", "USD-MXN", "USD-ZAR", "USD-THB"
+];
+const timeframes = ['1m', '5m', '1h', '4h', '1d', '1w'];
+const FOREX_API_KEYS = [
+    '289YKE5QXT6WYTMU',
+    'BEB6S2C4NGEOXRCA',
+    'SCZH4OGNM52B2X5P',
+    'ZP3O6MM02ZZUHJG2',
+    'ES2AURLO7XEFUHGC',
+    'MUGYSNS1C5QEDUZX',
+];
+let currentKeyIndex = 0;
 class TradingBot {
     constructor(exchangeId) {
+        this.allSymbols = [];
         this.exchange = new ccxt[exchangeId]();
+        // this.fetchAllForexPairs()
+        const filePath = path.resolve(__dirname, 'existingPairs.txt');
+        if (!fs.existsSync(filePath) || !fs.readFileSync(filePath, 'utf8').trim().split('\n').length) {
+            this.checkFOREXPairsExistence().then((existingPairs) => {
+                fs.writeFileSync(filePath, existingPairs.join('\n'));
+                console.log('Existing pairs have been saved!');
+            }).catch((error) => {
+                console.error("Error checking pairs:", error);
+            });
+        }
     }
     fetchOHLCV(symbol, timeframe) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const formattedSymbol = symbol.replace('/', '-');
+            const isForex = forexPairs.includes(formattedSymbol);
+            console.log("🚀 ~ file: bot.ts:44 ~ TradingBot ~ fetchOHLCV ~ formattedSymbol:", formattedSymbol, isForex);
+            if (isForex) {
+                return yield this.fetchFOREXOHLC(formattedSymbol.replace('-', ''), timeframe);
+            }
+            else {
+                return yield this.fetchCryptoOHLCV(symbol, timeframe);
+            }
+        });
+    }
+    fetchCryptoOHLCV(symbol, timeframe) {
         return __awaiter(this, void 0, void 0, function* () {
             while (true) {
                 try {
@@ -56,6 +100,98 @@ class TradingBot {
                     }
                 }
             }
+        });
+    }
+    fetchFOREXOHLC(symbol, timeframe) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const BASE_URL = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=${timeframe}&apikey=${FOREX_API_KEY}`;
+            // const response = await fetch(BASE_URL);
+            const data = yield this.fetchWithRotatingApiKey(BASE_URL);
+            // const data = await response.json();
+            console.log("🚀 ~ file: bot.ts:75 ~ TradingBot ~ fetchFOREXOHLC ~ data:", data);
+            let formattedOHLCData = [];
+            // Filter for the key that starts with 'Time Series'
+            const timeSeriesKey = Object.keys(data).find(key => key.startsWith('Time Series'));
+            if (!timeSeriesKey) {
+                console.error('Failed to find the Time Series key in the response.');
+                return null;
+            }
+            const timeSeries = data[timeSeriesKey];
+            for (let date in timeSeries) {
+                const ohlc = timeSeries[date];
+                const timestamp = new Date(date).getTime();
+                formattedOHLCData.push([
+                    timestamp,
+                    parseFloat(ohlc['1. open']),
+                    parseFloat(ohlc['2. high']),
+                    parseFloat(ohlc['3. low']),
+                    parseFloat(ohlc['4. close']),
+                    parseFloat(ohlc['5. volume'] || "0") // Assuming default volume of 0 if not provided
+                ]);
+            }
+            fs.writeFileSync("forexdata.json", JSON.stringify(formattedOHLCData));
+            return formattedOHLCData;
+        });
+    }
+    fetchWithRotatingApiKey(url) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let response;
+            let attempts = 0;
+            while (attempts < FOREX_API_KEYS.length) {
+                try {
+                    const apiKey = FOREX_API_KEYS[currentKeyIndex];
+                    response = yield fetch(`${url}&apikey=${apiKey}`);
+                    // If you're using a library like Axios, you might get a status code
+                    // directly. With fetch, you'll have to check response.ok or response.status.
+                    if (response.ok) {
+                        return yield response.json();
+                    }
+                    else if (response.status === 429) { // 429 is the typical "Too Many Requests" HTTP status code
+                        // Rotate to the next key for the next attempt
+                        currentKeyIndex = (currentKeyIndex + 1) % FOREX_API_KEYS.length;
+                        attempts++;
+                    }
+                    else {
+                        throw new Error(`Request failed with status ${response.status}`);
+                    }
+                }
+                catch (error) {
+                    console.error("Failed to fetch with current API key. Trying the next one.", error);
+                    currentKeyIndex = (currentKeyIndex + 1) % FOREX_API_KEYS.length;
+                    attempts++;
+                }
+            }
+            throw new Error("All API keys have reached their rate limits.");
+        });
+    }
+    checkFOREXPairsExistence() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const existingPairs = [];
+            for (const pair of forexPairs) {
+                const response = yield fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${pair}&apikey=${FOREX_API_KEY}`);
+                const data = yield response.json();
+                if (!data['Error Message'] && !data['Note']) {
+                    existingPairs.push(pair);
+                }
+            }
+            return existingPairs;
+        });
+    }
+    fetchSymbolsForCurrency(currency) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const BASE_URL = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${currency}&apikey=${FOREX_API_KEY}`;
+            const response = yield fetch(BASE_URL);
+            const data = yield response.json();
+            const symbols = [];
+            if (data && data.bestMatches) {
+                data.bestMatches.forEach(match => {
+                    symbols.push(match['1. symbol']);
+                });
+            }
+            else {
+                console.error(`Failed to fetch symbols for ${currency}`);
+            }
+            return symbols;
         });
     }
     calculateBollingerBands(ohlcv) {

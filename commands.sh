@@ -1,4 +1,6 @@
 #!/bin/bash 
+TESTNET_BYBIT="https://testnet.bybit.com"
+PROJECT_PATH="/Users/beniben/Domaines_De_Vie/Business/GPT_Trading"
 
 alias pushToGit="ssh-add ~/.ssh/Code-Czar && git push origin main"
 alias killScreens="screen -ls | grep Detached | cut -d. -f1 | awk '{print $1}' | xargs -I % screen -X -S % quit"
@@ -9,3 +11,6 @@ alias deploy="rsync -avz -e 'ssh -p 2233' . beniben@$ipserver:/var/www/trading-c
 alias deployPI1="rsync -avz --exclude=node_modules --exclude=env --exclude .git -e 'ssh -p 2233' . beniben@$rpi1:/var/www/trading-chatgpt"
 
 alias recreateDB="cd trading-bot-centralization-server/trading_center && rm -rf db.sqlite3 && python manage.py makemigrations && python manage.py migrate && cd ../.."
+
+alias openByBit="open $TESTNET_BYBIT"
+alias cdProject="cd $PROJECT_PATH"
