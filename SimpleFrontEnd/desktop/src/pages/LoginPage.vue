@@ -1,20 +1,38 @@
 <template>
-    <q-page>
-        <q-card class="q-ma-md" style="max-width: 400px">
-            <q-card-section>
-                <div class="text-h6">Welcome to My App</div>
-            </q-card-section>
+    <q-page class="video-background">
+        <!-- Video Background -->
+        <video playsinline autoplay muted loop class="absolute-position full-width full-height">
+            <source src="@/assets/stocks_1.mp4" type="video/mp4">
+        </video>
 
-            <q-card-section>
-                <q-btn label="Login with Google" @click="login('google')" color="primary" class="full-width q-mb-sm" />
+        <!-- Two-Column Layout -->
+        <div class="row items-center full-height">
+            <!-- Left Column (2/3 width) -->
+            <div class="col-8">
+                <!-- You can add content here if needed -->
+            </div>
 
-                <q-btn label="Login with GitHub" @click="login('github')" color="secondary" class="full-width q-mb-sm" />
+            <!-- Right Column (1/3 width) with Login Component -->
 
-                <!-- Add more buttons for other providers as needed -->
-            </q-card-section>
-        </q-card>
+            <div class="col-4" style="height: 100%">
+                <q-card class="q-ma-md" style=" height:100%;  background-color: rgba(255,255,255,0.6); margin:0">
+                    <q-card-section class="row items-center justify-center" style="height: 100%; margin:0">
+                        <div style="margin:0">
+                            <div class="text-h2 q-mb-md" style="text-align:center">Opportunities</div>
+
+                            <q-btn label="Login with Google" @click="login('google')" color="primary"
+                                class="full-width q-mb-sm" />
+                            <q-btn label="Login with GitHub" @click="login('github')" color="secondary"
+                                class="full-width q-mb-sm" />
+                            <!-- Add more buttons for other providers as needed -->
+                        </div>
+                    </q-card-section>
+                </q-card>
+            </div>
+        </div>
     </q-page>
 </template>
+
 
 <script lang="ts" setup>
 import { ref, defineProps, defineEmits } from 'vue';
@@ -41,3 +59,57 @@ const login = async (provider: 'google' | 'github') => {
     }
 };
 </script>
+
+<style scoped>
+.relative-position {
+    position: relative;
+}
+
+.absolute-position {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    /* Ensure the video plays behind your content */
+}
+
+.full-width {
+    width: 100%;
+}
+
+.full-height {
+    height: 100%;
+}
+
+.video-background {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100vh;
+    /* or adjust as needed */
+}
+
+.video-background video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.centered-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+</style>
+
+
+
+
