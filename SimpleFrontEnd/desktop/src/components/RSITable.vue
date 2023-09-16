@@ -1,7 +1,7 @@
 <template>
   <q-layout>
     <q-tabs v-model="tab">
-      <q-tab name="table" label='Sortable Table' />
+      <q-tab name="table" label='Opportunities' />
     </q-tabs>
 
     <q-separator />
@@ -172,8 +172,7 @@ onBeforeUnmount(() => {
 });
 
 onMounted(() => {
-  fetching = true
-  fetchRSIData();
+  startFetching()
 });
 
 
