@@ -3,6 +3,13 @@ import { RouteRecordRaw } from 'vue-router';
 const routes = [
   {
     path: '/',
+    component: () => import('layouts/PublicLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/IndexPage.vue') }
+    ]
+  },
+  {
+    path: '/login',
     component: () => import('layouts/AuthLayout.vue'),
     children: [
       { path: '', component: () => import('pages/LoginPage.vue') }
@@ -18,7 +25,7 @@ const routes = [
     path: '/app',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
+      { path: '', component: () => import('pages/RSIPage.vue') }
       // other app routes go here
     ]
   }
