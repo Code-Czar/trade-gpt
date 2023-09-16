@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import * as crypto from 'crypto';
 const { RestClientV5 } = require('bybit-api');
@@ -7,9 +6,7 @@ const { RestClientV5 } = require('bybit-api');
 dotenv.config();
 
 export class BybitManager {
-    private bybitApiKey: string;
-    private bybitApiSecret: string;
-    private bybitUrl: string;
+
     private client: any;
 
     constructor() {

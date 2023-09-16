@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const { TradingBot } = require('./src/bot');
+const { PAIR_TYPES, TradingBot } = require('./src/bot');
 const bot = new TradingBot('binance');
 const symbol = 'BTC/USDT';
 const timeframe = '1m'; // 1 day
@@ -91,6 +91,30 @@ app.get('/api/support/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 
     const support = yield bot.findLowestSupport(ohlcvs);
     res.json({ support });
 }));
+app.get('/api/historical/:symbol/:timeframe/:limit', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { symbol, timeframe, limit } = req.params;
+    try {
+        // Determine the type of the pair (this might require a helper function or logic)
+        // For demonstration purposes, I'm assuming the symbol belongs to 'leveragePairs'.
+        // But in a real-world scenario, you might want to determine the exact pair type 
+        // dynamically or by some other means.
+        const pairType = PAIR_TYPES.leveragePairs; // or forexPairs, cryptoPairs, etc.
+        // Access the bot's dataStore to get the stored data
+        const symbolData = bot.dataStore.get(pairType).get(symbol);
+        if (!symbolData || !symbolData.ohlcvs.has(timeframe)) {
+            res.status(404).json({ error: 'Data not found' });
+            return;
+        }
+        const ohlcvs = symbolData.ohlcvs.get(timeframe);
+        // Return only the latest data up to the limit
+        const latestData = ohlcvs.slice(-parseInt(limit));
+        res.json(latestData);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching historical data' });
+    }
+}));
 app.get('/api/resistance/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let { symbol, timeframe } = req.params;
     symbol = symbol.replace('-', '/');
@@ -98,6 +122,42 @@ app.get('/api/resistance/:symbol/:timeframe', (req, res) => __awaiter(void 0, vo
     const resistance = yield bot.findTopResistance(ohlcvs);
     res.json({ resistance });
 }));
+app.get('/api/symbols/leverage', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const symbolsWithLeverage = yield bot.getBybitPairsWithLeverage();
+        res.json(symbolsWithLeverage);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching symbols with leverage' });
+    }
+}));
+app.post('/api/rsi/bulk', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { symbols, timeframes } = req.body;
+    if (!symbols || !timeframes) {
+        return res.status(400).send({ error: 'Symbols and timeframes are required.' });
+    }
+    const rsiValues = {};
+    for (let symbol of symbols) {
+        rsiValues[symbol] = {};
+        for (let timeframe of timeframes) {
+            try {
+                const symbolData = bot.dataStore.get(PAIR_TYPES.leveragePairs).get(symbol); // Change PAIR_TYPES.cryptoPairs based on your needs
+                if (symbolData && symbolData.rsi && symbolData.rsi.has(timeframe)) {
+                    rsiValues[symbol][timeframe] = symbolData.rsi.get(timeframe);
+                }
+                else {
+                    rsiValues[symbol][timeframe] = null;
+                }
+            }
+            catch (error) {
+                console.error(`Error fetching RSI from datastore for ${symbol} and ${timeframe}:`, error);
+            }
+        }
+    }
+    res.json(rsiValues);
+}));
 app.listen(3000, () => {
     // console.log('Server is running on http://localhost:3000');
+    bot.populateDataStore();
 });

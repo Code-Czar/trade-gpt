@@ -30,12 +30,31 @@ let currentKeyIndex = 0;
 
 
 
+export const PAIR_TYPES = {
+    leveragePairs: 'leveragePairs',
+    forexPairs: 'forexPairs',
+    cryptoPairs: 'cryptoPairs'
+};
+
+
+
+
+// Continuously populate the data store for all pairs
+
+
+
 
 export class TradingBot {
     private exchange: ccxt.Exchange;
     public allSymbols = []
+    public dataStore = new Map();
+
 
     constructor(exchangeId: string) {
+        this.dataStore.set(PAIR_TYPES.leveragePairs, new Map());
+        this.dataStore.set(PAIR_TYPES.forexPairs, new Map());
+        this.dataStore.set(PAIR_TYPES.cryptoPairs, new Map());
+
         this.exchange = new (ccxt as any)[exchangeId]();
         // this.fetchAllForexPairs()
 
@@ -176,6 +195,161 @@ export class TradingBot {
         return symbols;
     }
 
+    async populateDataStoreForPair(pairType, symbol, timeframe) {
+        try {
+            let ohlcvs = null;
+            if (pairType === PAIR_TYPES.leveragePairs) {
+                symbol = symbol.name;
+                ohlcvs = await this.getBinanceHistoricalData(symbol, timeframe);
+            } else {
+                ohlcvs = await this.fetchOHLCV(symbol, timeframe);
+            }
+            if (!ohlcvs) {
+                return
+            }
+
+            const rsi = this.calculateRSI(ohlcvs);
+
+            let symbolData = this.dataStore.get(pairType).get(symbol);
+
+            if (!symbolData) {
+                this.dataStore.get(pairType).set(symbol, {
+                    ohlcvs: new Map(),
+                    rsi: new Map(),
+                });
+                symbolData = this.dataStore.get(pairType).get(symbol);
+            }
+
+            if (symbolData.ohlcvs.has(timeframe)) {
+                const existingOhlcvs = symbolData.ohlcvs.get(timeframe);
+                const combinedOhlcvs = existingOhlcvs.concat(ohlcvs);
+                symbolData.ohlcvs.set(timeframe, combinedOhlcvs.slice(-200));  // Only store the last 200 values
+            } else {
+                symbolData.ohlcvs.set(timeframe, [ohlcvs]);
+            }
+
+            if (symbolData.rsi.has(timeframe)) {
+                const existingRsi = symbolData.rsi.get(timeframe);
+                const combinedRsi = existingRsi.concat(rsi);
+                symbolData.rsi.set(timeframe, combinedRsi.slice(-200));  // Only store the last 200 values
+            } else {
+                symbolData.rsi.set(timeframe, [rsi]);
+            }
+
+            this.dataStore.get(pairType).set(symbol, symbolData);
+        } catch (error) {
+            console.error(`Error populating data store for ${symbol} and ${timeframe}:`, error);
+        }
+    };
+
+    async populateDataStore(timeframes = ['1d', '1h', '5m']) {
+        const leveragePairs = await this.getBybitPairsWithLeverage();
+        // Placeholder for forex and crypto pairs
+        const forexPairs = [];
+        const cryptoPairs = [];
+
+        // Loop indefinitely to keep fetching data for all pairs
+        while (true) {
+            for (const pair of leveragePairs) {
+                for (const timeframe of timeframes) {
+                    await this.populateDataStoreForPair(PAIR_TYPES.leveragePairs, pair, timeframe);
+                }
+
+                for (const pair of forexPairs) {
+                    await this.populateDataStoreForPair(PAIR_TYPES.forexPairs, pair, timeframe);
+                }
+
+                for (const pair of cryptoPairs) {
+                    await this.populateDataStoreForPair(PAIR_TYPES.cryptoPairs, pair, timeframe);
+                }
+            }
+        }
+    };
+
+
+    async getBybitPairsWithLeverage() {
+        const url = "https://api.bybit.com/v2/public/symbols";
+        const response = await axios.get(url);
+        const data = response.data;
+
+        const pairs_with_leverage = [];
+
+        if (data && data.result) {
+            for (const item of data.result) {
+                if (item.leverage_filter && item.leverage_filter.max_leverage) {
+                    pairs_with_leverage.push(item);
+                }
+            }
+        }
+
+        return pairs_with_leverage;
+    }
+
+    async getBinanceHistoricalData(pair, interval, limit = 200) {
+        try {
+            const url = `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=${interval}&limit=${limit}`;
+            const response = await axios.get(url);
+            const data = response.data;
+
+            const closing_prices = data.map(item => parseFloat(item[4]));
+            return closing_prices;
+
+        } catch (error) {
+
+        }
+
+    }
+
+    calculateRSI(prices: number[], period = 14): number {
+        if (prices.length < period + 1) {
+            throw new Error("Not enough data to compute RSI");
+        }
+
+        const deltas = prices.slice(1).map((price, i) => price - prices[i]);
+        const gains = deltas.map(delta => Math.max(delta, 0));
+        const losses = deltas.map(delta => Math.abs(Math.min(delta, 0)));  // use abs to get positive loss values
+
+        let avg_gain = gains.slice(0, period).reduce((a, b) => a + b) / period;
+        let avg_loss = losses.slice(0, period).reduce((a, b) => a + b) / period;
+
+        for (let idx = period; idx < prices.length - 1; idx++) {
+            avg_gain = ((avg_gain * (period - 1)) + gains[idx]) / period;
+            avg_loss = ((avg_loss * (period - 1)) + losses[idx]) / period;
+        }
+
+        if (avg_loss === 0) {
+            return 100;
+        }
+        const rs = avg_gain / avg_loss;
+        return 100 - (100 / (1 + rs));
+    }
+
+    calculate_rsi_series(prices, period = 14) {
+        if (prices.length < period + 1) throw new Error("Not enough data to compute RSI series");
+
+        const deltas = prices.slice(1).map((price, i) => price - prices[i]);
+        const gains = deltas.map(delta => Math.max(delta, 0));
+        const losses = deltas.map(delta => Math.max(-delta, 0));
+
+        let avg_gain = gains.slice(0, period).reduce((a, b) => a + b) / period;
+        let avg_loss = losses.slice(0, period).reduce((a, b) => a + b) / period;
+
+        const rsis = [];
+
+        for (let idx = period; idx < prices.length - 1; idx++) {
+            avg_gain = ((avg_gain * (period - 1)) + gains[idx]) / period;
+            avg_loss = ((avg_loss * (period - 1)) + losses[idx]) / period;
+
+            if (avg_loss === 0) {
+                rsis.push(100);
+            } else {
+                const rs = avg_gain / avg_loss;
+                rsis.push(100 - (100 / (1 + rs)));
+            }
+        }
+
+        return rsis;
+    }
 
 
     calculateBollingerBands(ohlcv: any[]) {
@@ -183,10 +357,6 @@ export class TradingBot {
         return BollingerBands.calculate({ period: 20, values: closeValues, stdDev: 2 });
     }
 
-    calculateRSI(ohlcv: any[]) {
-        const closeValues = ohlcv.map(x => x[4]);
-        return RSI.calculate({ values: closeValues, period: 14 });
-    }
 
     calculateMACD(ohlcv: any[]) {
         const closeValues = ohlcv.map(x => x[4]);
@@ -311,72 +481,7 @@ export class TradingBot {
 
 
 
-    async get_bybit_pairs_with_leverage() {
-        const url = "https://api.bybit.com/v2/public/symbols";
-        const response = await axios.get(url);
-        const data = response.data;
 
-        const pairs_with_leverage = [];
-
-        if (data && data.result) {
-            for (const item of data.result) {
-                if (item.leverage_filter && item.leverage_filter.max_leverage) {
-                    pairs_with_leverage.push(item.name);
-                }
-            }
-        }
-
-        return pairs_with_leverage;
-    }
-
-    async get_historical_data(pair, interval, limit = 14) {
-        const url = `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=${interval}&limit=${limit}`;
-        const response = await axios.get(url);
-        const data = response.data;
-
-        const closing_prices = data.map(item => parseFloat(item[4]));
-        return closing_prices;
-    }
-
-    calculate_rsi(prices) {
-        const deltas = prices.slice(1).map((price, i) => price - prices[i]);
-        const gains = deltas.filter(delta => delta > 0);
-        const losses = deltas.filter(delta => delta < 0).map(loss => -loss);
-
-        const avg_gain = (gains.length > 0) ? (gains.reduce((a, b) => a + b) / gains.length) : 0;
-        const avg_loss = (losses.length > 0) ? (losses.reduce((a, b) => a + b) / losses.length) : 0;
-
-        if (avg_loss === 0) return 100;
-        const rs = avg_gain / avg_loss;
-        return 100 - (100 / (1 + rs));
-    }
-
-    calculate_rsi_series(prices, period = 14) {
-        if (prices.length < period + 1) throw new Error("Not enough data to compute RSI series");
-
-        const deltas = prices.slice(1).map((price, i) => price - prices[i]);
-        const gains = deltas.map(delta => Math.max(delta, 0));
-        const losses = deltas.map(delta => Math.max(-delta, 0));
-
-        let avg_gain = gains.slice(0, period).reduce((a, b) => a + b) / period;
-        let avg_loss = losses.slice(0, period).reduce((a, b) => a + b) / period;
-
-        const rsis = [];
-
-        for (let idx = period; idx < prices.length - 1; idx++) {
-            avg_gain = ((avg_gain * (period - 1)) + gains[idx]) / period;
-            avg_loss = ((avg_loss * (period - 1)) + losses[idx]) / period;
-
-            if (avg_loss === 0) {
-                rsis.push(100);
-            } else {
-                const rs = avg_gain / avg_loss;
-                rsis.push(100 - (100 / (1 + rs)));
-            }
-        }
-
-        return rsis;
-    }
 
 
 
