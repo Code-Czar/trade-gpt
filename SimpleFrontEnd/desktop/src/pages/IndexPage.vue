@@ -15,7 +15,7 @@
       <video id="videoBg2" autoplay loop muted playsinline width="250">
         <source src="@/assets/stocks_1.webm" type="video/webm" />
         Your browser does not support the video tag.
-      </video> -->
+      </video>
       <div class="overlay-content">
         <div class="text-h2">Headline</div>
         <div class="text-subtitle1 q-my-md">Sub-Headline</div>
@@ -26,16 +26,14 @@
     <!-- Other Sections -->
     <section class="bg-primary text-white">
       Content for section 1...
-      <!-- <video id="videoBg2" autoplay loop muted playsinline width="250">
-        <source src="@/assets/stocks_1.webm" type="video/webm" />
-        Your browser does not support the video tag.
-      </video> -->
+
     </section>
 
     <section class="bg-secondary text-white">
       Content for section 2...
-      <q-btn label="Call to Action" color="primary" @click="goToApp"> Open App </q-btn>
+      <q-btn label="Open App" color="primary" @click="goToApp" />
 
+      <q-btn label="Login" color="primary" @click="goToLogin" />
     </section>
 
     <!-- ... Add more sections as needed ... -->
@@ -62,6 +60,10 @@ const playVideo = () => {
 const goToApp = () => {
 
   router.push('/app');
+}
+const goToLogin = () => {
+
+  router.push('/login');
 }
 
 // document.querySelector("#videoBg")?.addEventListener("click", playVideo);

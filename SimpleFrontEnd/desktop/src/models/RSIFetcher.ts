@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const SERVER_URL = "http://localhost:3000"; // Assuming your backend server is running on this URL
+const SERVER_URL = "https://beniben.hopto.org"; // Assuming your backend server is running on this URL
 
 export async function get_bybit_pairs_with_leverage(): Promise<string[]> {
     const url = `${SERVER_URL}/api/symbols/leverage`;

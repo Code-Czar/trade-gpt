@@ -14,7 +14,7 @@ if command -v ffmpeg &>/dev/null; then
 
         # Check if webm file does not exist, then convert
         if [[ ! -e $webm_file ]]; then
-            ffmpeg -i "$file" -c:v libvpx -c:a libvorbis "$webm_file"
+            ffmpeg -i "$file" -vf "scale=-1:480,fps=25" -c:v libvpx -c:a libvorbis "$webm_file"
         fi
     done
 else
@@ -24,4 +24,6 @@ fi
 cd desktop
 quasar build -m cordova -T android
 cd src-cordova
+adb kill-server 
+adb start-server
 cordova run android
