@@ -3,7 +3,8 @@ TESTNET_BYBIT="https://testnet.bybit.com"
 PROJECT_PATH="/Users/beniben/Domaines_De_Vie/Business/GPT_Trading"
 
 # Init
-
+# alias nvm="~/.nvm/nvm.sh"
+# nvm use 18.0
 
 alias pushToGit="ssh-add ~/.ssh/Code-Czar && git push origin main"
 

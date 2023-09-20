@@ -19,7 +19,7 @@
       <div class="overlay-content">
         <div class="text-h2">Headline</div>
         <div class="text-subtitle1 q-my-md">Sub-Headline</div>
-        <q-btn label="Call to Action" color="primary" @click="playVideo" />
+        <q-btn label="Call to Action" color="primary" @click="goToApp" />
       </div>
     </section>
 
@@ -31,9 +31,13 @@
 
     <section class="bg-secondary text-white">
       Content for section 2...
-      <q-btn label="Open App" color="primary" @click="goToApp" />
+      <div style="display:flex; flex-direction: column">
 
-      <q-btn label="Login" color="primary" @click="goToLogin" />
+        <q-btn label="Open App" color="primary" @click="goToApp" />
+        <q-btn label="Send test mail" color="primary" @click="sendTestMail" />
+
+        <q-btn label="Login" color="primary" @click="goToLogin" />
+      </div>
     </section>
 
     <!-- ... Add more sections as needed ... -->
@@ -48,6 +52,9 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { STRATEGY_ANALYZER_URL } from '@/models/consts'
+
 
 
 const router = useRouter();
@@ -64,6 +71,18 @@ const goToApp = () => {
 const goToLogin = () => {
 
   router.push('/login');
+}
+const sendTestMail = async () => {
+  try {
+    // Perform the POST request to the server
+    await axios.post(`${STRATEGY_ANALYZER_URL}/api/test-email`);
+    // Notify user of success
+    alert('Test email sent successfully!');
+  } catch (error) {
+    // Handle any errors that occur during the request
+    console.error('Error sending test email:', error);
+    alert('Failed to send test email.');
+  }
 }
 
 // document.querySelector("#videoBg")?.addEventListener("click", playVideo);

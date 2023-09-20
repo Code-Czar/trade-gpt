@@ -1,11 +1,69 @@
 const fetch = require('node-fetch');
 
 import { sendSignalEmail } from './email';
+import { SERVER_DATA_URL, PAIRS_LEVERAGE_URL } from './consts';
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
+
 
 const RSIUpperThreshold = 51;
 const RSILowerThreshold = 50;
 const positionUSDTAmount = 10;
+
+const RSI_THRESHOLD = 30;  // You can adjust this value as per your requirements
+
+export const fetchRSIAndCheckThreshold = async () => {
+    const symbolsUrl = `${SERVER_DATA_URL}/api/symbols/leverage`;
+    const rsiBulkUrl = `${SERVER_DATA_URL}/api/rsi/bulk`;
+
+    try {
+        const symbolsResponse = await fetch(symbolsUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+
+        });
+        const symbolsObjects = await symbolsResponse.json()
+        console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ symbolsObjects:", symbolsObjects)
+        const symbols = symbolsObjects.map(pair => pair.name);
+        const timeframes = ["1d", "1h", "5m"];
+
+        const rsiResponse = await fetch(rsiBulkUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ symbols, timeframes })
+        });
+        const rsiValues = await rsiResponse.json();
+        console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ rsiResponse:", rsiValues)
+
+
+
+
+        let signalTriggered = false;
+
+        for (let symbol of symbols) {
+            for (let timeframe of timeframes) {
+                const rsiValue = rsiValues[symbol] && rsiValues[symbol][timeframe];
+                if (rsiValue && rsiValue < RSI_THRESHOLD) {
+                    signalTriggered = true;
+                    console.log(`RSI value for ${symbol} at ${timeframe} is below the threshold! RSI: ${rsiValue}`);
+                    // Send signal email
+                    await sendSignalEmail("RSI Alert", symbol, timeframe, `RSI: ${rsiValue}`, true);
+                }
+            }
+        }
+
+        if (!signalTriggered) {
+            console.log('No RSI values were below the threshold.');
+        }
+
+    } catch (error) {
+        console.error('Error fetching RSI data or sending email:', error);
+    }
+}
+
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
     // Identify if the last candlestick's price touched the lower Bollinger Band

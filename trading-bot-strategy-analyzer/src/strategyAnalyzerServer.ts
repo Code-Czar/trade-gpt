@@ -1,13 +1,37 @@
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
+const https = require('https');
+import { SERVER_DATA_URL } from './consts';
 
 
-import { analyzeData } from './strategyAnalyzer';
+
+import { analyzeData, fetchRSIAndCheckThreshold } from './strategyAnalyzer';
+import { sendSignalEmail } from './email';
+
+const certificatePath = "/etc/letsencrypt/live/beniben.hopto.org/"
+const key = fs.readFileSync(`${certificatePath}/privkey.pem`)
+const cert = fs.readFileSync(`${certificatePath}/fullchain.pem`)
+
+console.log("🚀 ~ file: strategyAnalyzerServer.ts:13 ~ key:", key, cert)
+
+const httpsOptions = {
+    key: key,
+    cert: cert,
+    // secureProtocol: 'TLSv1_2_method'
+};
+
 
 // Your other imports, constants, and functions...
 
 const app = express();
+https.createServer(httpsOptions, app).listen(3002, () => {
+    console.log('Server running on https://localhost:3002');
+});
+
+app.get('/', (req, res) => {
+    res.send('Hello over HTTPS!');
+});
 
 // Enable CORS
 app.use(cors());
@@ -185,12 +209,7 @@ async function fetchForex() {
 
 }
 
-setInterval(async () => {
-    // await fetchCryptos()
-}, 10 * 1000);
-setTimeout(async () => {
-    await fetchForex()
-}, 5 * 1000);
+
 // fetchForex()
 
 // Route to serve the latest data and signals
@@ -283,7 +302,17 @@ app.get('/api/:symbol/:timeframe/:analysisType/data-and-signals', (req, res) => 
         res.status(404).json({ error: 'Data not yet available' });
     }
 });
-
-app.listen(3002, () => {
-    // console.log('Analyzer server is running on http://localhost:3002');
+app.post('/api/test-email', async (req, res) => {
+    // Send the test email
+    await sendSignalEmail("longTest", "SymbolTest", "1dTest", 'RSITest', true);
+    res.status(200).json({ info: 'Complete' });
 });
+
+
+setInterval(async () => {
+    // await fetchCryptos()
+    fetchRSIAndCheckThreshold();
+}, 10 * 1000);
+setTimeout(async () => {
+    await fetchForex()
+}, 5 * 1000);

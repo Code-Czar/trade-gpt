@@ -2,11 +2,11 @@ import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 
 dotenv.config();
-const sendSignal = false;
+const SEND_SIGNAL = false;
 const tradingViewUrl = "https://www.tradingview.com/chart/?symbol=";
 
 
-export async function sendSignalEmail(positionType: string, symbol: string, timeFrame: string, analysisType: string, exchange: string = "BINANCE") {
+export async function sendSignalEmail(positionType: string, symbol: string, timeFrame: string, analysisType: string, sendSignal = SEND_SIGNAL, exchange: string = "BINANCE") {
     if (!sendSignal) return;
     const credentials = {
         user: process.env.GMAIL_USER, // your Gmail account 
