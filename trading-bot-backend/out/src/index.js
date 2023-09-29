@@ -20,3 +20,4 @@ function startBot() {
     });
 }
 startBot().catch(console.error);
+//# sourceMappingURL=index.js.map

@@ -5,6 +5,7 @@ export function calculateBollingerBands(values: number[], period = 14, stdDev = 
 }
 
 export function calculateMACD(values: number[], fastPeriod = 12, slowPeriod = 26, signalPeriod = 9) {
+    //@ts-ignore
     return MACD.calculate({ fastPeriod, slowPeriod, signalPeriod, values });
 }
 

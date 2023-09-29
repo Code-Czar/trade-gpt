@@ -31,20 +31,50 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TradingBot = exports.PAIR_TYPES = void 0;
+const node_fetch_1 = __importDefault(require("node-fetch"));
 const ccxt = __importStar(require("ccxt"));
 const technicalindicators_1 = require("technicalindicators");
+// import { OHLCV, BasicObject } from '@/types';
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-const MAJOR_CURRENCIES = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "NZD"];
+const MAJOR_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'NZD'];
 const FOREX_API_KEY = 'IUQ1W2DHSATKLZY9';
 const forexPairs = [
-    "EUR-USD", "USD-JPY", "GBP-USD", "USD-CHF", "USD-CAD", "AUD-USD", "NZD-USD",
-    "EUR-GBP", "EUR-AUD", "GBP-JPY", "CHF-JPY", "EUR-CAD", "AUD-CAD", "CAD-JPY", "NZD-JPY",
-    "GBP-CAD", "GBP-NZD", "GBP-AUD", "EUR-NZD", "AUD-NZD", "AUD-JPY", "USD-SGD", "USD-HKD",
-    "USD-TRY", "EUR-TRY", "USD-INR", "USD-MXN", "USD-ZAR", "USD-THB"
+    'EUR-USD',
+    'USD-JPY',
+    'GBP-USD',
+    'USD-CHF',
+    'USD-CAD',
+    'AUD-USD',
+    'NZD-USD',
+    'EUR-GBP',
+    'EUR-AUD',
+    'GBP-JPY',
+    'CHF-JPY',
+    'EUR-CAD',
+    'AUD-CAD',
+    'CAD-JPY',
+    'NZD-JPY',
+    'GBP-CAD',
+    'GBP-NZD',
+    'GBP-AUD',
+    'EUR-NZD',
+    'AUD-NZD',
+    'AUD-JPY',
+    'USD-SGD',
+    'USD-HKD',
+    'USD-TRY',
+    'EUR-TRY',
+    'USD-INR',
+    'USD-MXN',
+    'USD-ZAR',
+    'USD-THB',
 ];
 const timeframes = ['1m', '5m', '1h', '4h', '1d', '1w'];
 const FOREX_API_KEYS = [
@@ -59,7 +89,7 @@ let currentKeyIndex = 0;
 exports.PAIR_TYPES = {
     leveragePairs: 'leveragePairs',
     forexPairs: 'forexPairs',
-    cryptoPairs: 'cryptoPairs'
+    cryptoPairs: 'cryptoPairs',
 };
 // Continuously populate the data store for all pairs
 class TradingBot {
@@ -73,11 +103,13 @@ class TradingBot {
         // this.fetchAllForexPairs()
         const filePath = path.resolve(__dirname, 'existingPairs.txt');
         if (!fs.existsSync(filePath) || !fs.readFileSync(filePath, 'utf8').trim().split('\n').length) {
-            this.checkFOREXPairsExistence().then((existingPairs) => {
+            this.checkFOREXPairsExistence()
+                .then((existingPairs) => {
                 fs.writeFileSync(filePath, existingPairs.join('\n'));
                 console.log('Existing pairs have been saved!');
-            }).catch((error) => {
-                console.error("Error checking pairs:", error);
+            })
+                .catch((error) => {
+                console.error('Error checking pairs:', error);
             });
         }
     }
@@ -85,7 +117,7 @@ class TradingBot {
         return __awaiter(this, void 0, void 0, function* () {
             const formattedSymbol = symbol.replace('/', '-');
             const isForex = forexPairs.includes(formattedSymbol);
-            console.log("🚀 ~ file: bot.ts:44 ~ TradingBot ~ fetchOHLCV ~ formattedSymbol:", formattedSymbol, isForex);
+            console.log('🚀 ~ file: bot.ts:44 ~ TradingBot ~ fetchOHLCV ~ formattedSymbol:', formattedSymbol, isForex);
             if (isForex) {
                 return yield this.fetchFOREXOHLC(formattedSymbol.replace('-', ''), timeframe);
             }
@@ -104,7 +136,7 @@ class TradingBot {
                 catch (error) {
                     if (error instanceof ccxt.DDoSProtection) {
                         // console.log('Rate limit hit, waiting before retrying...');
-                        yield new Promise(resolve => setTimeout(resolve, 1000)); // wait for 1 second
+                        yield new Promise((resolve) => setTimeout(resolve, 1000)); // wait for 1 second
                     }
                     else {
                         throw error; // re-throw the error if it's not a rate limit error
@@ -119,10 +151,10 @@ class TradingBot {
             // const response = await fetch(BASE_URL);
             const data = yield this.fetchWithRotatingApiKey(BASE_URL);
             // const data = await response.json();
-            console.log("🚀 ~ file: bot.ts:75 ~ TradingBot ~ fetchFOREXOHLC ~ data:", data);
+            console.log('🚀 ~ file: bot.ts:75 ~ TradingBot ~ fetchFOREXOHLC ~ data:', data);
             let formattedOHLCData = [];
             // Filter for the key that starts with 'Time Series'
-            const timeSeriesKey = Object.keys(data).find(key => key.startsWith('Time Series'));
+            const timeSeriesKey = Object.keys(data).find((key) => key.startsWith('Time Series'));
             if (!timeSeriesKey) {
                 console.error('Failed to find the Time Series key in the response.');
                 return null;
@@ -137,10 +169,10 @@ class TradingBot {
                     parseFloat(ohlc['2. high']),
                     parseFloat(ohlc['3. low']),
                     parseFloat(ohlc['4. close']),
-                    parseFloat(ohlc['5. volume'] || "0") // Assuming default volume of 0 if not provided
+                    parseFloat(ohlc['5. volume'] || '0'), // Assuming default volume of 0 if not provided
                 ]);
             }
-            fs.writeFileSync("forexdata.json", JSON.stringify(formattedOHLCData));
+            fs.writeFileSync('forexdata.json', JSON.stringify(formattedOHLCData));
             return formattedOHLCData;
         });
     }
@@ -151,13 +183,14 @@ class TradingBot {
             while (attempts < FOREX_API_KEYS.length) {
                 try {
                     const apiKey = FOREX_API_KEYS[currentKeyIndex];
-                    response = yield fetch(`${url}&apikey=${apiKey}`);
+                    response = yield (0, node_fetch_1.default)(`${url}&apikey=${apiKey}`);
                     // If you're using a library like Axios, you might get a status code
                     // directly. With fetch, you'll have to check response.ok or response.status.
                     if (response.ok) {
                         return yield response.json();
                     }
-                    else if (response.status === 429) { // 429 is the typical "Too Many Requests" HTTP status code
+                    else if (response.status === 429) {
+                        // 429 is the typical "Too Many Requests" HTTP status code
                         // Rotate to the next key for the next attempt
                         currentKeyIndex = (currentKeyIndex + 1) % FOREX_API_KEYS.length;
                         attempts++;
@@ -167,19 +200,19 @@ class TradingBot {
                     }
                 }
                 catch (error) {
-                    console.error("Failed to fetch with current API key. Trying the next one.", error);
+                    console.error('Failed to fetch with current API key. Trying the next one.', error);
                     currentKeyIndex = (currentKeyIndex + 1) % FOREX_API_KEYS.length;
                     attempts++;
                 }
             }
-            throw new Error("All API keys have reached their rate limits.");
+            throw new Error('All API keys have reached their rate limits.');
         });
     }
     checkFOREXPairsExistence() {
         return __awaiter(this, void 0, void 0, function* () {
             const existingPairs = [];
             for (const pair of forexPairs) {
-                const response = yield fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${pair}&apikey=${FOREX_API_KEY}`);
+                const response = yield (0, node_fetch_1.default)(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${pair}&apikey=${FOREX_API_KEY}`);
                 const data = yield response.json();
                 if (!data['Error Message'] && !data['Note']) {
                     existingPairs.push(pair);
@@ -191,11 +224,11 @@ class TradingBot {
     fetchSymbolsForCurrency(currency) {
         return __awaiter(this, void 0, void 0, function* () {
             const BASE_URL = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${currency}&apikey=${FOREX_API_KEY}`;
-            const response = yield fetch(BASE_URL);
+            const response = yield (0, node_fetch_1.default)(BASE_URL);
             const data = yield response.json();
             const symbols = [];
             if (data && data.bestMatches) {
-                data.bestMatches.forEach(match => {
+                data.bestMatches.forEach((match) => {
                     symbols.push(match['1. symbol']);
                 });
             }
@@ -210,8 +243,8 @@ class TradingBot {
             try {
                 let ohlcvs = null;
                 if (pairType === exports.PAIR_TYPES.leveragePairs) {
-                    symbol = symbol.name;
-                    ohlcvs = yield this.getBinanceHistoricalData(symbol, timeframe);
+                    const symbolName = symbol.name;
+                    ohlcvs = yield this.getBinanceHistoricalData(symbolName, timeframe);
                 }
                 else {
                     ohlcvs = yield this.fetchOHLCV(symbol, timeframe);
@@ -251,7 +284,6 @@ class TradingBot {
             }
         });
     }
-    ;
     populateDataStore(timeframes = ['1d', '1h', '5m']) {
         return __awaiter(this, void 0, void 0, function* () {
             const leveragePairs = yield this.getBybitPairsWithLeverage();
@@ -264,20 +296,23 @@ class TradingBot {
                     for (const timeframe of timeframes) {
                         yield this.populateDataStoreForPair(exports.PAIR_TYPES.leveragePairs, pair, timeframe);
                     }
-                    for (const pair of forexPairs) {
+                }
+                for (const pair of forexPairs) {
+                    for (const timeframe of timeframes) {
                         yield this.populateDataStoreForPair(exports.PAIR_TYPES.forexPairs, pair, timeframe);
                     }
-                    for (const pair of cryptoPairs) {
+                }
+                for (const pair of cryptoPairs) {
+                    for (const timeframe of timeframes) {
                         yield this.populateDataStoreForPair(exports.PAIR_TYPES.cryptoPairs, pair, timeframe);
                     }
                 }
             }
         });
     }
-    ;
     getBybitPairsWithLeverage() {
         return __awaiter(this, void 0, void 0, function* () {
-            const url = "https://api.bybit.com/v2/public/symbols";
+            const url = 'https://api.bybit.com/v2/public/symbols';
             const response = yield axios.get(url);
             const data = response.data;
             const pairs_with_leverage = [];
@@ -297,74 +332,88 @@ class TradingBot {
                 const url = `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=${interval}&limit=${limit}`;
                 const response = yield axios.get(url);
                 const data = response.data;
-                const closing_prices = data.map(item => parseFloat(item[4]));
+                const closing_prices = data.map((item) => parseFloat(item[4]));
                 return closing_prices;
             }
-            catch (error) {
-            }
+            catch (error) { }
         });
     }
     calculateRSI(prices, period = 14) {
-        if (prices.length < period + 1) {
-            throw new Error("Not enough data to compute RSI");
+        if (!prices) {
+            return null;
+        }
+        if ((prices === null || prices === void 0 ? void 0 : prices.length) && prices.length < period + 1) {
+            throw new Error('Not enough data to compute RSI');
         }
         const deltas = prices.slice(1).map((price, i) => price - prices[i]);
-        const gains = deltas.map(delta => Math.max(delta, 0));
-        const losses = deltas.map(delta => Math.abs(Math.min(delta, 0))); // use abs to get positive loss values
+        const gains = deltas.map((delta) => Math.max(delta, 0));
+        const losses = deltas.map((delta) => Math.abs(Math.min(delta, 0))); // use abs to get positive loss values
         let avg_gain = gains.slice(0, period).reduce((a, b) => a + b) / period;
         let avg_loss = losses.slice(0, period).reduce((a, b) => a + b) / period;
         for (let idx = period; idx < prices.length - 1; idx++) {
-            avg_gain = ((avg_gain * (period - 1)) + gains[idx]) / period;
-            avg_loss = ((avg_loss * (period - 1)) + losses[idx]) / period;
+            avg_gain = (avg_gain * (period - 1) + gains[idx]) / period;
+            avg_loss = (avg_loss * (period - 1) + losses[idx]) / period;
         }
         if (avg_loss === 0) {
             return 100;
         }
         const rs = avg_gain / avg_loss;
-        return 100 - (100 / (1 + rs));
+        return 100 - 100 / (1 + rs);
     }
     calculate_rsi_series(prices, period = 14) {
         if (prices.length < period + 1)
-            throw new Error("Not enough data to compute RSI series");
+            throw new Error('Not enough data to compute RSI series');
         const deltas = prices.slice(1).map((price, i) => price - prices[i]);
-        const gains = deltas.map(delta => Math.max(delta, 0));
-        const losses = deltas.map(delta => Math.max(-delta, 0));
+        const gains = deltas.map((delta) => Math.max(delta, 0));
+        const losses = deltas.map((delta) => Math.max(-delta, 0));
         let avg_gain = gains.slice(0, period).reduce((a, b) => a + b) / period;
         let avg_loss = losses.slice(0, period).reduce((a, b) => a + b) / period;
         const rsis = [];
         for (let idx = period; idx < prices.length - 1; idx++) {
-            avg_gain = ((avg_gain * (period - 1)) + gains[idx]) / period;
-            avg_loss = ((avg_loss * (period - 1)) + losses[idx]) / period;
+            avg_gain = (avg_gain * (period - 1) + gains[idx]) / period;
+            avg_loss = (avg_loss * (period - 1) + losses[idx]) / period;
             if (avg_loss === 0) {
                 rsis.push(100);
             }
             else {
                 const rs = avg_gain / avg_loss;
-                rsis.push(100 - (100 / (1 + rs)));
+                rsis.push(100 - 100 / (1 + rs));
             }
         }
         return rsis;
     }
     calculateBollingerBands(ohlcv) {
-        const closeValues = ohlcv.map(x => x[4]);
-        return technicalindicators_1.BollingerBands.calculate({ period: 20, values: closeValues, stdDev: 2 });
+        const closeValues = ohlcv === null || ohlcv === void 0 ? void 0 : ohlcv.map((x) => x[4]);
+        if (closeValues) {
+            return technicalindicators_1.BollingerBands.calculate({ period: 20, values: closeValues, stdDev: 2 });
+        }
+        return null;
     }
     calculateMACD(ohlcv) {
-        const closeValues = ohlcv.map(x => x[4]);
+        if (!ohlcv) {
+            return null;
+        }
+        const closeValues = ohlcv.map((x) => x[4]);
         return technicalindicators_1.MACD.calculate({
             values: closeValues,
             fastPeriod: 12,
             slowPeriod: 26,
             signalPeriod: 9,
             SimpleMAOscillator: false,
-            SimpleMASignal: false
+            SimpleMASignal: false,
         });
     }
     calculateVolumes(ohlcv) {
-        return ohlcv.map(x => x[5]);
+        if (!ohlcv) {
+            return null;
+        }
+        return ohlcv.map((x) => x[5]);
     }
     findLowestSupport(ohlcvs) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!ohlcvs) {
+                return null;
+            }
             let lowest = ohlcvs[0][3];
             for (let i = 1; i < ohlcvs.length; i++) {
                 if (ohlcvs[i][3] < lowest) {
@@ -390,7 +439,7 @@ class TradingBot {
                             level: ohlc.low,
                             hits: [],
                             start: prevOhlc.time,
-                            end: null
+                            end: null,
                         };
                     }
                 }
@@ -420,6 +469,9 @@ class TradingBot {
     }
     findTopResistance(ohlcvs) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!ohlcvs) {
+                return null;
+            }
             let highest = ohlcvs[0][2];
             for (let i = 1; i < ohlcvs.length; i++) {
                 if (ohlcvs[i][2] > highest) {
@@ -434,8 +486,10 @@ class TradingBot {
             const resistances = [];
             let potentialResistance = null;
             ohlcvs.forEach((ohlc, index) => {
-                if (index === 0)
+                if (index === 0) {
                     return;
+                }
+                ;
                 const prevOhlc = ohlcvs[index - 1];
                 // If we're not currently tracking a resistance level
                 if (!potentialResistance) {
@@ -445,7 +499,7 @@ class TradingBot {
                             level: ohlc.high,
                             hits: [],
                             start: prevOhlc.time,
-                            end: null
+                            end: null,
                         };
                     }
                 }
@@ -475,3 +529,4 @@ class TradingBot {
     }
 }
 exports.TradingBot = TradingBot;
+//# sourceMappingURL=bot.js.map

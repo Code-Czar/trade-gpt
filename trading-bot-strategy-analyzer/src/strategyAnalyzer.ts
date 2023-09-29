@@ -11,6 +11,8 @@ const positionUSDTAmount = 10;
 
 const RSI_THRESHOLD = 30;  // You can adjust this value as per your requirements
 
+const notificationsSent = {};
+
 export const fetchRSIAndCheckThreshold = async () => {
     const symbolsUrl = `${SERVER_DATA_URL}/api/symbols/leverage`;
     const rsiBulkUrl = `${SERVER_DATA_URL}/api/rsi/bulk`;
@@ -46,11 +48,27 @@ export const fetchRSIAndCheckThreshold = async () => {
         for (let symbol of symbols) {
             for (let timeframe of timeframes) {
                 const rsiValue = rsiValues[symbol] && rsiValues[symbol][timeframe];
-                if (rsiValue && rsiValue < RSI_THRESHOLD) {
+
+                // Initialize if not already present
+                if (!notificationsSent[symbol]) {
+                    notificationsSent[symbol] = {};
+                }
+
+                // Check if the RSI is below the threshold and no notification has been sent yet
+                if (rsiValue && rsiValue < RSI_THRESHOLD && !notificationsSent[symbol][timeframe]) {
                     signalTriggered = true;
                     console.log(`RSI value for ${symbol} at ${timeframe} is below the threshold! RSI: ${rsiValue}`);
+
                     // Send signal email
                     await sendSignalEmail("RSI Alert", symbol, timeframe, `RSI: ${rsiValue}`, true);
+
+                    // Mark notification as sent
+                    notificationsSent[symbol][timeframe] = true;
+                }
+
+                // If the RSI is above the threshold and a notification was previously sent, reset the notification flag
+                if (rsiValue && rsiValue >= RSI_THRESHOLD && notificationsSent[symbol][timeframe]) {
+                    notificationsSent[symbol][timeframe] = false;
                 }
             }
         }

@@ -48,3 +48,4 @@ function send_ssh_key() {
 
 # Start services 
 alias startFront="cd trading-bot-frontend; yarn start"
+alias startBack="cd trading-bot-backend; yarn start"

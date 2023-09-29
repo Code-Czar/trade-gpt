@@ -1,5 +1,19 @@
 {
+  "ts-node": {
+    "files": true
+  },
+  // "include": ["src/types/*.d.ts"],
   "compilerOptions": {
+    "noImplicitAny": false,
+    "baseUrl": ".", 
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+
+    "typeRoots": ["./node_modules/@types", "./src/types/*"],
+    "types": ["mocha", "node"],
+    
+
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
     /* Projects */
@@ -104,6 +118,11 @@
 
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
-    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
-  }
+    "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
+    "outDir": "./out", // Specify the output directory for the compiled JavaScript code
+    "sourceMap":true
+
+  },
+  "includes": ["src/types/**/*.ts", "src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
+
 }

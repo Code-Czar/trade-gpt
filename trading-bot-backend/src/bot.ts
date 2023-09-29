@@ -1,19 +1,45 @@
+import fetch from 'node-fetch';
 import * as ccxt from 'ccxt';
 import * as cliChart from 'cli-chart';
 import { BollingerBands, MACD, RSI } from 'technicalindicators';
+// import { OHLCV, BasicObject } from '@/types';
+
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 
-
-
-const MAJOR_CURRENCIES = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "NZD"];
+const MAJOR_CURRENCIES = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'NZD'];
 const FOREX_API_KEY = 'IUQ1W2DHSATKLZY9';
 const forexPairs = [
-    "EUR-USD", "USD-JPY", "GBP-USD", "USD-CHF", "USD-CAD", "AUD-USD", "NZD-USD",
-    "EUR-GBP", "EUR-AUD", "GBP-JPY", "CHF-JPY", "EUR-CAD", "AUD-CAD", "CAD-JPY", "NZD-JPY",
-    "GBP-CAD", "GBP-NZD", "GBP-AUD", "EUR-NZD", "AUD-NZD", "AUD-JPY", "USD-SGD", "USD-HKD",
-    "USD-TRY", "EUR-TRY", "USD-INR", "USD-MXN", "USD-ZAR", "USD-THB"
+    'EUR-USD',
+    'USD-JPY',
+    'GBP-USD',
+    'USD-CHF',
+    'USD-CAD',
+    'AUD-USD',
+    'NZD-USD',
+    'EUR-GBP',
+    'EUR-AUD',
+    'GBP-JPY',
+    'CHF-JPY',
+    'EUR-CAD',
+    'AUD-CAD',
+    'CAD-JPY',
+    'NZD-JPY',
+    'GBP-CAD',
+    'GBP-NZD',
+    'GBP-AUD',
+    'EUR-NZD',
+    'AUD-NZD',
+    'AUD-JPY',
+    'USD-SGD',
+    'USD-HKD',
+    'USD-TRY',
+    'EUR-TRY',
+    'USD-INR',
+    'USD-MXN',
+    'USD-ZAR',
+    'USD-THB',
 ];
 const timeframes = ['1m', '5m', '1h', '4h', '1d', '1w'];
 
@@ -24,31 +50,21 @@ const FOREX_API_KEYS = [
     'ZP3O6MM02ZZUHJG2',
     'ES2AURLO7XEFUHGC',
     'MUGYSNS1C5QEDUZX',
-
-]
+];
 let currentKeyIndex = 0;
-
-
 
 export const PAIR_TYPES = {
     leveragePairs: 'leveragePairs',
     forexPairs: 'forexPairs',
-    cryptoPairs: 'cryptoPairs'
+    cryptoPairs: 'cryptoPairs',
 };
-
-
-
 
 // Continuously populate the data store for all pairs
 
-
-
-
 export class TradingBot {
     private exchange: ccxt.Exchange;
-    public allSymbols = []
+    public allSymbols = [];
     public dataStore = new Map();
-
 
     constructor(exchangeId: string) {
         this.dataStore.set(PAIR_TYPES.leveragePairs, new Map());
@@ -61,26 +77,26 @@ export class TradingBot {
         const filePath = path.resolve(__dirname, 'existingPairs.txt');
 
         if (!fs.existsSync(filePath) || !fs.readFileSync(filePath, 'utf8').trim().split('\n').length) {
-            this.checkFOREXPairsExistence().then((existingPairs) => {
-                fs.writeFileSync(filePath, existingPairs.join('\n'));
-                console.log('Existing pairs have been saved!');
-            }).catch((error) => {
-                console.error("Error checking pairs:", error);
-            });
+            this.checkFOREXPairsExistence()
+                .then((existingPairs) => {
+                    fs.writeFileSync(filePath, existingPairs.join('\n'));
+                    console.log('Existing pairs have been saved!');
+                })
+                .catch((error) => {
+                    console.error('Error checking pairs:', error);
+                });
         }
     }
 
     async fetchOHLCV(symbol: string, timeframe: string) {
-        const formattedSymbol = symbol.replace('/', '-')
+        const formattedSymbol = symbol.replace('/', '-');
         const isForex = forexPairs.includes(formattedSymbol);
-        console.log("🚀 ~ file: bot.ts:44 ~ TradingBot ~ fetchOHLCV ~ formattedSymbol:", formattedSymbol, isForex)
+        console.log('🚀 ~ file: bot.ts:44 ~ TradingBot ~ fetchOHLCV ~ formattedSymbol:', formattedSymbol, isForex);
         if (isForex) {
-            return await this.fetchFOREXOHLC(formattedSymbol.replace('-', ''), timeframe)
+            return await this.fetchFOREXOHLC(formattedSymbol.replace('-', ''), timeframe);
+        } else {
+            return await this.fetchCryptoOHLCV(symbol, timeframe);
         }
-        else {
-            return await this.fetchCryptoOHLCV(symbol, timeframe)
-        }
-
     }
     async fetchCryptoOHLCV(symbol: string, timeframe: string) {
         while (true) {
@@ -90,13 +106,12 @@ export class TradingBot {
             } catch (error) {
                 if (error instanceof ccxt.DDoSProtection) {
                     // console.log('Rate limit hit, waiting before retrying...');
-                    await new Promise(resolve => setTimeout(resolve, 1000)); // wait for 1 second
+                    await new Promise((resolve) => setTimeout(resolve, 1000)); // wait for 1 second
                 } else {
                     throw error; // re-throw the error if it's not a rate limit error
                 }
             }
         }
-
     }
     async fetchFOREXOHLC(symbol: string, timeframe: string) {
         const BASE_URL = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=${timeframe}&apikey=${FOREX_API_KEY}`;
@@ -104,12 +119,12 @@ export class TradingBot {
         // const response = await fetch(BASE_URL);
         const data = await this.fetchWithRotatingApiKey(BASE_URL);
         // const data = await response.json();
-        console.log("🚀 ~ file: bot.ts:75 ~ TradingBot ~ fetchFOREXOHLC ~ data:", data)
+        console.log('🚀 ~ file: bot.ts:75 ~ TradingBot ~ fetchFOREXOHLC ~ data:', data);
 
-        let formattedOHLCData = [];
+        let formattedOHLCData: OHLCV = [];
 
         // Filter for the key that starts with 'Time Series'
-        const timeSeriesKey = Object.keys(data).find(key => key.startsWith('Time Series'));
+        const timeSeriesKey = Object.keys(data).find((key) => key.startsWith('Time Series'));
         if (!timeSeriesKey) {
             console.error('Failed to find the Time Series key in the response.');
             return null;
@@ -126,14 +141,14 @@ export class TradingBot {
                 parseFloat(ohlc['2. high']),
                 parseFloat(ohlc['3. low']),
                 parseFloat(ohlc['4. close']),
-                parseFloat(ohlc['5. volume'] || "0")  // Assuming default volume of 0 if not provided
+                parseFloat(ohlc['5. volume'] || '0'), // Assuming default volume of 0 if not provided
             ]);
         }
-        fs.writeFileSync("forexdata.json", JSON.stringify(formattedOHLCData));
+        fs.writeFileSync('forexdata.json', JSON.stringify(formattedOHLCData));
         return formattedOHLCData;
     }
 
-    async fetchWithRotatingApiKey(url) {
+    async fetchWithRotatingApiKey(url: string) {
         let response;
         let attempts = 0;
 
@@ -146,7 +161,8 @@ export class TradingBot {
                 // directly. With fetch, you'll have to check response.ok or response.status.
                 if (response.ok) {
                     return await response.json();
-                } else if (response.status === 429) {  // 429 is the typical "Too Many Requests" HTTP status code
+                } else if (response.status === 429) {
+                    // 429 is the typical "Too Many Requests" HTTP status code
                     // Rotate to the next key for the next attempt
                     currentKeyIndex = (currentKeyIndex + 1) % FOREX_API_KEYS.length;
                     attempts++;
@@ -154,20 +170,22 @@ export class TradingBot {
                     throw new Error(`Request failed with status ${response.status}`);
                 }
             } catch (error) {
-                console.error("Failed to fetch with current API key. Trying the next one.", error);
+                console.error('Failed to fetch with current API key. Trying the next one.', error);
                 currentKeyIndex = (currentKeyIndex + 1) % FOREX_API_KEYS.length;
                 attempts++;
             }
         }
 
-        throw new Error("All API keys have reached their rate limits.");
+        throw new Error('All API keys have reached their rate limits.');
     }
 
     async checkFOREXPairsExistence() {
-        const existingPairs = [];
+        const existingPairs: Array<string> = [];
 
         for (const pair of forexPairs) {
-            const response = await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${pair}&apikey=${FOREX_API_KEY}`);
+            const response = await fetch(
+                `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${pair}&apikey=${FOREX_API_KEY}`,
+            );
             const data = await response.json();
 
             if (!data['Error Message'] && !data['Note']) {
@@ -177,15 +195,15 @@ export class TradingBot {
 
         return existingPairs;
     }
-    async fetchSymbolsForCurrency(currency) {
+    async fetchSymbolsForCurrency(currency: string) {
         const BASE_URL = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${currency}&apikey=${FOREX_API_KEY}`;
 
         const response = await fetch(BASE_URL);
         const data = await response.json();
 
-        const symbols = [];
+        const symbols: Array<string> = [];
         if (data && data.bestMatches) {
-            data.bestMatches.forEach(match => {
+            data.bestMatches.forEach((match) => {
                 symbols.push(match['1. symbol']);
             });
         } else {
@@ -195,20 +213,20 @@ export class TradingBot {
         return symbols;
     }
 
-    async populateDataStoreForPair(pairType, symbol, timeframe) {
+    async populateDataStoreForPair(pairType: string, symbol: BasicObject | string, timeframe: string) {
         try {
-            let ohlcvs = null;
+            let ohlcvs: OHLCV | number[] | null = null;
             if (pairType === PAIR_TYPES.leveragePairs) {
-                symbol = symbol.name;
-                ohlcvs = await this.getBinanceHistoricalData(symbol, timeframe);
+                const symbolName = (symbol as BasicObject).name;
+                ohlcvs = await this.getBinanceHistoricalData(symbolName, timeframe);
             } else {
-                ohlcvs = await this.fetchOHLCV(symbol, timeframe);
+                ohlcvs = await this.fetchOHLCV(symbol as string, timeframe);
             }
             if (!ohlcvs) {
-                return
+                return;
             }
 
-            const rsi = this.calculateRSI(ohlcvs);
+            const rsi = this.calculateRSI(ohlcvs as number[]);
 
             let symbolData = this.dataStore.get(pairType).get(symbol);
 
@@ -223,7 +241,7 @@ export class TradingBot {
             if (symbolData.ohlcvs.has(timeframe)) {
                 const existingOhlcvs = symbolData.ohlcvs.get(timeframe);
                 const combinedOhlcvs = existingOhlcvs.concat(ohlcvs);
-                symbolData.ohlcvs.set(timeframe, combinedOhlcvs.slice(-200));  // Only store the last 200 values
+                symbolData.ohlcvs.set(timeframe, combinedOhlcvs.slice(-200)); // Only store the last 200 values
             } else {
                 symbolData.ohlcvs.set(timeframe, [ohlcvs]);
             }
@@ -231,7 +249,7 @@ export class TradingBot {
             if (symbolData.rsi.has(timeframe)) {
                 const existingRsi = symbolData.rsi.get(timeframe);
                 const combinedRsi = existingRsi.concat(rsi);
-                symbolData.rsi.set(timeframe, combinedRsi.slice(-200));  // Only store the last 200 values
+                symbolData.rsi.set(timeframe, combinedRsi.slice(-200)); // Only store the last 200 values
             } else {
                 symbolData.rsi.set(timeframe, [rsi]);
             }
@@ -240,13 +258,13 @@ export class TradingBot {
         } catch (error) {
             console.error(`Error populating data store for ${symbol} and ${timeframe}:`, error);
         }
-    };
+    }
 
     async populateDataStore(timeframes = ['1d', '1h', '5m']) {
         const leveragePairs = await this.getBybitPairsWithLeverage();
         // Placeholder for forex and crypto pairs
-        const forexPairs = [];
-        const cryptoPairs = [];
+        const forexPairs: Array<string> = [];
+        const cryptoPairs: Array<string> = [];
 
         // Loop indefinitely to keep fetching data for all pairs
         while (true) {
@@ -254,28 +272,30 @@ export class TradingBot {
                 for (const timeframe of timeframes) {
                     await this.populateDataStoreForPair(PAIR_TYPES.leveragePairs, pair, timeframe);
                 }
-
-                for (const pair of forexPairs) {
+            }
+            for (const pair of forexPairs) {
+                for (const timeframe of timeframes) {
                     await this.populateDataStoreForPair(PAIR_TYPES.forexPairs, pair, timeframe);
                 }
+            }
 
-                for (const pair of cryptoPairs) {
+            for (const pair of cryptoPairs) {
+                for (const timeframe of timeframes) {
                     await this.populateDataStoreForPair(PAIR_TYPES.cryptoPairs, pair, timeframe);
                 }
             }
         }
-    };
-
+    }
 
     async getBybitPairsWithLeverage() {
-        const url = "https://api.bybit.com/v2/public/symbols";
+        const url = 'https://api.bybit.com/v2/public/symbols';
         const response = await axios.get(url);
         const data = response.data;
 
-        const pairs_with_leverage = [];
+        const pairs_with_leverage: BasicObject[] = [];
 
         if (data && data.result) {
-            for (const item of data.result) {
+            for (const item of data.result as Array<BasicObject>) {
                 if (item.leverage_filter && item.leverage_filter.max_leverage) {
                     pairs_with_leverage.push(item);
                 }
@@ -291,90 +311,99 @@ export class TradingBot {
             const response = await axios.get(url);
             const data = response.data;
 
-            const closing_prices = data.map(item => parseFloat(item[4]));
+            const closing_prices = data.map((item) => parseFloat(item[4]));
             return closing_prices;
-
-        } catch (error) {
-
-        }
-
+        } catch (error) { }
     }
 
-    calculateRSI(prices: number[], period = 14): number {
-        if (prices.length < period + 1) {
-            throw new Error("Not enough data to compute RSI");
+    calculateRSI(prices: number[] | null, period = 14): number | null {
+        if (!prices) {
+            return null
+        }
+        if (prices?.length && prices.length < period + 1) {
+            throw new Error('Not enough data to compute RSI');
         }
 
         const deltas = prices.slice(1).map((price, i) => price - prices[i]);
-        const gains = deltas.map(delta => Math.max(delta, 0));
-        const losses = deltas.map(delta => Math.abs(Math.min(delta, 0)));  // use abs to get positive loss values
+        const gains = deltas.map((delta) => Math.max(delta, 0));
+        const losses = deltas.map((delta) => Math.abs(Math.min(delta, 0))); // use abs to get positive loss values
 
         let avg_gain = gains.slice(0, period).reduce((a, b) => a + b) / period;
         let avg_loss = losses.slice(0, period).reduce((a, b) => a + b) / period;
 
         for (let idx = period; idx < prices.length - 1; idx++) {
-            avg_gain = ((avg_gain * (period - 1)) + gains[idx]) / period;
-            avg_loss = ((avg_loss * (period - 1)) + losses[idx]) / period;
+            avg_gain = (avg_gain * (period - 1) + gains[idx]) / period;
+            avg_loss = (avg_loss * (period - 1) + losses[idx]) / period;
         }
 
         if (avg_loss === 0) {
             return 100;
         }
         const rs = avg_gain / avg_loss;
-        return 100 - (100 / (1 + rs));
+        return 100 - 100 / (1 + rs);
     }
 
     calculate_rsi_series(prices, period = 14) {
-        if (prices.length < period + 1) throw new Error("Not enough data to compute RSI series");
+        if (prices.length < period + 1) throw new Error('Not enough data to compute RSI series');
 
         const deltas = prices.slice(1).map((price, i) => price - prices[i]);
-        const gains = deltas.map(delta => Math.max(delta, 0));
-        const losses = deltas.map(delta => Math.max(-delta, 0));
+        const gains = deltas.map((delta) => Math.max(delta, 0));
+        const losses = deltas.map((delta) => Math.max(-delta, 0));
 
         let avg_gain = gains.slice(0, period).reduce((a, b) => a + b) / period;
         let avg_loss = losses.slice(0, period).reduce((a, b) => a + b) / period;
 
-        const rsis = [];
+        const rsis: number[] = [];
 
         for (let idx = period; idx < prices.length - 1; idx++) {
-            avg_gain = ((avg_gain * (period - 1)) + gains[idx]) / period;
-            avg_loss = ((avg_loss * (period - 1)) + losses[idx]) / period;
+            avg_gain = (avg_gain * (period - 1) + gains[idx]) / period;
+            avg_loss = (avg_loss * (period - 1) + losses[idx]) / period;
 
             if (avg_loss === 0) {
                 rsis.push(100);
             } else {
                 const rs = avg_gain / avg_loss;
-                rsis.push(100 - (100 / (1 + rs)));
+                rsis.push(100 - 100 / (1 + rs));
             }
         }
 
         return rsis;
     }
 
-
-    calculateBollingerBands(ohlcv: any[]) {
-        const closeValues = ohlcv.map(x => x[4]);
-        return BollingerBands.calculate({ period: 20, values: closeValues, stdDev: 2 });
+    calculateBollingerBands(ohlcv: OHLCV | null) {
+        const closeValues = ohlcv?.map((x) => x[4]);
+        if (closeValues) {
+            return BollingerBands.calculate({ period: 20, values: closeValues, stdDev: 2 });
+        }
+        return null;
     }
 
-
-    calculateMACD(ohlcv: any[]) {
-        const closeValues = ohlcv.map(x => x[4]);
+    calculateMACD(ohlcv: any[] | null) {
+        if (!ohlcv) {
+            return null
+        }
+        const closeValues = ohlcv.map((x) => x[4]);
         return MACD.calculate({
             values: closeValues,
             fastPeriod: 12,
             slowPeriod: 26,
             signalPeriod: 9,
             SimpleMAOscillator: false,
-            SimpleMASignal: false
+            SimpleMASignal: false,
         });
     }
 
-    calculateVolumes(ohlcv: any[]) {
-        return ohlcv.map(x => x[5]);
+    calculateVolumes(ohlcv: any[] | null) {
+        if (!ohlcv) {
+            return null;
+        }
+        return ohlcv.map((x) => x[5]);
     }
 
-    async findLowestSupport(ohlcvs: any[]) {
+    async findLowestSupport(ohlcvs: any[] | null) {
+        if (!ohlcvs) {
+            return null;
+        }
         let lowest = ohlcvs[0][3];
         for (let i = 1; i < ohlcvs.length; i++) {
             if (ohlcvs[i][3] < lowest) {
@@ -385,8 +414,8 @@ export class TradingBot {
     }
 
     async findSupport(ohlcvs, tolerance = 0.0001) {
-        const supports = [];
-        let potentialSupport = null;
+        const supports: BasicObject[] = [];
+        let potentialSupport: BasicObject | null = null;
 
         ohlcvs.forEach((ohlc, index) => {
             if (index === 0) return;
@@ -401,7 +430,7 @@ export class TradingBot {
                         level: ohlc.low,
                         hits: [],
                         start: prevOhlc.time,
-                        end: null
+                        end: null,
                     };
                 }
             } else {
@@ -426,7 +455,10 @@ export class TradingBot {
 
         return supports;
     }
-    async findTopResistance(ohlcvs: any[]) {
+    async findTopResistance(ohlcvs: any[] | null) {
+        if (!ohlcvs) {
+            return null;
+        }
         let highest = ohlcvs[0][2];
         for (let i = 1; i < ohlcvs.length; i++) {
             if (ohlcvs[i][2] > highest) {
@@ -437,11 +469,11 @@ export class TradingBot {
     }
 
     async findResistance(ohlcvs, tolerance = 0.0001) {
-        const resistances = [];
-        let potentialResistance = null;
+        const resistances: BasicObject[] = [];
+        let potentialResistance: BasicObject | null = null;
 
         ohlcvs.forEach((ohlc, index) => {
-            if (index === 0) return;
+            if (index === 0) { return };
 
             const prevOhlc = ohlcvs[index - 1];
 
@@ -453,7 +485,7 @@ export class TradingBot {
                         level: ohlc.high,
                         hits: [],
                         start: prevOhlc.time,
-                        end: null
+                        end: null,
                     };
                 }
             } else {
@@ -478,13 +510,4 @@ export class TradingBot {
 
         return resistances;
     }
-
-
-
-
-
-
-
-
-
 }

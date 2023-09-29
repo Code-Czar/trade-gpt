@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const dataConvertor = require('./src/utils/convertData');
 const { PAIR_TYPES, TradingBot } = require('./src/bot');
 const bot = new TradingBot('binance');
 const symbol = 'BTC/USDT';
@@ -23,17 +24,6 @@ app.use(cors());
 let ohlcvData = null;
 // Fetch new data every 1 minute
 let count = 0;
-// setInterval(async () => {
-//     try {
-//         const ohlcv = await bot.fetchOHLCV(symbol, timeframe);
-//         ohlcvData = ohlcv;
-//         count++;
-//         // console.log(`Fetched ${count} data`);
-//         // console.log(`Size ${ohlcvData.length} data`);
-//     } catch (error) {
-//         console.error(error);
-//     }
-// }, 2 * 1000);  // 1 seconds
 app.get('/api/data/:symbol/:timeframe', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let { symbol, timeframe } = req.params;
     symbol = symbol.replace('-', '/');
@@ -156,6 +146,11 @@ app.post('/api/rsi/bulk', (req, res) => __awaiter(void 0, void 0, void 0, functi
         }
     }
     res.json(rsiValues);
+}));
+// Tests 
+app.get('/api/rsi/getValues', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("🚀 ~ file: backend-server.ts:170 ~ app.get ~ bot.dataStore:", bot.dataStore, dataConvertor);
+    return res.json(dataConvertor.stringifyMap(bot.dataStore));
 }));
 app.listen(3000, () => {
     // console.log('Server is running on http://localhost:3000');
