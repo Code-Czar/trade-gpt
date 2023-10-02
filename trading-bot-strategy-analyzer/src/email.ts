@@ -1,6 +1,7 @@
-import dotenv from 'dotenv';
-import nodemailer from 'nodemailer';
-
+// import dotenv from 'dotenv';
+// import nodemailer from 'nodemailer';
+const dotenv = require('dotenv')
+const nodemailer = require('nodemailer')
 dotenv.config();
 const SEND_SIGNAL = false;
 const tradingViewUrl = "https://www.tradingview.com/chart/?symbol=";

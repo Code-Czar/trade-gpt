@@ -42,7 +42,7 @@ export class PositionManager {
 
     async checkPnL() {
         for (let id in this.positions) {
-            console.log("🚀 ~ file: positionManager.ts:45 ~ PositionManager ~ checkPnL ~ this.positions:", id)
+            // console.log("🚀 ~ file: positionManager.ts:45 ~ PositionManager ~ checkPnL ~ this.positions:", id)
             const position = this.positions[id];
             const currentPrice = await this.getCurrentPrice(position.symbol);
             let pnl = this.calculatePnL(id, currentPrice);

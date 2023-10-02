@@ -21,43 +21,42 @@ describe('POST /set-rsi', () => {
 
     before((done) => {
         console.log('Starting server...');
-        server = app.listen(3000, done);
+        // server = app.listen(3000, done);
         console.log("🚀 ~ file: app.test.ts:23 ~ before ~ server:", server)
+        // setTimeout(done, 10000);
     });
 
     after((done) => {
         console.log('Stopping server...');
-        server.close(done);
+        // server.close(done);
     });
-    it('should respond with json and 200 status code', () => {
-        request.post('/set-rsi')
+    it('should respond with json and 200 status code', async () => {
+        const response = await request.post('/set-rsi')
             .send({
                 pair: '1INCHUSDT',
                 timeframe: '1d',
                 rsiValues: [70, 30]
             })
             .expect('Content-Type', /json/)
-            .expect(200).then((response) => {
+            .expect(200);
 
-                // Assert the response body
-                expect(response.body).to.be.an('object');
-                expect(response.body.message).to.equal('RSI values updated successfully');
-            });
-
+        // Assert the response body
+        expect(response.body).to.be.an('object');
+        expect(response.body.message).to.equal('RSI values updated successfully');
     });
 
-    // it('should respond with json and 400 status code for invalid request body', () => {
-    //     const response = await request.post('/set-rsi')
-    //         .send({
-    //             pair: '1INCHUSDT',
-    //             timeframe: '1d'
-    //             // missing rsiValues
-    //         })
-    //         .expect('Content-Type', /json/)
-    //         .expect(400);
+    it('should respond with json and 400 status code for invalid request body', async () => {
+        const response = await request.post('/set-rsi')
+            .send({
+                pair: '1INCHUSDT',
+                timeframe: '1d'
+                // missing rsiValues
+            })
+            .expect('Content-Type', /json/)
+            .expect(400);
 
-    //     // Assert the response body
-    //     expect(response.body).to.be.an('object');
-    //     expect(response.body.error).to.equal('Invalid request body');
-    // });
+        // Assert the response body
+        expect(response.body).to.be.an('object');
+        expect(response.body.error).to.equal('Invalid request body');
+    });
 });

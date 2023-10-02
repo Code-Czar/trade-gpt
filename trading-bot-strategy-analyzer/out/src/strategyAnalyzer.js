@@ -9,13 +9,80 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.analyzeData = void 0;
+exports.analyzeData = exports.fetchRSIAndCheckThreshold = exports.checkRSIThresholds = exports.fetchRSI = void 0;
 const fetch = require('node-fetch');
 const email_1 = require("./email");
+const consts_1 = require("./consts");
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 const RSIUpperThreshold = 51;
 const RSILowerThreshold = 50;
 const positionUSDTAmount = 10;
+const RSI_THRESHOLD = 30; // You can adjust this value as per your requirements
+const notificationsSent = {};
+const fetchRSI = (timeframes = ["1d", "1h", "5m"]) => __awaiter(void 0, void 0, void 0, function* () {
+    const symbolsUrl = `${consts_1.SERVER_DATA_URL}/api/symbols/leverage`;
+    const rsiBulkUrl = `${consts_1.SERVER_DATA_URL}/api/rsi/bulk`;
+    const symbolsResponse = yield fetch(symbolsUrl, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    });
+    const symbolsObjects = yield symbolsResponse.json();
+    // console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ symbolsObjects:", symbolsObjects)
+    const symbols = symbolsObjects.map(pair => pair.name);
+    const rsiResponse = yield fetch(rsiBulkUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ symbols, timeframes })
+    });
+    const rsiValues = yield rsiResponse.json();
+    // console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ rsiResponse:", rsiValues)
+    return { rsiValues, symbols, timeframes };
+});
+exports.fetchRSI = fetchRSI;
+const checkRSIThresholds = (rsiValues, symbols, timeframes) => __awaiter(void 0, void 0, void 0, function* () {
+    let signalTriggered = false;
+    for (let symbol of symbols) {
+        for (let timeframe of timeframes) {
+            const rsiValue = rsiValues[symbol] && rsiValues[symbol][timeframe];
+            // Initialize if not already present
+            if (!notificationsSent[symbol]) {
+                notificationsSent[symbol] = {};
+            }
+            // Check if the RSI is below the threshold and no notification has been sent yet
+            if (rsiValue && rsiValue < RSI_THRESHOLD && !notificationsSent[symbol][timeframe]) {
+                signalTriggered = true;
+                console.log(`RSI value for ${symbol} at ${timeframe} is below the threshold! RSI: ${rsiValue}`);
+                // Send signal email
+                yield (0, email_1.sendSignalEmail)("RSI Alert", symbol, timeframe, `RSI: ${rsiValue}`, true);
+                // Mark notification as sent
+                notificationsSent[symbol][timeframe] = true;
+            }
+            // If the RSI is above the threshold and a notification was previously sent, reset the notification flag
+            if (rsiValue && rsiValue >= RSI_THRESHOLD && notificationsSent[symbol][timeframe]) {
+                notificationsSent[symbol][timeframe] = false;
+            }
+        }
+    }
+    if (!signalTriggered) {
+        console.log('No RSI values were below the threshold.');
+    }
+    return notificationsSent;
+});
+exports.checkRSIThresholds = checkRSIThresholds;
+const fetchRSIAndCheckThreshold = () => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { rsiValues, symbols, timeframes } = yield (0, exports.fetchRSI)();
+        yield (0, exports.checkRSIThresholds)(rsiValues, symbols, timeframes);
+    }
+    catch (error) {
+        console.error('Error fetching RSI data or sending email:', error);
+    }
+});
+exports.fetchRSIAndCheckThreshold = fetchRSIAndCheckThreshold;
 const generateBuySignal = (data) => {
     const { ohlcvData, bbData, rsi, macd } = data;
     // Identify if the last candlestick's price touched the lower Bollinger Band
@@ -53,8 +120,8 @@ function analyzeRSI(data) {
     const length = rsi.length;
     const latestRSI = rsi[length - 1];
     const signals = {
-        buySignal: false,
-        sellSignal: false
+        buySignal: {},
+        sellSignal: {}
     };
     if (latestRSI < RSILowerThreshold) {
         signals.buySignal = {
@@ -223,3 +290,4 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus, autoOpenPosi
     });
 }
 exports.analyzeData = analyzeData;
+//# sourceMappingURL=strategyAnalyzer.js.map

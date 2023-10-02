@@ -2,6 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const https = require('https');
+const fetch = require('node-fetch');
+
+require('dotenv').config();
+
 import { SERVER_DATA_URL } from './consts';
 
 
@@ -9,18 +13,25 @@ import { SERVER_DATA_URL } from './consts';
 import { analyzeData, fetchRSIAndCheckThreshold } from './strategyAnalyzer';
 import { sendSignalEmail } from './email';
 
-const certificatePath = "/etc/letsencrypt/live/beniben.hopto.org/"
-const key = fs.readFileSync(`${certificatePath}/privkey.pem`)
-const cert = fs.readFileSync(`${certificatePath}/fullchain.pem`)
+const mode = process.env.MODE;
 
-console.log("🚀 ~ file: strategyAnalyzerServer.ts:13 ~ key:", key, cert)
 
-const httpsOptions = {
-    key: key,
-    cert: cert,
-    // secureProtocol: 'TLSv1_2_method'
-};
 
+
+
+let httpsOptions = {};
+// if (mode === 'PRODUCTION') {
+//     const certificatePath = "/etc/letsencrypt/live/beniben.hopto.org/"
+//     const key = fs.readFileSync(`${certificatePath}/privkey.pem`)
+//     const cert = fs.readFileSync(`${certificatePath}/fullchain.pem`)
+//     console.log("🚀 ~ file: strategyAnalyzerServer.ts:13 ~ key:", key, cert)
+//     httpsOptions = {
+//         key: key,
+//         cert: cert,
+//     };
+// }
+
+console.log("🚀 ~ file: strategyAnalyzerServer.ts:15 ~ mode:", mode, httpsOptions)
 
 // Your other imports, constants, and functions...
 
@@ -148,14 +159,14 @@ async function fetchCryptos() {
             latestDataAndSignals[symbol][timeframe]['RSI'] = RSI_latestDataAndSignals;
             latestDataAndSignals[symbol][timeframe]['COMPLETE_ANALYSIS'] = Complete_latestDataAndSignals;
 
-            if (RSI_latestDataAndSignals[1].buySignal) {
+            if (RSI_latestDataAndSignals && RSI_latestDataAndSignals[1].buySignal) {
                 // console.log(`RSI : Buy signal for ${symbol} on ${timeframe} timeframe!`);
-            } else if (RSI_latestDataAndSignals[1].sellSignal) {
+            } else if (RSI_latestDataAndSignals && RSI_latestDataAndSignals[1].sellSignal) {
                 // console.log(`RSI : Sell signal for ${symbol} on ${timeframe} timeframe!`);
             }
-            if (Complete_latestDataAndSignals[1].buySignal) {
+            if (Complete_latestDataAndSignals && Complete_latestDataAndSignals[1].buySignal) {
                 // console.log(`Complete : Buy signal for ${symbol} on ${timeframe} timeframe!`);
-            } else if (Complete_latestDataAndSignals[1].sellSignal) {
+            } else if (Complete_latestDataAndSignals && Complete_latestDataAndSignals[1].sellSignal) {
                 // console.log(`Complete : Sell signal for ${symbol} on ${timeframe} timeframe!`);
             }
         }
@@ -173,31 +184,9 @@ async function fetchForex() {
                     const rsi = await postOHLCVData(data, 'http://localhost:3000/rsi')
 
                     console.log("🚀 ~ file: strategyAnalyzerServer.ts:129 ~ fetchForex ~ response:", data)
-                    // let RSI_latestDataAndSignals = await analyzeData(symbol, timeframe, 'RSI', signalStatus, false);
                     fs.writeFileSync(`src/outputData/rsiDataSignals-${symbol}-${timeframe}.json`, JSON.stringify(data));
                     fs.writeFileSync(`src/outputData/rsiData-${symbol}-${timeframe}.json`, JSON.stringify(rsi));
-                    // let Complete_latestDataAndSignals = await analyzeData(symbol, timeframe, 'COMPLETE_ANALYSIS', signalStatus, false);
 
-                    // if (!latestDataAndSignals[symbol]) {
-                    //     latestDataAndSignals[symbol] = {};
-                    // }
-                    // if (!latestDataAndSignals[symbol][timeframe]) {
-                    //     latestDataAndSignals[symbol][timeframe] = {};
-                    // }
-
-                    // latestDataAndSignals[symbol][timeframe]['RSI'] = RSI_latestDataAndSignals;
-                    // latestDataAndSignals[symbol][timeframe]['COMPLETE_ANALYSIS'] = Complete_latestDataAndSignals;
-
-                    // if (RSI_latestDataAndSignals[1].buySignal) {
-                    //     // console.log(`RSI : Buy signal for ${symbol} on ${timeframe} timeframe!`);
-                    // } else if (RSI_latestDataAndSignals[1].sellSignal) {
-                    //     // console.log(`RSI : Sell signal for ${symbol} on ${timeframe} timeframe!`);
-                    // }
-                    // if (Complete_latestDataAndSignals[1].buySignal) {
-                    //     // console.log(`Complete : Buy signal for ${symbol} on ${timeframe} timeframe!`);
-                    // } else if (Complete_latestDataAndSignals[1].sellSignal) {
-                    //     // console.log(`Complete : Sell signal for ${symbol} on ${timeframe} timeframe!`);
-                    // }
                 } catch (error) {
                     console.error("🚀 ~ file: strategyAnalyzerServer.ts:120 ~ fetchForex ~ error:", error)
 
@@ -210,7 +199,6 @@ async function fetchForex() {
 }
 
 
-// fetchForex()
 
 // Route to serve the latest data and signals
 app.get('/api/:analysisType/data-and-signals', (req, res) => {
@@ -316,3 +304,6 @@ setInterval(async () => {
 setTimeout(async () => {
     await fetchForex()
 }, 5 * 1000);
+
+
+export default app;

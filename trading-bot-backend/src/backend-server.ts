@@ -1,13 +1,19 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import dataConvertor from './utils';
+// // import express, { Request, Response } from 'express';
+// import cors from 'cors';
+// import bodyParser from 'body-parser';
+import { stringifyMap } from './utils/convertData';
 
-import { PAIR_TYPES, TradingBot } from './bot';
+const { PAIR_TYPES, TradingBot } = require('./bot');
 
 const bot = new TradingBot('binance');
+const express = require('express');
+// const { Request, Response } = require('express');
+const cors = require('cors');
+// const bodyParser = require('bodyParser');
+const bodyParser = require('body-parser')
+// const dataConvertor = require('./utils/convertData')
 
-const app: express.Application = express();
+const app = express();
 
 app.use(bodyParser.json());
 
@@ -156,15 +162,15 @@ app.post('/api/rsi/bulk', async (req: Request, res: Response) => {
             }
         }
     }
-
     res.json(rsiValues);
 });
 
 
 // Tests 
 app.get('/api/rsi/getValues', async (req: Request, res: Response) => {
-    console.log("🚀 ~ file: backend-server.ts:170 ~ app.get ~ bot.dataStore:", bot.dataStore, dataConvertor)
-    return res.json(dataConvertor.stringifyMap(bot.dataStore))
+    const leveragePairsResult = await stringifyMap(bot.dataStore.get(PAIR_TYPES.leveragePairs))
+    const stringified = JSON.stringify(leveragePairsResult)
+    return res.status(200).json(leveragePairsResult)
 })
 
 app.post('/set-rsi', async (req: Request, res: Response) => {
@@ -193,13 +199,12 @@ app.post('/set-rsi', async (req: Request, res: Response) => {
 
 
 
-// app.address = 3000
-// app.listen(app.address, () => {
-//     // console.log('Server is running on http://localhost:3000');
-//     bot.populateDataStore()
-// });
+const PORT = 3000;
 
-console.log("🚀 ~ file: backend-server.ts:203 ~ app:", app)
-export default app;
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+    bot.populateDataStore()
+});
 // module.exports = app;
+// export default {};
 

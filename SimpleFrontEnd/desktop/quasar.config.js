@@ -59,6 +59,12 @@ module.exports = configure(function (/* ctx */) {
         browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
         node: 'node16'
       },
+      script: [ // Add this block
+        {
+          id: 'OneSignalSDK',
+          src: 'https://cdn.onesignal.com/sdks/OneSignalSDK.js',
+        },
+      ],
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
       // vueRouterBase,

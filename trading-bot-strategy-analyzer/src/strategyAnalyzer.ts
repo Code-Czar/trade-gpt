@@ -9,73 +9,78 @@ const RSIUpperThreshold = 51;
 const RSILowerThreshold = 50;
 const positionUSDTAmount = 10;
 
-const RSI_THRESHOLD = 30;  // You can adjust this value as per your requirements
+const RSI_THRESHOLD = 35;  // You can adjust this value as per your requirements
 
 const notificationsSent = {};
 
-export const fetchRSIAndCheckThreshold = async () => {
+export const fetchRSI = async (timeframes = ["1d", "1h", "5m"]) => {
     const symbolsUrl = `${SERVER_DATA_URL}/api/symbols/leverage`;
     const rsiBulkUrl = `${SERVER_DATA_URL}/api/rsi/bulk`;
 
-    try {
-        const symbolsResponse = await fetch(symbolsUrl, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+    const symbolsResponse = await fetch(symbolsUrl, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
 
-        });
-        const symbolsObjects = await symbolsResponse.json()
-        console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ symbolsObjects:", symbolsObjects)
-        const symbols = symbolsObjects.map(pair => pair.name);
-        const timeframes = ["1d", "1h", "5m"];
+    });
+    const symbolsObjects = await symbolsResponse.json()
+    // console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ symbolsObjects:", symbolsObjects)
+    const symbols = symbolsObjects.map(pair => pair.name);
 
-        const rsiResponse = await fetch(rsiBulkUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ symbols, timeframes })
-        });
-        const rsiValues = await rsiResponse.json();
-        console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ rsiResponse:", rsiValues)
+    const rsiResponse = await fetch(rsiBulkUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ symbols, timeframes })
+    });
+    const rsiValues = await rsiResponse.json();
+    // console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ rsiResponse:", rsiValues)
+    return { rsiValues, symbols, timeframes }
+}
 
+export const checkRSIThresholds = async (rsiValues, symbols, timeframes) => {
+    let signalTriggered = false;
 
+    for (let symbol of symbols) {
+        for (let timeframe of timeframes) {
+            const rsiValue = rsiValues[symbol] && rsiValues[symbol][timeframe];
 
+            // Initialize if not already present
+            if (!notificationsSent[symbol]) {
+                notificationsSent[symbol] = {};
+            }
 
-        let signalTriggered = false;
+            // Check if the RSI is below the threshold and no notification has been sent yet
+            if (rsiValue && rsiValue < RSI_THRESHOLD && !notificationsSent[symbol][timeframe]) {
+                signalTriggered = true;
+                console.log(`RSI value for ${symbol} at ${timeframe} is below the threshold! RSI: ${rsiValue}`);
 
-        for (let symbol of symbols) {
-            for (let timeframe of timeframes) {
-                const rsiValue = rsiValues[symbol] && rsiValues[symbol][timeframe];
+                // Send signal email
+                await sendSignalEmail("RSI Alert", symbol, timeframe, `RSI: ${rsiValue}`, true);
 
-                // Initialize if not already present
-                if (!notificationsSent[symbol]) {
-                    notificationsSent[symbol] = {};
-                }
+                // Mark notification as sent
+                notificationsSent[symbol][timeframe] = true;
+            }
 
-                // Check if the RSI is below the threshold and no notification has been sent yet
-                if (rsiValue && rsiValue < RSI_THRESHOLD && !notificationsSent[symbol][timeframe]) {
-                    signalTriggered = true;
-                    console.log(`RSI value for ${symbol} at ${timeframe} is below the threshold! RSI: ${rsiValue}`);
-
-                    // Send signal email
-                    await sendSignalEmail("RSI Alert", symbol, timeframe, `RSI: ${rsiValue}`, true);
-
-                    // Mark notification as sent
-                    notificationsSent[symbol][timeframe] = true;
-                }
-
-                // If the RSI is above the threshold and a notification was previously sent, reset the notification flag
-                if (rsiValue && rsiValue >= RSI_THRESHOLD && notificationsSent[symbol][timeframe]) {
-                    notificationsSent[symbol][timeframe] = false;
-                }
+            // If the RSI is above the threshold and a notification was previously sent, reset the notification flag
+            if (rsiValue && rsiValue >= RSI_THRESHOLD && notificationsSent[symbol][timeframe]) {
+                notificationsSent[symbol][timeframe] = false;
             }
         }
+    }
 
-        if (!signalTriggered) {
-            console.log('No RSI values were below the threshold.');
-        }
+    if (!signalTriggered) {
+        console.log('No RSI values were below the threshold.');
+    }
+    return notificationsSent
+}
+
+export const fetchRSIAndCheckThreshold = async () => {
+    try {
+        const { rsiValues, symbols, timeframes } = await fetchRSI()
+        await checkRSIThresholds(rsiValues, symbols, timeframes)
 
     } catch (error) {
         console.error('Error fetching RSI data or sending email:', error);
@@ -127,8 +132,8 @@ function analyzeRSI(data) {
     const latestRSI = rsi[length - 1];
 
     const signals = {
-        buySignal: false,
-        sellSignal: false
+        buySignal: {},
+        sellSignal: {}
     }
 
     if (latestRSI < RSILowerThreshold) {

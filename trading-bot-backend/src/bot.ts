@@ -222,6 +222,7 @@ export class TradingBot {
             } else {
                 ohlcvs = await this.fetchOHLCV(symbol as string, timeframe);
             }
+            // console.log("🚀 ~ file: bot.ts:224 ~ TradingBot ~ populateDataStoreForPair ~ ohlcvs:", ohlcvs, pairType)
             if (!ohlcvs) {
                 return;
             }
@@ -253,14 +254,21 @@ export class TradingBot {
             } else {
                 symbolData.rsi.set(timeframe, [rsi]);
             }
+            if (typeof symbol === 'object') {
 
-            this.dataStore.get(pairType).set(symbol, symbolData);
+                this.dataStore.get(pairType).set(symbol.name, symbolData);
+            } else {
+                this.dataStore.get(pairType).set(symbol, symbolData);
+
+            }
+            // console.log("🚀 ~ file: bot.ts:259 ~ TradingBot ~ populateDataStoreForPair ~ symbolData:", this.dataStore.get(pairType))
         } catch (error) {
             console.error(`Error populating data store for ${symbol} and ${timeframe}:`, error);
         }
     }
 
     async populateDataStore(timeframes = ['1d', '1h', '5m']) {
+        console.log("🚀 ~ file: bot.ts:264 ~ TradingBot ~ populateDataStore ~ populateDataStore:")
         const leveragePairs = await this.getBybitPairsWithLeverage();
         // Placeholder for forex and crypto pairs
         const forexPairs: Array<string> = [];
@@ -270,7 +278,9 @@ export class TradingBot {
         while (true) {
             for (const pair of leveragePairs) {
                 for (const timeframe of timeframes) {
+                    // console.log("🚀 ~ file: bot.ts:264 ~ TradingBot ~ populateDataStore ~ populateDataStore:", pair, timeframe)
                     await this.populateDataStoreForPair(PAIR_TYPES.leveragePairs, pair, timeframe);
+                    // console.log("🚀 ~ file: bot.ts:279 ~ TradingBot ~ populateDataStore ~ this.dataStore:", pair, timeframe)
                 }
             }
             for (const pair of forexPairs) {
@@ -313,7 +323,10 @@ export class TradingBot {
 
             const closing_prices = data.map((item) => parseFloat(item[4]));
             return closing_prices;
-        } catch (error) { }
+        } catch (error) {
+            console.log("🚀 ~ file: bot.ts:327 ~ TradingBot ~ getBinanceHistoricalData ~ error:", pair, error?.data?.msg)
+
+        }
     }
 
     calculateRSI(prices: number[] | null, period = 14): number | null {

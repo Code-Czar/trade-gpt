@@ -31,7 +31,7 @@ function deploy_to_pi() {
     local path="$4"
     
     echo "$port $user $ip $path"
-    rsync -avz --exclude=node_modules --exclude=env --exclude .git -e "ssh -p $port" . "$user@$ip:$path"
+    rsync -avz --exclude=node_modules --exclude=env --exclude=out --exclude .git -e "ssh -p $port" . "$user@$ip:$path"
     ssh -p $port "$user@$ip" "cp $path/remoteBash.sh ~/.bashrc"
 }
 function send_ssh_key() {

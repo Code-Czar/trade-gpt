@@ -12,9 +12,32 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
+const https = require('https');
+const fetch = require('node-fetch');
+require('dotenv').config();
 const strategyAnalyzer_1 = require("./strategyAnalyzer");
+const email_1 = require("./email");
+const mode = process.env.MODE;
+let httpsOptions = {};
+// if (mode === 'PRODUCTION') {
+//     const certificatePath = "/etc/letsencrypt/live/beniben.hopto.org/"
+//     const key = fs.readFileSync(`${certificatePath}/privkey.pem`)
+//     const cert = fs.readFileSync(`${certificatePath}/fullchain.pem`)
+//     console.log("🚀 ~ file: strategyAnalyzerServer.ts:13 ~ key:", key, cert)
+//     httpsOptions = {
+//         key: key,
+//         cert: cert,
+//     };
+// }
+console.log("🚀 ~ file: strategyAnalyzerServer.ts:15 ~ mode:", mode, httpsOptions);
 // Your other imports, constants, and functions...
 const app = express();
+https.createServer(httpsOptions, app).listen(3002, () => {
+    console.log('Server running on https://localhost:3002');
+});
+app.get('/', (req, res) => {
+    res.send('Hello over HTTPS!');
+});
 // Enable CORS
 app.use(cors());
 // Global store for the latest data and signals
@@ -120,16 +143,16 @@ function fetchCryptos() {
                 }
                 latestDataAndSignals[symbol][timeframe]['RSI'] = RSI_latestDataAndSignals;
                 latestDataAndSignals[symbol][timeframe]['COMPLETE_ANALYSIS'] = Complete_latestDataAndSignals;
-                if (RSI_latestDataAndSignals[1].buySignal) {
+                if (RSI_latestDataAndSignals && RSI_latestDataAndSignals[1].buySignal) {
                     // console.log(`RSI : Buy signal for ${symbol} on ${timeframe} timeframe!`);
                 }
-                else if (RSI_latestDataAndSignals[1].sellSignal) {
+                else if (RSI_latestDataAndSignals && RSI_latestDataAndSignals[1].sellSignal) {
                     // console.log(`RSI : Sell signal for ${symbol} on ${timeframe} timeframe!`);
                 }
-                if (Complete_latestDataAndSignals[1].buySignal) {
+                if (Complete_latestDataAndSignals && Complete_latestDataAndSignals[1].buySignal) {
                     // console.log(`Complete : Buy signal for ${symbol} on ${timeframe} timeframe!`);
                 }
-                else if (Complete_latestDataAndSignals[1].sellSignal) {
+                else if (Complete_latestDataAndSignals && Complete_latestDataAndSignals[1].sellSignal) {
                     // console.log(`Complete : Sell signal for ${symbol} on ${timeframe} timeframe!`);
                 }
             }
@@ -148,28 +171,8 @@ function fetchForex() {
                         const data = yield response.json();
                         const rsi = yield postOHLCVData(data, 'http://localhost:3000/rsi');
                         console.log("🚀 ~ file: strategyAnalyzerServer.ts:129 ~ fetchForex ~ response:", data);
-                        // let RSI_latestDataAndSignals = await analyzeData(symbol, timeframe, 'RSI', signalStatus, false);
                         fs.writeFileSync(`src/outputData/rsiDataSignals-${symbol}-${timeframe}.json`, JSON.stringify(data));
                         fs.writeFileSync(`src/outputData/rsiData-${symbol}-${timeframe}.json`, JSON.stringify(rsi));
-                        // let Complete_latestDataAndSignals = await analyzeData(symbol, timeframe, 'COMPLETE_ANALYSIS', signalStatus, false);
-                        // if (!latestDataAndSignals[symbol]) {
-                        //     latestDataAndSignals[symbol] = {};
-                        // }
-                        // if (!latestDataAndSignals[symbol][timeframe]) {
-                        //     latestDataAndSignals[symbol][timeframe] = {};
-                        // }
-                        // latestDataAndSignals[symbol][timeframe]['RSI'] = RSI_latestDataAndSignals;
-                        // latestDataAndSignals[symbol][timeframe]['COMPLETE_ANALYSIS'] = Complete_latestDataAndSignals;
-                        // if (RSI_latestDataAndSignals[1].buySignal) {
-                        //     // console.log(`RSI : Buy signal for ${symbol} on ${timeframe} timeframe!`);
-                        // } else if (RSI_latestDataAndSignals[1].sellSignal) {
-                        //     // console.log(`RSI : Sell signal for ${symbol} on ${timeframe} timeframe!`);
-                        // }
-                        // if (Complete_latestDataAndSignals[1].buySignal) {
-                        //     // console.log(`Complete : Buy signal for ${symbol} on ${timeframe} timeframe!`);
-                        // } else if (Complete_latestDataAndSignals[1].sellSignal) {
-                        //     // console.log(`Complete : Sell signal for ${symbol} on ${timeframe} timeframe!`);
-                        // }
                     }
                     catch (error) {
                         console.error("🚀 ~ file: strategyAnalyzerServer.ts:120 ~ fetchForex ~ error:", error);
@@ -180,13 +183,6 @@ function fetchForex() {
         }
     });
 }
-setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
-    // await fetchCryptos()
-}), 10 * 1000);
-setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
-    yield fetchForex();
-}), 5 * 1000);
-// fetchForex()
 // Route to serve the latest data and signals
 app.get('/api/:analysisType/data-and-signals', (req, res) => {
     const analysisType = req.params.analysisType;
@@ -273,6 +269,17 @@ app.get('/api/:symbol/:timeframe/:analysisType/data-and-signals', (req, res) => 
         res.status(404).json({ error: 'Data not yet available' });
     }
 });
-app.listen(3002, () => {
-    // console.log('Analyzer server is running on http://localhost:3002');
-});
+app.post('/api/test-email', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // Send the test email
+    yield (0, email_1.sendSignalEmail)("longTest", "SymbolTest", "1dTest", 'RSITest', true);
+    res.status(200).json({ info: 'Complete' });
+}));
+setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
+    // await fetchCryptos()
+    (0, strategyAnalyzer_1.fetchRSIAndCheckThreshold)();
+}), 10 * 1000);
+setTimeout(() => __awaiter(void 0, void 0, void 0, function* () {
+    yield fetchForex();
+}), 5 * 1000);
+exports.default = app;
+//# sourceMappingURL=strategyAnalyzerServer.js.map

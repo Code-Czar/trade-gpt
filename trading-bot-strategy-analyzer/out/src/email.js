@@ -16,9 +16,10 @@ exports.sendSignalEmail = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 dotenv_1.default.config();
-const sendSignal = false;
+const SEND_SIGNAL = false;
 const tradingViewUrl = "https://www.tradingview.com/chart/?symbol=";
-function sendSignalEmail(positionType, symbol, timeFrame, analysisType, exchange = "BINANCE") {
+const bybitURL = "https://www.bybit.com/trade/usdt/";
+function sendSignalEmail(positionType, symbol, timeFrame, analysisType, sendSignal = SEND_SIGNAL, exchange = "BINANCE") {
     return __awaiter(this, void 0, void 0, function* () {
         if (!sendSignal)
             return;
@@ -38,9 +39,12 @@ function sendSignalEmail(positionType, symbol, timeFrame, analysisType, exchange
             to: process.env.GMAIL_USER,
             subject: `Trading signal for ${timeFrame} on ${analysisType}`,
             text: `A ${symbol} | ${positionType}signal was generated for ${timeFrame} on ${analysisType}.`,
-            html: `<p>A <strong>${symbol} | ${positionType} </strong> signal was generated for <strong>${timeFrame}</strong> on <strong>${analysisType}</strong>.</p><br/> <a href="${tradingViewUrl}${exchange}:${formattedSymbol}"> View on trading view </a>`, // html body
+            html: `<p>A <strong>${symbol} | ${positionType} </strong> signal was generated for <strong>${timeFrame}</strong> on <strong>${analysisType}</strong>.</p><br/> 
+        <a href="${tradingViewUrl}${exchange}:${formattedSymbol}"> View on trading view </a>
+        <a href="${bybitURL}${formattedSymbol}"> View on Bybit </a>`, // html body
         });
         // console.log('Message sent: %s', info.messageId);
     });
 }
 exports.sendSignalEmail = sendSignalEmail;
+//# sourceMappingURL=email.js.map
