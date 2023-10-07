@@ -226,8 +226,9 @@ export class TradingBot {
             if (!ohlcvs) {
                 return;
             }
-
-            const rsi = this.calculateRSI(ohlcvs as number[]);
+            const closing_prices = ohlcvs.map((item) => parseFloat(item[4]));
+            const roundedRSIString = this.calculateRSI(closing_prices as number[])?.toFixed(2)
+            const rsi = parseFloat(roundedRSIString);
 
             let symbolData = this.dataStore.get(pairType).get(symbol);
 
@@ -263,7 +264,7 @@ export class TradingBot {
             }
             // console.log("🚀 ~ file: bot.ts:259 ~ TradingBot ~ populateDataStoreForPair ~ symbolData:", this.dataStore.get(pairType))
         } catch (error) {
-            console.error(`Error populating data store for ${symbol} and ${timeframe}:`, error);
+            console.error(`Error populating data store for ${typeof symbol === 'object' ? symbol.name : symbol} and ${timeframe}:`, error);
         }
     }
 
@@ -321,8 +322,8 @@ export class TradingBot {
             const response = await axios.get(url);
             const data = response.data;
 
-            const closing_prices = data.map((item) => parseFloat(item[4]));
-            return closing_prices;
+            // const closing_prices = data.map((item) => parseFloat(item[4]));
+            return data;
         } catch (error) {
             console.log("🚀 ~ file: bot.ts:327 ~ TradingBot ~ getBinanceHistoricalData ~ error:", pair, error?.data?.msg)
 

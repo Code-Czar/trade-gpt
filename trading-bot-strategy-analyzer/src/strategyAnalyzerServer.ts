@@ -297,10 +297,22 @@ app.post('/api/test-email', async (req, res) => {
 });
 
 
-setInterval(async () => {
-    // await fetchCryptos()
-    fetchRSIAndCheckThreshold();
-}, 10 * 1000);
+async function loopFetchRSIAndCheckThreshold() {
+    while (true) {
+        try {
+            // await fetchCryptos()
+            await fetchRSIAndCheckThreshold();
+        } catch (error) {
+            console.error(error);
+        }
+        // Wait for 10 seconds before the next iteration.
+        await new Promise(resolve => setTimeout(resolve, 10 * 1000));
+    }
+}
+
+// Start the loop
+loopFetchRSIAndCheckThreshold();
+
 setTimeout(async () => {
     await fetchForex()
 }, 5 * 1000);

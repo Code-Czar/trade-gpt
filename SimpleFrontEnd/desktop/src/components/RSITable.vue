@@ -5,6 +5,7 @@
     </q-tabs>
 
     <q-separator />
+    <TradingChart v-if="showChart" :input-symbol="symbolToChart" />
 
     <q-tab-panels v-model="tab">
       <q-tab-panel name="table">
@@ -20,6 +21,9 @@
           </template>
           <template v-slot:body-cell-view="props">
             <q-td :props="props">
+              <q-btn @click="openChart(props.row.name)" label="Chart" />
+            </q-td>
+            <q-td :props="props">
               <q-btn @click="openByBit(props.row.name)" label="View on ByBit" />
             </q-td>
           </template>
@@ -30,8 +34,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
-import { RSIFetcher } from '@/models';
+import { ref, onMounted, onBeforeUnmount, onUnmounted } from 'vue';
+import { dataController } from '@/controllers';
+import TradingChart from './TradingChart.vue';
 
 const tab = ref('table');
 const tableData = ref([]);
@@ -40,6 +45,8 @@ const pagination = ref({
   ascending: true,
   rowsPerPage: 200
 });
+const symbolToChart = ref('BTCUSDT')
+const showChart = ref(false)
 
 const columns = [
   { name: 'name', label: 'Name', align: 'left', field: 'name', sortable: true },
@@ -50,67 +57,36 @@ const columns = [
   { name: 'view', label: 'ByBit', align: 'center', field: row => row.name, sortable: false }
 ];
 let fetching = false;
-const REFRESH_RATE = 1000
+const REFRESH_RATE = 20000;
 
 const openByBit = (pairName) => {
   window.open(`https://www.bybit.com/trade/usdt/${pairName}`, '_blank');
 };
+const openChart = (pairName) => {
+  console.log("🚀 ~ file: RSITable.vue:62 ~ openChart ~ pairName: SHOWING CHART", pairName)
+  symbolToChart.value = pairName
+  showChart.value = true
+
+  // Get a reference to the TradingChart div
+  const tradingChartDiv = document.querySelector('#trading-chart');
+
+  // Scroll to the TradingChart div
+  if (tradingChartDiv) {
+    tradingChartDiv.scrollIntoView({ behavior: 'smooth' });
+  }
+
+
+};
 
 const fetchRSIData = async () => {
-  try {
-    const pairs = await RSIFetcher.get_bybit_pairs_with_leverage();
-    console.log("Fetched pairs:", pairs);
+  const dataResult = await dataController.getRSILastData()
+  tableData.value = dataResult
+  tableData.value.sort(customSort);  // Resort the tableData  
+};
 
-    // while (fetching) {
-    // setTimeout(async () => {
-    const symbols = pairs.map(pair => pair.name);
-    const timeframes = ["1d", "1h", "5m"];
-
-    const bulkRSI = await RSIFetcher.calculate_rsi_bulk(symbols, timeframes);
-    console.log("🚀 ~ file: RSITable.vue:70 ~ //setTimeout ~ bulkRSI:", bulkRSI)
-
-    for (const pair of pairs) {
-      if (!fetching) return;
-      const dataEntry = {
-        name: pair.name,
-        maxLeverage: pair.leverage_filter ? pair.leverage_filter.max_leverage : 0
-      };
-
-      let hasRSIValue = false; // Flag to check if the pair has any RSI value
-
-      for (const interval of timeframes) {
-        try {
-          const rsi = bulkRSI[pair.name][interval];
-          if (rsi) {
-            dataEntry[`rsi_${interval}`] = rsi[rsi.length - 1];
-            dataEntry[`maxLeverage`] = pair.leverage_filter.max_leverage;
-            hasRSIValue = true;
-          }
-        } catch (error) {
-          console.error(`Error fetching data for ${pair.name} with interval ${interval}:`, error.message);
-        }
-      }
-
-      if (hasRSIValue) {
-        const existingIndex = tableData.value.findIndex(p => p.name === pair.name);
-
-        if (existingIndex !== -1) {
-          // If the symbol exists, update the existing entry
-          tableData.value[existingIndex] = dataEntry;
-        } else {
-          // If the symbol doesn't exist, push a new entry
-          tableData.value.push(dataEntry);
-        }
-
-        tableData.value.sort(customSort);  // Resort the tableData
-      }
-
-
-    }
-
-  } catch (error) {
-    console.error("Error fetching pairs:", error.message);
-  }
+const fetchAllOHLCS = async () => {
+  const dataResult = await dataController.fetchRSIAndOHLCV()
+  // Resort the tableData  
 };
 
 
@@ -147,14 +123,10 @@ const descendingCompare = (aValue, bValue) => {
   return bValue - aValue;  // Sort in descending order by default
 };
 
-// watch(tableData, (newVal) => {
-//   tableData.value = [...newVal].sort(customSort);
-// }, { deep: true });
-
-
 const startFetching = () => {
   fetching = true
   setInterval(() => {
+    fetchAllOHLCS();
     fetchRSIData();
   }, REFRESH_RATE)
 };
@@ -167,12 +139,18 @@ const sortTable = () => {
   pagination.value.descending = !pagination.value.descending;
 };
 
+onMounted(() => {
+  fetchRSIData();
+  fetchAllOHLCS();
+  startFetching()
+});
 onBeforeUnmount(() => {
   stopFetching();
 });
 
-onMounted(() => {
-  startFetching()
+
+onUnmounted(() => {
+  stopFetching();
 });
 
 
