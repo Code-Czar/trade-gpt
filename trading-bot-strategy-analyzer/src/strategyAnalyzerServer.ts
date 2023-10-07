@@ -12,6 +12,7 @@ import { SERVER_DATA_URL } from './consts';
 
 import { analyzeData, fetchRSIAndCheckThreshold } from './strategyAnalyzer';
 import { sendSignalEmail } from './email';
+import { sendNofitication } from './notificationsSender';
 
 const mode = process.env.MODE;
 
@@ -20,16 +21,16 @@ const mode = process.env.MODE;
 
 
 let httpsOptions = {};
-// if (mode === 'PRODUCTION') {
-//     const certificatePath = "/etc/letsencrypt/live/beniben.hopto.org/"
-//     const key = fs.readFileSync(`${certificatePath}/privkey.pem`)
-//     const cert = fs.readFileSync(`${certificatePath}/fullchain.pem`)
-//     console.log("🚀 ~ file: strategyAnalyzerServer.ts:13 ~ key:", key, cert)
-//     httpsOptions = {
-//         key: key,
-//         cert: cert,
-//     };
-// }
+if (mode === 'PRODUCTION') {
+    const certificatePath = "/etc/letsencrypt/live/beniben.hopto.org/"
+    const key = fs.readFileSync(`${certificatePath}/privkey.pem`)
+    const cert = fs.readFileSync(`${certificatePath}/fullchain.pem`)
+    console.log("🚀 ~ file: strategyAnalyzerServer.ts:13 ~ key:", key, cert)
+    httpsOptions = {
+        key: key,
+        cert: cert,
+    };
+}
 
 console.log("🚀 ~ file: strategyAnalyzerServer.ts:15 ~ mode:", mode, httpsOptions)
 
@@ -293,6 +294,11 @@ app.get('/api/:symbol/:timeframe/:analysisType/data-and-signals', (req, res) => 
 app.post('/api/test-email', async (req, res) => {
     // Send the test email
     await sendSignalEmail("longTest", "SymbolTest", "1dTest", 'RSITest', true);
+    res.status(200).json({ info: 'Complete' });
+});
+app.post('/api/test-notification', async (req, res) => {
+    // Send the test email
+    await sendNofitication("Notification Test");
     res.status(200).json({ info: 'Complete' });
 });
 

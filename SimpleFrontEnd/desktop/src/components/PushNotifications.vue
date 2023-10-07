@@ -1,36 +1,22 @@
-<template>
-    <!-- Your template here -->
-    <h1> Push notifications </h1>
-</template>
-  
+
 <script setup>
-import { onMounted } from 'vue';
+import { onUnmounted } from 'vue';
 
-const ONE_SIGNAL_APP_ID = '96d52203-d7fa-4174-a9c9-85a0fb84afc7';
+const APP_ID = "c9f90795-f921-4717-92b2-3dd1e9405b30";
 
-onMounted(() => {
-    window.OneSignal = window.OneSignal || [];
-    OneSignal.push(() => {
-        OneSignal.init({
-            appId: ONE_SIGNAL_APP_ID,
-        });
-    });
 
-    // Example: To show the user the native prompt, use the following:
-    OneSignal.push(() => {
-        OneSignal.showNativePrompt();
-    });
 
-    // Handle new OneSignal messages
-    OneSignal.push(() => {
-        OneSignal.on('subscriptionChange', (isSubscribed) => {
-            console.log('The user subscription state is now:', isSubscribed);
-        });
-
-        OneSignal.on('notificationDisplay', (event) => {
-            console.log('OneSignal notification displayed:', event);
-        });
-    });
+window.OneSignal.init({
+    appId: APP_ID,
+    safari_web_id: "web.onesignal.auto.613528e9-2930-4b07-a098-5a9518822d98",
+    notifyButton: {
+        enable: true,
+    },
+    allowLocalhostAsSecureOrigin: true,
+});
+onUnmounted(() => {
+    // window.OneSignal.removeEventListener('subscriptionChange');
+    window.OneSignal.PushSubscription.optOut();
 });
 </script>
   

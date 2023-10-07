@@ -1289,6 +1289,11 @@ qs@6.11.0:
   dependencies:
     side-channel "^1.0.4"
 
+quasar-app-extension-onesignal@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/quasar-app-extension-onesignal/-/quasar-app-extension-onesignal-0.3.0.tgz#435fab970a9fda2e9c0f10475865bb149dcb4db4"
+  integrity sha512-NrJ/EVRZ990rNdHU8ZXtxMH5gln5ayp9fzGS2f7yVtsZma8xWOGDuH3bsycOw2qqECFaO3l294oB4oymY4vsMg==
+
 quick-lru@^5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/quick-lru/-/quick-lru-5.1.1.tgz#366493e6b3e42a3a6885e2e99d18f80fb7a8c932"

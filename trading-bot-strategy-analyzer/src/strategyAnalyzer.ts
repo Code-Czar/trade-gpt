@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 
 import { sendSignalEmail } from './email';
+import { sendNotification } from './notificationsSender';
 import { SERVER_DATA_URL, PAIRS_LEVERAGE_URL } from './consts';
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 
@@ -58,7 +59,21 @@ export const checkRSIThresholds = async (rsiValues, symbols, timeframes) => {
                 console.log(`RSI value for ${symbol} at ${timeframe} is below the threshold! RSI: ${rsiValue}`);
 
                 // Send signal email
-                await sendSignalEmail("RSI Alert", symbol, timeframe, `RSI: ${rsiValue}`, true);
+                try {
+
+                    await sendNotification(`RSI Alert: ${symbol} at ${timeframe} is below the threshold! RSI: ${rsiValue}`);
+                } catch (error) {
+                    console.log("🚀 ~ file: strategyAnalyzer.ts:66 ~ checkRSIThresholds ~ error:", error)
+
+                }
+                try {
+
+                    await sendSignalEmail("RSI Alert", symbol, timeframe, `RSI: ${rsiValue}`, true);
+                } catch (error) {
+                    console.log("🚀 ~ file: strategyAnalyzer.ts:73 ~ checkRSIThresholds ~ error:", error)
+
+                }
+                // await sendNotification("RSI Alert : ", symbol, timeframe, `RSI: ${rsiValue}`, true);
 
                 // Mark notification as sent
                 notificationsSent[symbol][timeframe] = true;

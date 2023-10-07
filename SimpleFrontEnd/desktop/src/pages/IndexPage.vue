@@ -35,6 +35,7 @@
 
         <q-btn label="Open App" color="primary" @click="goToApp" />
         <q-btn label="Send test mail" color="primary" @click="sendTestMail" />
+        <q-btn label="Send test Notification" color="primary" @click="sendTestNotification" />
 
         <q-btn label="Login" color="primary" @click="goToLogin" />
       </div>
@@ -76,6 +77,18 @@ const sendTestMail = async () => {
   try {
     // Perform the POST request to the server
     await axios.post(`${STRATEGY_ANALYZER_URL}/api/test-email`);
+    // Notify user of success
+    alert('Test email sent successfully!');
+  } catch (error) {
+    // Handle any errors that occur during the request
+    console.error('Error sending test email:', error);
+    alert('Failed to send test email.');
+  }
+}
+const sendTestNotification = async () => {
+  try {
+    // Perform the POST request to the server
+    await axios.post(`${STRATEGY_ANALYZER_URL}/api/test-notification`);
     // Notify user of success
     alert('Test email sent successfully!');
   } catch (error) {

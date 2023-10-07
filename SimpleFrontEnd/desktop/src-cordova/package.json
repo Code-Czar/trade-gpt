@@ -18,6 +18,12 @@
   "cordova": {
     "platforms": [
       "android"
-    ]
+    ],
+    "plugins": {
+      "onesignal-cordova-plugin": {}
+    }
+  },
+  "dependencies": {
+    "onesignal-cordova-plugin": "5.0.2"
   }
 }

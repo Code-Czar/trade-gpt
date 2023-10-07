@@ -10,7 +10,7 @@
     <q-tab-panels v-model="tab">
       <q-tab-panel name="table">
         <q-table :rows="tableData" :columns="columns" row-key="id" :rows-per-page-options="[200, 500, 1000]"
-          v-model:pagination="pagination" :sort-method="customSort">
+          v-model:pagination="pagination">
 
           <template v-slot:top>
             <q-space />

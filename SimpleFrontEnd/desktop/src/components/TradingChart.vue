@@ -10,10 +10,25 @@
         <button @click="toggleMACD">{{ showMACD.value ? 'Hide' : 'Show' }} MACD</button>
         <button @click="toggleSupport">{{ showSupport.value ? 'Hide' : 'Show' }} Support</button>
         <button @click="toggleResistance">{{ showResistance.value ? 'Hide' : 'Show' }} Resistance</button>
+        <select v-model="selectedTimeFrame">
+            <option value="1m">1m</option>
+            <option value="5m">5m</option>
+            <option value="15m">15m</option>
+            <option value="30m">30m</option>
+            <option value="1h">1h</option>
+            <option value="4h">4h</option>
+            <option value="1d">1d</option>
+            <option value="1w">1w</option>
+            <option value="1M">1M</option>
+
+        </select>
         <div ref="chartContainer" style="width: 100%; height: 500px"></div>
+        <!-- <div v-show="showRSI" ref="rsiChartContainer" style="width: 100%; height: 200px"></div>
+        <div v-show="showVolume" ref="volumeChartContainer" style="width: 100%; height: 300px"></div> -->
         <div ref="rsiChartContainer" style="width: 100%; height: 200px"></div>
         <div ref="volumeChartContainer" style="width: 100%; height: 300px"></div>
         <div ref="macdChartContainer" style="width: 100%; height: 300px"></div>
+
     </div>
 </template>
 
@@ -50,7 +65,7 @@ const chartContainer = ref(null);
 const showBollingerBands = ref(true);
 
 let smaSeries = null;
-let emaSeries = null;
+let emaSeries = {};
 const showSMA = ref(false);
 const showEMA = ref(false);
 
@@ -80,6 +95,7 @@ let resistanceLine;
 const showSupport = ref(false);
 const showResistance = ref(false);
 
+const selectedTimeFrame = ref('5m');
 const toggleSupport = () => {
     showSupport.value = !showSupport.value;
 };
@@ -116,14 +132,31 @@ function formatDateToYYYYMMDD(date) {
     return `${year}-${month}-${day}`;
 }
 
+const addEMA = (formattedData, period = 14, color = 'rgba(255, 0, 7, 1)') => {
+    let inputEMA7 = {
+        values: formattedData.map((data) => data.close),
+        period: period,
+    };
+    let ema = EMA.calculate(inputEMA7);
+
+    let emaData = ema.map((value, index) => ({ time: formattedData[index + inputEMA7.period - 1].time, value: value }));
+
+    if (emaSeries[period]) {
+        emaSeries[period].setData(emaData);
+    } else {
+        emaSeries[period] = chart.addLineSeries({ color, lineWidth: 1 });
+        emaSeries[period].setData(emaData);
+    }
+}
+
 const formatChartData = (data) => {
     if (!data) return [];
     console.log("🚀 ~ file: TradingChart.vue:103 ~ formatChartData ~ data:", data)
     const result = []
     data.forEach((row) => {
         result.push({
-            // time: row[0],
-            time: formatDateToYYYYMMDD(new Date(row[0])),
+            time: row[0],
+            // time: formatDateToYYYYMMDD(new Date(row[0])),
             open: parseFloat(row[1]),
             high: parseFloat(row[2]),
             low: parseFloat(row[3]),
@@ -166,7 +199,7 @@ watchEffect(async () => {
     // const pairs = Array.from(store.pairs);
     const symbolPair = store.pairs.get(props.inputSymbol)
     console.log("🚀 ~ file: TradingChart.vue:144 ~ watchEffect ~ APEUSDT:", symbolPair)
-    const seriesValues = symbolPair.ohlcvs['1d'];
+    const seriesValues = symbolPair.ohlcvs[selectedTimeFrame.value];
     console.log("🚀 ~ file: TradingChart.vue:144 ~ watchEffect ~ seriesValues:", seriesValues)
     const firstSerie = seriesValues;
     if (!firstSerie || !chart) return;
@@ -176,18 +209,7 @@ watchEffect(async () => {
 
     console.log('🚀 ~ file: TradingChart.vue:108 ~ watchEffect ~ formattedData:', formattedData);
     if (candlestickSeries) {
-        // candlestickSeries.setData([
-        //     { time: '2018-12-22', open: 75.16, high: 82.84, low: 36.16, close: 45.72 },
-        //     { time: '2018-12-23', open: 45.12, high: 53.90, low: 45.12, close: 48.09 },
-        //     { time: '2018-12-24', open: 60.71, high: 60.71, low: 53.39, close: 59.29 },
-        //     { time: '2018-12-25', open: 68.26, high: 68.26, low: 59.04, close: 60.50 },
-        //     { time: '2018-12-26', open: 67.71, high: 105.85, low: 66.67, close: 91.04 },
-        //     { time: '2018-12-27', open: 91.04, high: 121.40, low: 82.70, close: 111.40 },
-        //     { time: '2018-12-28', open: 111.51, high: 142.83, low: 103.34, close: 131.25 },
-        //     { time: '2018-12-29', open: 131.33, high: 151.17, low: 77.68, close: 96.43 },
-        //     { time: '2018-12-30', open: 106.33, high: 110.20, low: 90.39, close: 98.10 },
-        //     { time: '2018-12-31', open: 109.87, high: 114.69, low: 85.66, close: 111.26 },
-        // ]);
+
         candlestickSeries.setData(formattedData);
 
     }
@@ -216,7 +238,7 @@ watchEffect(async () => {
         if (middleBandSeries) {
             middleBandSeries.setData(middleBand);
         } else {
-            middleBandSeries = chart.addLineSeries({ color: 'rgba(4, 111, 232, 1)', lineWidth: 1 });
+            middleBandSeries = chart.addLineSeries({ color: '#2c3e50', lineWidth: 1 });
             middleBandSeries.setData(middleBand);
         }
 
@@ -288,24 +310,18 @@ watchEffect(async () => {
     }
 
     if (showEMA.value) {
-        let inputEMA = {
-            values: formattedData.map((data) => data.close),
-            period: 14,
-        };
-        let ema = EMA.calculate(inputEMA);
+        addEMA(formattedData, 7, '#f1c40f')
+        addEMA(formattedData, 14, '#2980b9')
+        addEMA(formattedData, 28, '#8e44ad')
 
-        let emaData = ema.map((value, index) => ({ time: formattedData[index + inputEMA.period - 1].time, value: value }));
-
-        if (emaSeries) {
-            emaSeries.setData(emaData);
-        } else {
-            emaSeries = chart.addLineSeries({ color: 'rgba(255, 0, 7, 1)', lineWidth: 1 });
-            emaSeries.setData(emaData);
-        }
     } else {
-        if (emaSeries) {
-            chart.removeSeries(emaSeries);
-            emaSeries = null;
+        const series = Object.values(emaSeries)
+        if (series.length > 0) {
+            series.forEach((emaSerie) => {
+
+                chart.removeSeries(emaSerie);
+            })
+            emaSeries = {};
         }
     }
 
@@ -484,8 +500,13 @@ onMounted(async () => {
             rightPriceScale: {
                 borderColor: 'rgba(197, 203, 206, 1)',
             },
+            // timeScale: {
+            //     borderColor: 'rgba(197, 203, 206, 1)',
+            // },
             timeScale: {
-                borderColor: 'rgba(197, 203, 206, 1)',
+                timeVisible: true,
+                // Use timeFormat to format the date as per your preference
+                timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
             },
         });
     } else {
@@ -529,15 +550,30 @@ onMounted(async () => {
     chart = createChart(chartContainer.value, {
         width: chartContainer.value.offsetWidth,
         height: chartContainer.value.offsetHeight,
+        timeScale: {
+            timeVisible: true,
+            // Use timeFormat to format the date as per your preference
+            timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
+        },
     });
     rsiChart = createChart(rsiChartContainer.value, {
         width: rsiChartContainer.value.offsetWidth,
         height: rsiChartContainer.value.offsetHeight,
+        timeScale: {
+            timeVisible: true,
+            // Use timeFormat to format the date as per your preference
+            timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
+        },
     });
 
     volumeChart = createChart(volumeChartContainer.value, {
         width: volumeChartContainer.value.offsetWidth,
         height: volumeChartContainer.value.offsetHeight,
+        timeScale: {
+            timeVisible: true,
+            // Use timeFormat to format the date as per your preference
+            timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
+        },
     });
     volumeSeries = volumeChart.addHistogramSeries({ color: 'rgba(4, 232, 36, 0.8)', priceFormat: { type: 'volume' } });
 

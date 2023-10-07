@@ -5,6 +5,7 @@
     "@supabase/supabase-js": "^2.33.2",
     "lightweight-charts": "^4.1.0",
     "node-fetch": "^3.3.2",
+    "quasar-app-extension-onesignal": "^0.3.0",
     "technicalindicators": "^3.1.0"
   }
 }
