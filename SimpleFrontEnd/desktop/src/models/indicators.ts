@@ -1,6 +1,7 @@
 import { SMA, EMA, RSI, MACD } from 'technicalindicators';
 
 
+
 const sma = (arr, windowSize) => {
     const result = [];
     for (let i = windowSize - 1; i < arr.length; i++) {
@@ -147,6 +148,42 @@ export const calculateRSI = async (formattedData) => {
 };
 
 
+const findFractals = (data) => {
+    const bullishFractals = [];
+    const bearishFractals = [];
+
+    // Starting from the 2nd index because we need two preceding candles to evaluate
+    // Ending at length - 2 because we need two following candles to evaluate
+    for (let i = 2; i < data.length - 2; i++) {
+        const [prevPrevCandle, prevCandle, currentCandle, nextCandle, nextNextCandle] = data.slice(i - 2, i + 3);
+
+        // Bullish Fractal: a low preceded and followed by higher lows
+        if (
+            currentCandle.low < prevCandle.low &&
+            currentCandle.low < prevPrevCandle.low &&
+            currentCandle.low < nextCandle.low &&
+            currentCandle.low < nextNextCandle.low
+        ) {
+            bullishFractals.push({ time: currentCandle.time, value: currentCandle.low });
+        }
+
+        // Bearish Fractal: a high preceded and followed by lower highs
+        if (
+            currentCandle.high > prevCandle.high &&
+            currentCandle.high > prevPrevCandle.high &&
+            currentCandle.high > nextCandle.high &&
+            currentCandle.high > nextNextCandle.high
+        ) {
+            bearishFractals.push({ time: currentCandle.time, value: currentCandle.high });
+        }
+    }
+
+    return { bullishFractals, bearishFractals };
+};
+
+
+
+
 
 export default {
     calculateBollingerBands,
@@ -154,5 +191,6 @@ export default {
     calculateMACD,
     calculateVolumes,
     calculateEMA,
-    calculateRSI
+    calculateRSI,
+    findFractals
 }

@@ -58,7 +58,6 @@ app.get('/api/leverage/fullData/:symbol/:timeframe', async (req: Request, res: R
                 result[key] = value[timeframe]
             }
         })
-
         res.status(200).json(result);
     } catch (error) {
         console.error(error);

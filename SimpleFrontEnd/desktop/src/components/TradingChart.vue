@@ -85,6 +85,11 @@ const showMACD = ref(false);
 const macdChartContainer = ref(null);
 let macdChart = null;
 const chartWidth = ref(null);
+let bullishFractalSeries = null;
+let bearishFractalSeries = null;
+let bullishFractalLines = [];
+let bearishFractalLines = [];
+
 
 // const supportData = store.supportData[0];
 // const resistanceData = store.resistanceData[0];
@@ -201,6 +206,8 @@ const createCandleStickChart = async () => {
         color: "red",
         lineWidth: 3,
     });
+    bullishFractalSeries = candlestickChart.addLineSeries({ color: 'green', lineWidth: 1, lineStyle: 1 });
+    bearishFractalSeries = candlestickChart.addLineSeries({ color: 'red', lineWidth: 1, lineStyle: 1 });
 }
 
 const createRSIChart = async () => {
@@ -311,196 +318,196 @@ const updateData = async (symbolPair) => {
     formattedData = await formatOHLCVForChartData(firstSerie);
 }
 
-const updateCharts = async (inputData = formattedData) => {
-    if (!formattedData) return;
-    if (candlestickSeries) {
-        candlestickSeries.setData(formattedData);
-    }
-    if (showBollingerBands.value) {
+// const updateCharts = async (inputData = formattedData) => {
+//     if (!formattedData) return;
+//     if (candlestickSeries) {
+//         candlestickSeries.setData(formattedData);
+//     }
+//     if (showBollingerBands.value) {
 
-        const { upperBand, lowerBand, middleBand } = await indicators.calculateBollingerBands(formattedData, 20)
+//         const { upperBand, lowerBand, middleBand } = await indicators.calculateBollingerBands(formattedData, 20)
 
-        if (upperBandSeries) {
-            upperBandSeries.setData(upperBand);
-        } else {
-            upperBandSeries = candlestickChart.addLineSeries({ color: 'rgba(4, 111, 232, 1)', lineWidth: 1 });
-            upperBandSeries.setData(upperBand);
-        }
+//         if (upperBandSeries) {
+//             upperBandSeries.setData(upperBand);
+//         } else {
+//             upperBandSeries = candlestickChart.addLineSeries({ color: 'rgba(4, 111, 232, 1)', lineWidth: 1 });
+//             upperBandSeries.setData(upperBand);
+//         }
 
-        if (middleBandSeries) {
-            middleBandSeries.setData(middleBand);
-        } else {
-            middleBandSeries = candlestickChart.addLineSeries({ color: '#2c3e50', lineWidth: 1 });
-            middleBandSeries.setData(middleBand);
-        }
+//         if (middleBandSeries) {
+//             middleBandSeries.setData(middleBand);
+//         } else {
+//             middleBandSeries = candlestickChart.addLineSeries({ color: '#2c3e50', lineWidth: 1 });
+//             middleBandSeries.setData(middleBand);
+//         }
 
-        if (lowerBandSeries) {
-            lowerBandSeries.setData(lowerBand);
-        } else {
-            lowerBandSeries = candlestickChart.addLineSeries({ color: 'rgba(4, 111, 232, 1)', lineWidth: 1 });
-            lowerBandSeries.setData(lowerBand);
-        }
-    } else {
-        if (upperBandSeries) {
-            candlestickChart.removeSeries(upperBandSeries);
-            upperBandSeries = null;
-        }
+//         if (lowerBandSeries) {
+//             lowerBandSeries.setData(lowerBand);
+//         } else {
+//             lowerBandSeries = candlestickChart.addLineSeries({ color: 'rgba(4, 111, 232, 1)', lineWidth: 1 });
+//             lowerBandSeries.setData(lowerBand);
+//         }
+//     } else {
+//         if (upperBandSeries) {
+//             candlestickChart.removeSeries(upperBandSeries);
+//             upperBandSeries = null;
+//         }
 
-        if (middleBandSeries) {
-            candlestickChart.removeSeries(middleBandSeries);
-            middleBandSeries = null;
-        }
+//         if (middleBandSeries) {
+//             candlestickChart.removeSeries(middleBandSeries);
+//             middleBandSeries = null;
+//         }
 
-        if (lowerBandSeries) {
-            candlestickChart.removeSeries(lowerBandSeries);
-            lowerBandSeries = null;
-        }
-    }
+//         if (lowerBandSeries) {
+//             candlestickChart.removeSeries(lowerBandSeries);
+//             lowerBandSeries = null;
+//         }
+//     }
 
-    if (showRSI.value) {
-        if (!rsiChart) {
-            await createRSIChart()
-        }
-        const { rsiData } = await indicators.calculateRSI(formattedData)
+//     if (showRSI.value) {
+//         if (!rsiChart) {
+//             await createRSIChart()
+//         }
+//         const { rsiData } = await indicators.calculateRSI(formattedData)
 
-        if (rsiSeries) {
-            rsiSeries.setData(rsiData);
-        } else {
-            rsiSeries = rsiChart.addLineSeries({ color: 'rgba(4, 232, 36, 1)', lineWidth: 1 });
-            rsiSeries.setData(rsiData);
-        }
-    } else {
-        if (rsiSeries) {
-            rsiChart.removeSeries(rsiSeries);
-            rsiSeries = null;
-        }
-    }
+//         if (rsiSeries) {
+//             rsiSeries.setData(rsiData);
+//         } else {
+//             rsiSeries = rsiChart.addLineSeries({ color: 'rgba(4, 232, 36, 1)', lineWidth: 1 });
+//             rsiSeries.setData(rsiData);
+//         }
+//     } else {
+//         if (rsiSeries) {
+//             rsiChart.removeSeries(rsiSeries);
+//             rsiSeries = null;
+//         }
+//     }
 
-    if (showSMA.value) {
-        if (!macdChart) {
-            await createMACDChart()
-        }
-        const smaData = await indicators.calculateSMA(formattedData)
-        if (smaSeries) {
-            smaSeries.setData(smaData);
-        } else {
-            smaSeries = candlestickChart.addLineSeries({ color: 'rgba(0, 255, 255, 1)', lineWidth: 1 });
-            smaSeries.setData(smaData);
-        }
-    } else {
-        if (smaSeries) {
-            candlestickChart.removeSeries(smaSeries);
-            smaSeries = null;
-        }
-    }
+//     if (showSMA.value) {
+//         if (!macdChart) {
+//             await createMACDChart()
+//         }
+//         const smaData = await indicators.calculateSMA(formattedData)
+//         if (smaSeries) {
+//             smaSeries.setData(smaData);
+//         } else {
+//             smaSeries = candlestickChart.addLineSeries({ color: 'rgba(0, 255, 255, 1)', lineWidth: 1 });
+//             smaSeries.setData(smaData);
+//         }
+//     } else {
+//         if (smaSeries) {
+//             candlestickChart.removeSeries(smaSeries);
+//             smaSeries = null;
+//         }
+//     }
 
-    if (showEMA.value) {
-        addEMA(formattedData, 7, '#f1c40f')
-        addEMA(formattedData, 14, '#2980b9')
-        addEMA(formattedData, 28, '#8e44ad')
+//     if (showEMA.value) {
+//         addEMA(formattedData, 7, '#f1c40f')
+//         addEMA(formattedData, 14, '#2980b9')
+//         addEMA(formattedData, 28, '#8e44ad')
 
-    } else {
-        const series = Object.values(emaSeries)
-        if (series.length > 0) {
-            series.forEach((emaSerie) => {
+//     } else {
+//         const series = Object.values(emaSeries)
+//         if (series.length > 0) {
+//             series.forEach((emaSerie) => {
 
-                candlestickChart.removeSeries(emaSerie);
-            })
-            emaSeries = {};
-        }
-    }
+//                 candlestickChart.removeSeries(emaSerie);
+//             })
+//             emaSeries = {};
+//         }
+//     }
 
-    if (showVolume.value) {
-        if (!volumeChart) {
-            await createVolumeChart()
-        }
-        const volumeData = await indicators.calculateVolumes(formattedData)
-        // console.log('🚀 ~ file: TradingChart.vue:250 ~ watchEffect ~ volumeData:', volumeData);
-        volumeSeries?.setData(volumeData);
-    } else {
-        volumeSeries?.setData([]); // set data to an empty array to clear the volume data
-    }
+//     if (showVolume.value) {
+//         if (!volumeChart) {
+//             await createVolumeChart()
+//         }
+//         const volumeData = await indicators.calculateVolumes(formattedData)
+//         // console.log('🚀 ~ file: TradingChart.vue:250 ~ watchEffect ~ volumeData:', volumeData);
+//         volumeSeries?.setData(volumeData);
+//     } else {
+//         volumeSeries?.setData([]); // set data to an empty array to clear the volume data
+//     }
 
-    if (showMACD.value) {
-        if (!macdChart) {
-            await createMACDChart()
-        }
-        const { macdData, signalData, histogramData } = await indicators.calculateMACD(formattedData)
+//     if (showMACD.value) {
+//         if (!macdChart) {
+//             await createMACDChart()
+//         }
+//         const { macdData, signalData, histogramData } = await indicators.calculateMACD(formattedData)
 
-        if (macdSeries) {
-            macdSeries.setData(macdData);
-        } else {
-            macdSeries = macdChart.addLineSeries({ color: 'rgba(4, 232, 36, 1)', lineWidth: 1 });
-            macdSeries.setData(macdData);
-        }
+//         if (macdSeries) {
+//             macdSeries.setData(macdData);
+//         } else {
+//             macdSeries = macdChart.addLineSeries({ color: 'rgba(4, 232, 36, 1)', lineWidth: 1 });
+//             macdSeries.setData(macdData);
+//         }
 
-        if (macdSignalSeries) {
-            macdSignalSeries.setData(signalData);
-        } else {
-            macdSignalSeries = macdChart.addLineSeries({ color: 'rgba(0, 123, 255, 1)', lineWidth: 1 });
-            macdSignalSeries.setData(signalData);
-        }
+//         if (macdSignalSeries) {
+//             macdSignalSeries.setData(signalData);
+//         } else {
+//             macdSignalSeries = macdChart.addLineSeries({ color: 'rgba(0, 123, 255, 1)', lineWidth: 1 });
+//             macdSignalSeries.setData(signalData);
+//         }
 
-        if (macdHistogramSeries) {
-            macdHistogramSeries.setData(histogramData);
-        } else {
-            macdHistogramSeries = macdChart.addHistogramSeries({
-                color: 'rgba(255, 193, 7, 0.8)',
-                priceFormat: { type: 'volume' },
-            });
-            macdHistogramSeries.setData(histogramData);
-        }
-    } else {
-        if (macdSeries) {
-            macdChart.removeSeries(macdSeries);
-            macdSeries = null;
-        }
+//         if (macdHistogramSeries) {
+//             macdHistogramSeries.setData(histogramData);
+//         } else {
+//             macdHistogramSeries = macdChart.addHistogramSeries({
+//                 color: 'rgba(255, 193, 7, 0.8)',
+//                 priceFormat: { type: 'volume' },
+//             });
+//             macdHistogramSeries.setData(histogramData);
+//         }
+//     } else {
+//         if (macdSeries) {
+//             macdChart.removeSeries(macdSeries);
+//             macdSeries = null;
+//         }
 
-        if (macdSignalSeries) {
-            macdChart.removeSeries(macdSignalSeries);
-            macdSignalSeries = null;
-        }
+//         if (macdSignalSeries) {
+//             macdChart.removeSeries(macdSignalSeries);
+//             macdSignalSeries = null;
+//         }
 
-        if (macdHistogramSeries) {
-            macdChart.removeSeries(macdHistogramSeries);
-            macdHistogramSeries = null;
-        }
-    }
+//         if (macdHistogramSeries) {
+//             macdChart.removeSeries(macdHistogramSeries);
+//             macdHistogramSeries = null;
+//         }
+//     }
 
-    const firstTimeValue = formattedData[0].time;
-    if (showSupport.value) {
-        store.supportData.forEach((support) => {
-            // console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ support:", support[4])
+//     // const firstTimeValue = formattedData[0].time;
+//     if (showSupport.value) {
+//         store.supportData.forEach((support) => {
+//             // console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ support:", support[4])
 
-            const supportLineData = formattedData.map((value) => ({
-                time: value.time,
-                value: Object.values(support)[3],
-                color: 'green',
-                lineWidth: 2,
-            }));
-            supportLineSeries.setData(supportLineData);
-        })
+//             const supportLineData = formattedData.map((value) => ({
+//                 time: value.time,
+//                 value: Object.values(support)[3],
+//                 color: 'green',
+//                 lineWidth: 2,
+//             }));
+//             supportLineSeries.setData(supportLineData);
+//         })
 
 
-    } else {
+//     } else {
 
-    }
+//     }
 
-    if (showResistance.value) {
-        store.resistanceData.forEach((resistance) => {
-            const resistanceLineData = formattedData.map((value) => ({
-                time: value.time,
-                value: Object.values(resistance)[3],
-                color: 'red',
-                lineWidth: 2,
-            }));;
-            resistanceLineSeries.setData(resistanceLineData);
-        })
+//     if (showResistance.value) {
+//         store.resistanceData.forEach((resistance) => {
+//             const resistanceLineData = formattedData.map((value) => ({
+//                 time: value.time,
+//                 value: Object.values(resistance)[3],
+//                 color: 'red',
+//                 lineWidth: 2,
+//             }));;
+//             resistanceLineSeries.setData(resistanceLineData);
+//         })
 
-    } else {
+//     } else {
 
-    }
-}
+//     }
+// }
 const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
     const symbolPair = store.pairs.get(symbolPairName)
     console.log("🚀 ~ file: TradingChart.vue:495 ~ updateChartsFromPair ~ symbolPair:", symbolPair, symbolPairName)
@@ -662,36 +669,39 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
     }
 
     const firstTimeValue = formattedData[0].time;
-    if (showSupport.value) {
-        store.supportData.forEach((support) => {
-            // console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ support:", support[4])
+    if (showSupport.value || showResistance.value) {
+        const { bullishFractals, bearishFractals } = indicators.findFractals(formattedData);
 
-            const supportLineData = formattedData.map((value) => ({
-                time: value.time,
-                value: Object.values(support)[3],
+        // Removing old fractal lines
+        bullishFractalLines.forEach(line => candlestickChart.removeSeries(line));
+        bearishFractalLines.forEach(line => candlestickChart.removeSeries(line));
+
+        bullishFractalLines = [];
+        bearishFractalLines = [];
+
+        // Adding new fractal lines
+        bullishFractals.forEach(fractal => {
+            const line = candlestickChart.addLineSeries({
                 color: 'green',
-                lineWidth: 2,
-            }));
-            supportLineSeries.setData(supportLineData);
-        })
+                lineWidth: 1,
+                lineStyle: 0,  // Solid line
+            });
+            line.setData([{ time: fractal.time, value: fractal.value }, { time: formattedData[formattedData.length - 1].time, value: fractal.value }]);
+            bullishFractalLines.push(line);
+        });
 
-
-    } else {
-
-    }
-
-    if (showResistance.value) {
-        store.resistanceData.forEach((resistance) => {
-            const resistanceLineData = formattedData.map((value) => ({
-                time: value.time,
-                value: Object.values(resistance)[3],
+        bearishFractals.forEach(fractal => {
+            const line = candlestickChart.addLineSeries({
                 color: 'red',
-                lineWidth: 2,
-            }));;
-            resistanceLineSeries.setData(resistanceLineData);
-        })
-
+                lineWidth: 1,
+                lineStyle: 0,  // Solid line
+            });
+            line.setData([{ time: fractal.time, value: fractal.value }, { time: formattedData[formattedData.length - 1].time, value: fractal.value }]);
+            bearishFractalLines.push(line);
+        });
     } else {
+        bullishFractalLines.forEach(line => line.setData([]));
+        bearishFractalLines.forEach(line => line.setData([]));
 
     }
 }

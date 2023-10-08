@@ -87,9 +87,11 @@ export class TradingBot {
             }
 
             if (symbolData.rsi.has(timeframe)) {
-                const existingRsi = symbolData.rsi.get(timeframe).rsi;
-                const combinedRsi = existingRsi.concat(rsi);
-                symbolData.rsi.set(timeframe, combinedRsi.slice(-200)); // Only store the last 200 values
+                const existingRsi = symbolData.rsi.get(timeframe);
+                console.log("🚀 ~ file: bot.ts:91 ~ TradingBot ~ populateDataStoreForPair ~ existingRsi:", existingRsi)
+                const combinedRsi = existingRsi.rsi.concat(rsi);
+                const combinedRsiData = existingRsi.rsiData.concat(rsiData);
+                symbolData.rsi.set(timeframe, { rsi: combinedRsi.slice(-200), rsiData: combinedRsiData.slice(-200) }); // Only store the last 200 values
             } else {
                 symbolData.rsi.set(timeframe, { rsi, rsiData });
             }
