@@ -31,7 +31,7 @@ export const dataStore = defineStore('data', {
       // //   this.pairs.set(key, pairs[key]);
       // // });
       Object.entries(pairs).forEach(([key, value]) => {
-        console.log("🚀 ~ file: example-store.ts:34 ~ Object.entries ~ value:", key, value)
+        // console.log("🚀 ~ file: example-store.ts:34 ~ Object.entries ~ value:", key, value)
         if (!this.pairs.has(key)) {
           this.pairs.set(key, value)
         } else {

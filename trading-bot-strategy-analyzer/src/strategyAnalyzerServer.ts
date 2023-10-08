@@ -12,7 +12,7 @@ import { SERVER_DATA_URL } from './consts';
 
 import { analyzeData, fetchRSIAndCheckThreshold } from './strategyAnalyzer';
 import { sendSignalEmail } from './email';
-import { sendNofitication } from './notificationsSender';
+import { sendNotification } from './notificationsSender';
 
 const mode = process.env.MODE;
 
@@ -298,7 +298,7 @@ app.post('/api/test-email', async (req, res) => {
 });
 app.post('/api/test-notification', async (req, res) => {
     // Send the test email
-    await sendNofitication("Notification Test");
+    await sendNotification("Notification Test");
     res.status(200).json({ info: 'Complete' });
 });
 

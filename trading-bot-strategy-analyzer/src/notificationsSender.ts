@@ -1,8 +1,6 @@
 // const OneSignal = require('@onesignal/node-onesignal');
 import * as OneSignal from '@onesignal/node-onesignal';
 
-
-const USER_AUTH_KEY = 'OTg0NDQ4ZDMtZTc5My00NTBmLWE5NTAtMTdkNjFhMjA1Mzdl';
 const APP_ID = 'c9f90795-f921-4717-92b2-3dd1e9405b30';
 const REST_API_KEY = "NTA3Mjc0OGItYWUyNS00Y2M3LWJlMGMtZTRiZTI4YzQ2ZDY0"
 
@@ -30,6 +28,12 @@ export const sendNotification = async (message: string) => {
     notification.included_segments = ['All'];
     notification.contents = {
         en: message
+    };
+    notification.data = {
+        message
+    };
+    notification.custom_data = {
+        message
     };
     const { id } = await client.createNotification(notification);
     console.log("🚀 ~ file: notificationsSender.ts:35 ~ sendNofitication ~ id:", id)
