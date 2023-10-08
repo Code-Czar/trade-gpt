@@ -59,12 +59,11 @@ const macdChartContainer = ref(null);
 let macdChart = null;
 const chartWidth = ref(null);
 
-const supportData = store.supportData[0];
-const resistanceData = store.resistanceData[0];
+
 let supportLineSeries;
 let resistanceLineSeries;
-let supportLine;
-let resistanceLine;
+
+let formattedData = null;
 
 const showSupport = ref(false);
 const showResistance = ref(false);
@@ -80,26 +79,31 @@ const toggleResistance = () => {
 
 const toggleSMA = () => {
     showSMA.value = !showSMA.value;
+    updateCharts()
 };
 
 const toggleEMA = () => {
     showEMA.value = !showEMA.value;
+    updateCharts();
 };
 
 const toggleBollingerBands = () => {
     showBollingerBands.value = !showBollingerBands.value;
+    updateCharts()
 };
 
 const toggleVolumes = () => {
     showVolume.value = !showVolume.value;
     // console.log('🚀 ~ file: TradingChart.vue:66 ~ toggleVolumes ~ showVolume.value:', showVolume.value);
+    updateCharts();
 };
 
 const toggleMACD = () => {
     showMACD.value = !showMACD.value;
+    updateCharts();
 };
 
-const formatChartData = (data) => {
+const formatChartData = async (data) => {
     if (!data) return [];
     return data.map((datum) => ({
         time: datum[0],
@@ -132,18 +136,20 @@ const standardDeviation = (arr, windowSize, smaValues) => {
     return result;
 };
 
-watchEffect(async () => {
-    // const newDataValues = Object.values(store.data);
-    // const newData = newDataValues[newDataValues.length - 1];
-    // if (!newData) return;
-    const seriesValues = Object.values(store.data);
-    const firstSerie = seriesValues;
+const updateData = async (storeData) => {
+
+    console.log("🚀 ~ file: TradingChart.vue:140 ~ watchEffect ~ store.data:", store.data)
+    const firstSerie = await storeData;
     if (!firstSerie || !chart) return;
     // console.log('🚀 ~ file: TradingChart.vue:26 ~ watch ~ newData:', firstSerie);
 
-    let formattedData = formatChartData(firstSerie);
+    formattedData = await formatChartData(firstSerie);
+}
 
-    // console.log('🚀 ~ file: TradingChart.vue:108 ~ watchEffect ~ formattedData:', formattedData);
+const updateCharts = async () => {
+    if (! await formattedData) {
+        return;
+    }
     if (candlestickSeries) {
         candlestickSeries.setData(formattedData);
     }
@@ -387,8 +393,6 @@ watchEffect(async () => {
     }
 
     if (showResistance.value) {
-
-
         // console.log("🚀 ~ file: TradingChart.vue:399 ~ store.resistanceData.resistance.forEach ~ store.resistanceData:", store.resistanceData)
         store.resistanceData.forEach((resistance) => {
             // console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ resistance:", resistance[4])
@@ -408,7 +412,12 @@ watchEffect(async () => {
         //     resistanceLine = null;
         // }
     }
+}
 
+watchEffect(async () => {
+    const storeData = Object.values(store.data);
+    updateData(storeData);
+    updateCharts();
 });
 
 onMounted(async () => {

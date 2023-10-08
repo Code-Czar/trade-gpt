@@ -36,9 +36,8 @@ export const dataStore = defineStore('data', {
           this.pairs.set(key, value)
         } else {
           const existingPair = this.pairs.get(key)
-          existingPair.ohlcvs = value.ohlcvs
-          existingPair.rsi = value.rsi
-          this.pairs.set(key, existingPair)
+
+          this.pairs.set(key, { ...existingPair, ...value })
         }
       })
 

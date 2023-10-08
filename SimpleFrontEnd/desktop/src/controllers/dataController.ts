@@ -38,9 +38,11 @@ export const getRSILastData = async () => {
 
             for (const interval of timeframes) {
                 try {
-                    const rsi = dataStore().pairs.get(pair.name).rsi[interval];
+                    const rsi = dataStore().pairs.get(pair.name).rsi[interval].rsi;
+                    // console.log("🚀 ~ file: dataController.ts:42 ~ getRSILastData ~ rsi:", rsi)
                     if (rsi) {
                         const rsiValue = rsi[rsi.length - 1]
+                        // console.log("🚀 ~ file: dataController.ts:45 ~ getRSILastData ~ rsiValue:", rsiValue)
                         const rsiRounded = parseFloat(rsiValue.toFixed(2))
                         dataEntry[`rsi_${interval}`] = rsiRounded;
                         dataEntry[`maxLeverage`] = pair.leverage_filter.max_leverage;
@@ -61,8 +63,6 @@ export const getRSILastData = async () => {
                     // If the symbol doesn't exist, push a new entry
                     result.push(dataEntry);
                 }
-
-
             }
 
 
@@ -88,6 +88,7 @@ export const fetchRSIAndOHLCV = async (addToStore = true) => {
 
     const result = await fetch(`${SERVER_URL}/api/rsi/getValues`)
     let data = (await result.json())
+    console.log("🚀 ~ file: dataController.ts:91 ~ fetchRSIAndOHLCV ~ data:", data)
     dataStore().setAllPairs(data)
     data = null;
 

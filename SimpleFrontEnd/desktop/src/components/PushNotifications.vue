@@ -77,14 +77,14 @@ window.OneSignal.on('change', function (event) {
     console.log('Notification Body:', notificationBody);
 });
 
-// OneSignal.init({
-//     appId: APP_ID,
-//     safari_web_id: "web.onesignal.auto.613528e9-2930-4b07-a098-5a9518822d98",
-//     notifyButton: {
-//         enable: true,
-//     },
-//     // allowLocalhostAsSecureOrigin: true,
-// });
+OneSignal.init({
+    appId: APP_ID,
+    safari_web_id: "web.onesignal.auto.613528e9-2930-4b07-a098-5a9518822d98",
+    notifyButton: {
+        enable: true,
+    },
+    // allowLocalhostAsSecureOrigin: true,
+});
 
 
 onUnmounted(() => {

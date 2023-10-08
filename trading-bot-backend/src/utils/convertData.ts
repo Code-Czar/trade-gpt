@@ -46,13 +46,34 @@ export const stringifyMap = async (nestedMap: Map<string, any>) => {
     return obj;
 }
 
+export const convertPairToJSON = async (pair: any) => {
+    const keys = Object.keys(pair);
+    const obj = {};
+    keys.forEach((key) => {
+        const value = pair[key];
+        if (value instanceof Map) {
+            obj[key] = mapToObject(value);
+        } else if (Array.isArray(value)) {
+            obj[key] = value.map(val => (val instanceof Map ? mapToObject(val) : val));
+        } else if (typeof value === 'object' && value !== null) {
+            obj[key] = objectToObject(value);
+        } else {
+            obj[key] = value;
+        }
+    });
+    return obj;
+
+};
+
 export default {
     mapToObject,
-    stringifyMap
+    stringifyMap,
+    convertPairToJSON
 }
 module.exports = {
     mapToObject,
-    stringifyMap
+    stringifyMap,
+    convertPairToJSON
 }
 
 

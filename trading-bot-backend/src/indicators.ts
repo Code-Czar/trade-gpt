@@ -1,5 +1,22 @@
 import { SMA, EMA, RSI, MACD } from 'technicalindicators';
 
+export const formatOHLCVForChartData = async (data) => {
+    if (!data) return [];
+    const result = []
+    data.forEach((row) => {
+        result.push({
+            time: row[0],
+            // time: formatDateToYYYYMMDD(new Date(row[0])),
+            open: parseFloat(row[1]),
+            high: parseFloat(row[2]),
+            low: parseFloat(row[3]),
+            close: parseFloat(row[4]),
+            volume: parseFloat(row[5]),
+        })
+
+    })
+    return result;
+};
 
 const sma = (arr, windowSize) => {
     const result = [];
@@ -149,6 +166,7 @@ export const calculateRSI = async (formattedData) => {
 
 
 export default {
+    formatOHLCVForChartData,
     calculateBollingerBands,
     calculateSMA,
     calculateMACD,

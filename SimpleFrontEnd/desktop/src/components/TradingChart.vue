@@ -10,7 +10,7 @@
         <button @click="toggleMACD">{{ showMACD.value ? 'Hide' : 'Show' }} MACD</button>
         <button @click="toggleSupport">{{ showSupport.value ? 'Hide' : 'Show' }} Support</button>
         <button @click="toggleResistance">{{ showResistance.value ? 'Hide' : 'Show' }} Resistance</button>
-        <select v-model="selectedTimeFrame">
+        <select v-model="selectedTimeFrame" @change="() => updateChartsFromPair()">
             <option value="1m">1m</option>
             <option value="5m">5m</option>
             <option value="15m">15m</option>
@@ -95,10 +95,12 @@ let resistanceLine;
 
 const showSupport = ref(false);
 const showResistance = ref(false);
+let formattedData = null;
 
 const selectedTimeFrame = ref('5m');
 const toggleSupport = () => {
     showSupport.value = !showSupport.value;
+    updateChartsFromPair();
 };
 
 const toggleResistance = () => {
@@ -108,23 +110,28 @@ const toggleResistance = () => {
 
 const toggleSMA = () => {
     showSMA.value = !showSMA.value;
+    updateChartsFromPair();
 };
 
 const toggleEMA = () => {
     showEMA.value = !showEMA.value;
+    updateChartsFromPair();
 };
 
 const toggleBollingerBands = () => {
     showBollingerBands.value = !showBollingerBands.value;
+    updateChartsFromPair();
 };
 
 const toggleVolumes = () => {
     showVolume.value = !showVolume.value;
+    updateChartsFromPair();
     // console.log('🚀 ~ file: TradingChart.vue:66 ~ toggleVolumes ~ showVolume.value:', showVolume.value);
 };
 
 const toggleMACD = () => {
     showMACD.value = !showMACD.value;
+    updateChartsFromPair();
 };
 function formatDateToYYYYMMDD(date) {
     const year = date.getFullYear();
@@ -143,8 +150,18 @@ const addEMA = async (formattedData, period = 14, color = 'rgba(255, 0, 7, 1)') 
         emaSeries[period].setData(emaData);
     }
 }
+const addEMAFromData = async (emaData, period = 14, color = 'rgba(255, 0, 7, 1)') => {
 
-const formatChartData = async (data) => {
+
+    if (emaSeries[period]) {
+        emaSeries[period].setData(emaData);
+    } else {
+        emaSeries[period] = candlestickChart.addLineSeries({ color, lineWidth: 1 });
+        emaSeries[period].setData(emaData);
+    }
+}
+
+const formatOHLCVForChartData = async (data) => {
     if (!data) return [];
     const result = []
     data.forEach((row) => {
@@ -285,16 +302,17 @@ const createMACDChart = async () => {
     });
 }
 
-
-watchEffect(async () => {
-    if (store.pairs.size === 0) return;
-    const symbolPair = store.pairs.get(props.inputSymbol)
+const updateData = async (symbolPair) => {
+    if (!symbolPair) return;
     const seriesValues = symbolPair.ohlcvs[selectedTimeFrame.value];
     const firstSerie = seriesValues;
     if (!firstSerie || !candlestickChart) return;
 
-    let formattedData = await formatChartData(firstSerie);
+    formattedData = await formatOHLCVForChartData(firstSerie);
+}
 
+const updateCharts = async (inputData = formattedData) => {
+    if (!formattedData) return;
     if (candlestickSeries) {
         candlestickSeries.setData(formattedData);
     }
@@ -482,8 +500,214 @@ watchEffect(async () => {
     } else {
 
     }
+}
+const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
+    const symbolPair = store.pairs.get(symbolPairName)
+    console.log("🚀 ~ file: TradingChart.vue:495 ~ updateChartsFromPair ~ symbolPair:", symbolPair, symbolPairName)
+    if (!formattedData) return;
+    if (candlestickSeries) {
+        candlestickSeries.setData(formattedData);
+    }
+    if (showBollingerBands.value) {
 
+        console.log("🚀 ~ file: TradingChart.vue:503 ~ updateChartsFromPair ~ symbolPair.bollingerBands:", symbolPair.bollingerBands)
+        const { upperBand, lowerBand, middleBand } = symbolPair.bollingerBands[selectedTimeFrame.value]
+
+        if (upperBandSeries) {
+            upperBandSeries.setData(upperBand);
+        } else {
+            upperBandSeries = candlestickChart.addLineSeries({ color: 'rgba(4, 111, 232, 1)', lineWidth: 1 });
+            upperBandSeries.setData(upperBand);
+        }
+
+        if (middleBandSeries) {
+            middleBandSeries.setData(middleBand);
+        } else {
+            middleBandSeries = candlestickChart.addLineSeries({ color: '#2c3e50', lineWidth: 1 });
+            middleBandSeries.setData(middleBand);
+        }
+
+        if (lowerBandSeries) {
+            lowerBandSeries.setData(lowerBand);
+        } else {
+            lowerBandSeries = candlestickChart.addLineSeries({ color: 'rgba(4, 111, 232, 1)', lineWidth: 1 });
+            lowerBandSeries.setData(lowerBand);
+        }
+    } else {
+        if (upperBandSeries) {
+            candlestickChart.removeSeries(upperBandSeries);
+            upperBandSeries = null;
+        }
+
+        if (middleBandSeries) {
+            candlestickChart.removeSeries(middleBandSeries);
+            middleBandSeries = null;
+        }
+
+        if (lowerBandSeries) {
+            candlestickChart.removeSeries(lowerBandSeries);
+            lowerBandSeries = null;
+        }
+    }
+
+    if (showRSI.value) {
+        if (!rsiChart) {
+            await createRSIChart()
+        }
+        const rsiData = symbolPair.rsi[selectedTimeFrame.value].rsiData
+
+        if (rsiSeries) {
+            rsiSeries.setData(rsiData);
+        } else {
+            rsiSeries = rsiChart.addLineSeries({ color: 'rgba(4, 232, 36, 1)', lineWidth: 1 });
+            rsiSeries.setData(rsiData);
+        }
+    } else {
+        if (rsiSeries) {
+            rsiChart.removeSeries(rsiSeries);
+            rsiSeries = null;
+        }
+    }
+
+    if (showSMA.value) {
+        if (!macdChart) {
+            await createMACDChart()
+        }
+        const smaData = symbolPair.sma[selectedTimeFrame.value].smaData
+        if (smaSeries) {
+            smaSeries.setData(smaData);
+        } else {
+            smaSeries = candlestickChart.addLineSeries({ color: 'rgba(0, 255, 255, 1)', lineWidth: 1 });
+            smaSeries.setData(smaData);
+        }
+    } else {
+        if (smaSeries) {
+            candlestickChart.removeSeries(smaSeries);
+            smaSeries = null;
+        }
+    }
+
+    if (showEMA.value) {
+        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema7, 7, '#f1c40f')
+        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema14, 14, '#2980b9')
+        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema28, 28, '#2980b9')
+
+
+    } else {
+        const series = Object.values(emaSeries)
+        if (series.length > 0) {
+            series.forEach((emaSerie) => {
+
+                candlestickChart.removeSeries(emaSerie);
+            })
+            emaSeries = {};
+        }
+    }
+
+    if (showVolume.value) {
+        if (!volumeChart) {
+            await createVolumeChart()
+        }
+        const volumeData = symbolPair.volumes[selectedTimeFrame.value]
+        // console.log('🚀 ~ file: TradingChart.vue:250 ~ watchEffect ~ volumeData:', volumeData);
+        volumeSeries?.setData(volumeData);
+    } else {
+        volumeSeries?.setData([]); // set data to an empty array to clear the volume data
+    }
+
+    if (showMACD.value) {
+        if (!macdChart) {
+            await createMACDChart()
+        }
+        const { macdData, signalData, histogramData } = symbolPair.macd[selectedTimeFrame.value]
+
+        if (macdSeries) {
+            macdSeries.setData(macdData);
+        } else {
+            macdSeries = macdChart.addLineSeries({ color: 'rgba(4, 232, 36, 1)', lineWidth: 1 });
+            macdSeries.setData(macdData);
+        }
+
+        if (macdSignalSeries) {
+            macdSignalSeries.setData(signalData);
+        } else {
+            macdSignalSeries = macdChart.addLineSeries({ color: 'rgba(0, 123, 255, 1)', lineWidth: 1 });
+            macdSignalSeries.setData(signalData);
+        }
+
+        if (macdHistogramSeries) {
+            macdHistogramSeries.setData(histogramData);
+        } else {
+            macdHistogramSeries = macdChart.addHistogramSeries({
+                color: 'rgba(255, 193, 7, 0.8)',
+                priceFormat: { type: 'volume' },
+            });
+            macdHistogramSeries.setData(histogramData);
+        }
+    } else {
+        if (macdSeries) {
+            macdChart.removeSeries(macdSeries);
+            macdSeries = null;
+        }
+
+        if (macdSignalSeries) {
+            macdChart.removeSeries(macdSignalSeries);
+            macdSignalSeries = null;
+        }
+
+        if (macdHistogramSeries) {
+            macdChart.removeSeries(macdHistogramSeries);
+            macdHistogramSeries = null;
+        }
+    }
+
+    const firstTimeValue = formattedData[0].time;
+    if (showSupport.value) {
+        store.supportData.forEach((support) => {
+            // console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ support:", support[4])
+
+            const supportLineData = formattedData.map((value) => ({
+                time: value.time,
+                value: Object.values(support)[3],
+                color: 'green',
+                lineWidth: 2,
+            }));
+            supportLineSeries.setData(supportLineData);
+        })
+
+
+    } else {
+
+    }
+
+    if (showResistance.value) {
+        store.resistanceData.forEach((resistance) => {
+            const resistanceLineData = formattedData.map((value) => ({
+                time: value.time,
+                value: Object.values(resistance)[3],
+                color: 'red',
+                lineWidth: 2,
+            }));;
+            resistanceLineSeries.setData(resistanceLineData);
+        })
+
+    } else {
+
+    }
+}
+
+
+watchEffect(async () => {
+    console.log("🚀 ~ file: TradingChart.vue:497 ~ watchEffect ~ store.pairs:", store.pairs)
+    if (store.pairs.size === 0) return;
+    const symbolPair = store.pairs.get(props.inputSymbol)
+    console.log("🚀 ~ file: TradingChart.vue:693 ~ watchEffect ~ symbolPair:", symbolPair, props.inputSymbol)
+    if (!symbolPair) return;
+    updateData(symbolPair);
+    updateChartsFromPair();
 });
+
+
 
 
 
