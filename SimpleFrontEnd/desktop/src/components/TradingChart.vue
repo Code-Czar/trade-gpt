@@ -91,6 +91,9 @@ let bullishFractalLines = [];
 let bearishFractalLines = [];
 let currentSymbolPair = null;
 let emaMarkersSeries = null;
+let uptrendLineSeries = null;
+let downtrendLineSeries = null;
+
 
 
 // const supportData = store.supportData[0];
@@ -115,8 +118,6 @@ function formatDateToYYYYMMDD(date) {
 
 const addEMA = async (formattedData, period = 14, color = 'rgba(255, 0, 7, 1)') => {
     const { emaData } = await indicators.calculateEMA(formattedData, period)
-    console.log("🚀 ~ file: TradingChart.vue:118 ~ addEMA ~ emaData:", emaData)
-
     if (emaSeries[period]) {
         emaSeries[period].setData(emaData);
     } else {
@@ -125,25 +126,114 @@ const addEMA = async (formattedData, period = 14, color = 'rgba(255, 0, 7, 1)') 
     }
 }
 
+const findPeaksAndTroughs = (data) => {
+    const peaks = [];
+    const troughs = [];
+    for (let i = 1; i < data.length - 1; i++) {
+        if (data[i].high > data[i - 1].high && data[i].high > data[i + 1].high) {
+            peaks.push(data[i]);
+        } else if (data[i].low < data[i - 1].low && data[i].low < data[i + 1].low) {
+            troughs.push(data[i]);
+        }
+    }
+    peaks.push(data[data.length - 1]);
+    troughs.push(data[data.length - 1]);
+    return { peaks, troughs };
+}
+
+
+
+const calculateSlope = (point1, point2) => {
+    return (point2.value - point1.value) / (point2.time - point1.time);
+};
+
+const identifyAndMarkReversals = (points, trendBand = "upper") => {
+    console.log("🚀 ~ file: TradingChart.vue:149 ~ identifyAndMarkReversals ~ points:", points)
+    if (points.length < 3) return; // Need at least 3 points to identify a reversal
+    const markers = [];
+
+    for (let i = 1; i < points.length - 1; i++) {
+        const slope1 = calculateSlope(points[i - 1], points[i]);
+        const slope2 = calculateSlope(points[i], points[i + 1]);
+
+        // Check for reversal
+        if (Math.sign(slope1) !== Math.sign(slope2)) {
+            // Reversal found, add marker
+            if (trendBand === "upper") {
+                markers.push({
+                    time: points[i].time,
+                    position: 'aboveBar',
+                    color: 'rgba(255, 0, 0, 1)',
+                    shape: 'circle',
+                    text: 'R - upper'
+                });
+            }
+            else if (trendBand === "lower") {
+
+                markers.push({
+                    time: points[i].time,
+                    position: 'belowBar',
+                    color: 'rgba(0, 0, 255, 1)',
+                    shape: 'circle',
+                    text: 'R - lower'
+                });
+            }
+
+        }
+    }
+    return markers
+
+};
+
+
+
+
+const drawTrendLines = (peaks, troughs) => {
+    // Example of drawing a line between two points
+    // The lineSeries.setData method accepts an array of points to draw lines between
+    uptrendLineSeries = candlestickChart.addLineSeries({ color: 'green', lineWidth: 2 });
+    downtrendLineSeries = candlestickChart.addLineSeries({ color: 'red', lineWidth: 2 });
+
+    // Here we're taking two consecutive troughs to draw an uptrend line
+    const markers = {}
+    if (troughs.length > 1) {
+        const mappedTroughs = troughs.map((trough) => ({ time: trough.time, value: trough.low }))
+        uptrendLineSeries.setData(
+            mappedTroughs
+
+        );
+        markers.lowerMarkers = identifyAndMarkReversals(mappedTroughs, 'lower');
+        console.log("🚀 ~ file: TradingChart.vue:199 ~ drawTrendLines ~ troughs:", troughs)
+
+    }
+
+    // And two consecutive peaks to draw a downtrend line
+    if (peaks.length > 1) {
+        const mappedPeaks = peaks.map((peak) => ({ time: peak.time, value: peak.high }));
+        downtrendLineSeries.setData(
+            mappedPeaks
+        );
+        // downtrendLineSeries.setData([
+        //     { time: peaks[0].time, value: peaks[0].high },
+        //     { time: peaks[1].time, value: peaks[1].high },
+        // ]);
+        console.log("🚀 ~ file: TradingChart.vue:197 ~ drawTrendLines ~ peaks:", peaks)
+        markers.higherMarkers = identifyAndMarkReversals(mappedPeaks, 'upper');
+    }
+    candlestickSeries.setMarkers([...markers.higherMarkers, ...markers.lowerMarkers]);
+};
+
+
+
+
+
 const addEMASignals = (formattedData, ema28Data, period = 28) => {
 
     const emaSignals = [];
     const emaData = ema28Data//.map((value, index) => ({ time: formattedData[index + period - 1].time, value: value.value }));
-    console.log("🚀 ~ file: TradingChart.vue:132 ~ addEMASignals ~ emaData:", emaData)
-
     formattedData.forEach((dataPoint, index) => {
-        // const emaData = ema28Data//.map((value, index) => ({ time: formattedData[index + period - 1].time, value: value.value }));
-        // console.log("🚀 ~ file: TradingChart.vue:131 ~ formattedData.forEach ~ ema28Data[index]:", dataPoint, emaData[index])
-        // if (dataPoint.close < emaData[index]?.value) {
-        //     emaSignals.push({
-        //         time: dataPoint.time,
-        //         value: dataPoint.low,
-        //         color: 'rgba(255, 0, 0, 1)',  // Red color for the symbol
-        //     });
-        // }
-        console.log("🚀 ~ file: TradingChart.vue:145 ~ formattedData.forEach ~ index:", index, period - 1, emaData.length, formattedData.length)
         if (index < period - 1) return;
-        // if (index >= emaData.length) return;  // Skip where EMA data is not available
+
 
         if (dataPoint.close < emaData[index - period + 1].value) {
             emaSignals.push({
@@ -153,8 +243,6 @@ const addEMASignals = (formattedData, ema28Data, period = 28) => {
             });
         }
     });
-
-    console.log("🚀 ~ file: TradingChart.vue:129 ~ addEMASignals ~ emaSignals:", emaSignals)
     if (!emaMarkersSeries) {
         emaMarkersSeries =
             candlestickChart.addCandlestickSeries({
@@ -169,10 +257,6 @@ const addEMASignals = (formattedData, ema28Data, period = 28) => {
         shape: 'arrowUp',
         text: 'Buy @ ' + Math.floor(emaData.value - 2),
     }))
-
-    console.log("🚀 ~ file: TradingChart.vue:159 ~ addEMASignals ~ signals:", markers, emaSignals[emaSignals.length - 1].time)
-    console.log("🚀 ~ file: TradingChart.vue:166 ~ addEMASignals ~ emaMarkersSeries:", emaMarkersSeries, emaSignals[emaSignals.length - 1].time, formattedData[formattedData.length - 1].time)
-
     candlestickSeries.setMarkers(markers);
     candlestickChart.timeScale().fitContent();
 }
@@ -363,14 +447,23 @@ const updateData = async (symbolPair) => {
 
 const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
     const symbolPair = store.pairs.get(symbolPairName)
-    console.log("🚀 ~ file: TradingChart.vue:495 ~ updateChartsFromPair ~ symbolPair:", symbolPair, symbolPairName)
     if (!formattedData) return;
     if (candlestickSeries) {
+        if (uptrendLineSeries) {
+
+            candlestickChart.removeSeries(uptrendLineSeries);
+        }
+        if (downtrendLineSeries) {
+
+            candlestickChart.removeSeries(downtrendLineSeries);
+        }
+
         candlestickSeries.setData(formattedData);
+        const { peaks, troughs } = findPeaksAndTroughs(formattedData);
+        drawTrendLines(peaks, troughs);
+
     }
     if (showBollingerBands.value) {
-
-        console.log("🚀 ~ file: TradingChart.vue:503 ~ updateChartsFromPair ~ symbolPair.bollingerBands:", symbolPair.bollingerBands)
         const { upperBand, lowerBand, middleBand } = symbolPair.bollingerBands[selectedTimeFrame.value]
 
         if (upperBandSeries) {
@@ -475,7 +568,6 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
             await createVolumeChart()
         }
         const volumeData = symbolPair.volumes[selectedTimeFrame.value]
-        // console.log('🚀 ~ file: TradingChart.vue:250 ~ watchEffect ~ volumeData:', volumeData);
         volumeSeries?.setData(volumeData);
     } else {
         volumeSeries?.setData([]); // set data to an empty array to clear the volume data
@@ -567,10 +659,8 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
 
 
 watchEffect(async () => {
-    console.log("🚀 ~ file: TradingChart.vue:497 ~ watchEffect ~ store.pairs:", store.pairs)
     if (store.pairs.size === 0) return;
     currentSymbolPair = store.pairs.get(props.inputSymbol)
-    console.log("🚀 ~ file: TradingChart.vue:693 ~ watchEffect ~ symbolPair:", currentSymbolPair, props.inputSymbol)
     if (!currentSymbolPair) return;
     updateData(currentSymbolPair);
     updateChartsFromPair();
@@ -596,7 +686,6 @@ const toggleEMA = () => {
     showEMA.value = !showEMA.value;
     if (showEMA.value) {
         // If EMA is turned on, also check and add EMA signals
-        console.log("🚀 ~ file: TradingChart.vue:544 ~ toggleEMA ~ currentSymbolPair:", currentSymbolPair)
         const ema28Data = currentSymbolPair.ema[selectedTimeFrame.value].ema28;  // Replace with actual EMA 28 data
         addEMASignals(formattedData, ema28Data);
     } else {
@@ -618,7 +707,6 @@ const toggleBollingerBands = () => {
 const toggleVolumes = () => {
     showVolume.value = !showVolume.value;
     updateChartsFromPair();
-    // console.log('🚀 ~ file: TradingChart.vue:66 ~ toggleVolumes ~ showVolume.value:', showVolume.value);
 };
 
 const toggleMACD = () => {
