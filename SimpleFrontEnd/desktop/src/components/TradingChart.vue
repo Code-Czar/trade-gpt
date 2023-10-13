@@ -89,6 +89,8 @@ let bullishFractalSeries = null;
 let bearishFractalSeries = null;
 let bullishFractalLines = [];
 let bearishFractalLines = [];
+let currentSymbolPair = null;
+let emaMarkersSeries = null;
 
 
 // const supportData = store.supportData[0];
@@ -103,41 +105,7 @@ const showResistance = ref(false);
 let formattedData = null;
 
 const selectedTimeFrame = ref('5m');
-const toggleSupport = () => {
-    showSupport.value = !showSupport.value;
-    updateChartsFromPair();
-};
 
-const toggleResistance = () => {
-    showResistance.value = !showResistance.value;
-};
-
-
-const toggleSMA = () => {
-    showSMA.value = !showSMA.value;
-    updateChartsFromPair();
-};
-
-const toggleEMA = () => {
-    showEMA.value = !showEMA.value;
-    updateChartsFromPair();
-};
-
-const toggleBollingerBands = () => {
-    showBollingerBands.value = !showBollingerBands.value;
-    updateChartsFromPair();
-};
-
-const toggleVolumes = () => {
-    showVolume.value = !showVolume.value;
-    updateChartsFromPair();
-    // console.log('🚀 ~ file: TradingChart.vue:66 ~ toggleVolumes ~ showVolume.value:', showVolume.value);
-};
-
-const toggleMACD = () => {
-    showMACD.value = !showMACD.value;
-    updateChartsFromPair();
-};
 function formatDateToYYYYMMDD(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is zero-based
@@ -147,6 +115,7 @@ function formatDateToYYYYMMDD(date) {
 
 const addEMA = async (formattedData, period = 14, color = 'rgba(255, 0, 7, 1)') => {
     const { emaData } = await indicators.calculateEMA(formattedData, period)
+    console.log("🚀 ~ file: TradingChart.vue:118 ~ addEMA ~ emaData:", emaData)
 
     if (emaSeries[period]) {
         emaSeries[period].setData(emaData);
@@ -155,9 +124,61 @@ const addEMA = async (formattedData, period = 14, color = 'rgba(255, 0, 7, 1)') 
         emaSeries[period].setData(emaData);
     }
 }
+
+const addEMASignals = (formattedData, ema28Data, period = 28) => {
+
+    const emaSignals = [];
+    const emaData = ema28Data//.map((value, index) => ({ time: formattedData[index + period - 1].time, value: value.value }));
+    console.log("🚀 ~ file: TradingChart.vue:132 ~ addEMASignals ~ emaData:", emaData)
+
+    formattedData.forEach((dataPoint, index) => {
+        // const emaData = ema28Data//.map((value, index) => ({ time: formattedData[index + period - 1].time, value: value.value }));
+        // console.log("🚀 ~ file: TradingChart.vue:131 ~ formattedData.forEach ~ ema28Data[index]:", dataPoint, emaData[index])
+        // if (dataPoint.close < emaData[index]?.value) {
+        //     emaSignals.push({
+        //         time: dataPoint.time,
+        //         value: dataPoint.low,
+        //         color: 'rgba(255, 0, 0, 1)',  // Red color for the symbol
+        //     });
+        // }
+        console.log("🚀 ~ file: TradingChart.vue:145 ~ formattedData.forEach ~ index:", index, period - 1, emaData.length, formattedData.length)
+        if (index < period - 1) return;
+        // if (index >= emaData.length) return;  // Skip where EMA data is not available
+
+        if (dataPoint.close < emaData[index - period + 1].value) {
+            emaSignals.push({
+                time: dataPoint.time,
+                value: dataPoint.low,
+                color: 'rgba(255, 0, 0, 1)',
+            });
+        }
+    });
+
+    console.log("🚀 ~ file: TradingChart.vue:129 ~ addEMASignals ~ emaSignals:", emaSignals)
+    if (!emaMarkersSeries) {
+        emaMarkersSeries =
+            candlestickChart.addCandlestickSeries({
+                upColor: '#26a69a', downColor: '#ef5350', borderVisible: true,
+                wickUpColor: '#26a69a', wickDownColor: '#ef5350',
+            });
+    }
+    const markers = emaSignals.map((emaData) => ({
+        time: emaData.time,
+        position: 'belowBar',
+        color: '#2196F3',
+        shape: 'arrowUp',
+        text: 'Buy @ ' + Math.floor(emaData.value - 2),
+    }))
+
+    console.log("🚀 ~ file: TradingChart.vue:159 ~ addEMASignals ~ signals:", markers, emaSignals[emaSignals.length - 1].time)
+    console.log("🚀 ~ file: TradingChart.vue:166 ~ addEMASignals ~ emaMarkersSeries:", emaMarkersSeries, emaSignals[emaSignals.length - 1].time, formattedData[formattedData.length - 1].time)
+
+    candlestickSeries.setMarkers(markers);
+    candlestickChart.timeScale().fitContent();
+}
+
+
 const addEMAFromData = async (emaData, period = 14, color = 'rgba(255, 0, 7, 1)') => {
-
-
     if (emaSeries[period]) {
         emaSeries[period].setData(emaData);
     } else {
@@ -170,6 +191,7 @@ const formatOHLCVForChartData = async (data) => {
     if (!data) return [];
     const result = []
     data.forEach((row) => {
+        const date = new Date(row[0])
         result.push({
             time: row[0],
             // time: formatDateToYYYYMMDD(new Date(row[0])),
@@ -193,10 +215,31 @@ const createCandleStickChart = async () => {
             // Use timeFormat to format the date as per your preference
             timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
         },
+        rightPriceScale: {
+            borderColor: '#D1D4DC',
+        },
+        layout: {
+            background: {
+                type: 'solid',
+                color: '#ffffff',
+            },
+            textColor: '#000',
+        },
+        grid: {
+            horzLines: {
+                color: '#F0F3FA',
+            },
+            vertLines: {
+                color: '#F0F3FA',
+            },
+        },
     });
     candlestickSeries = candlestickChart.addCandlestickSeries({
-        upColor: '#26a69a', downColor: '#ef5350', borderVisible: false,
-        wickUpColor: '#26a69a', wickDownColor: '#ef5350',
+        upColor: 'rgb(38,166,154)',
+        downColor: 'rgb(255,82,82)',
+        wickUpColor: 'rgb(38,166,154)',
+        wickDownColor: 'rgb(255,82,82)',
+        borderVisible: false,
     });
     supportLineSeries = candlestickChart.addLineSeries({
         color: "green",
@@ -318,196 +361,6 @@ const updateData = async (symbolPair) => {
     formattedData = await formatOHLCVForChartData(firstSerie);
 }
 
-// const updateCharts = async (inputData = formattedData) => {
-//     if (!formattedData) return;
-//     if (candlestickSeries) {
-//         candlestickSeries.setData(formattedData);
-//     }
-//     if (showBollingerBands.value) {
-
-//         const { upperBand, lowerBand, middleBand } = await indicators.calculateBollingerBands(formattedData, 20)
-
-//         if (upperBandSeries) {
-//             upperBandSeries.setData(upperBand);
-//         } else {
-//             upperBandSeries = candlestickChart.addLineSeries({ color: 'rgba(4, 111, 232, 1)', lineWidth: 1 });
-//             upperBandSeries.setData(upperBand);
-//         }
-
-//         if (middleBandSeries) {
-//             middleBandSeries.setData(middleBand);
-//         } else {
-//             middleBandSeries = candlestickChart.addLineSeries({ color: '#2c3e50', lineWidth: 1 });
-//             middleBandSeries.setData(middleBand);
-//         }
-
-//         if (lowerBandSeries) {
-//             lowerBandSeries.setData(lowerBand);
-//         } else {
-//             lowerBandSeries = candlestickChart.addLineSeries({ color: 'rgba(4, 111, 232, 1)', lineWidth: 1 });
-//             lowerBandSeries.setData(lowerBand);
-//         }
-//     } else {
-//         if (upperBandSeries) {
-//             candlestickChart.removeSeries(upperBandSeries);
-//             upperBandSeries = null;
-//         }
-
-//         if (middleBandSeries) {
-//             candlestickChart.removeSeries(middleBandSeries);
-//             middleBandSeries = null;
-//         }
-
-//         if (lowerBandSeries) {
-//             candlestickChart.removeSeries(lowerBandSeries);
-//             lowerBandSeries = null;
-//         }
-//     }
-
-//     if (showRSI.value) {
-//         if (!rsiChart) {
-//             await createRSIChart()
-//         }
-//         const { rsiData } = await indicators.calculateRSI(formattedData)
-
-//         if (rsiSeries) {
-//             rsiSeries.setData(rsiData);
-//         } else {
-//             rsiSeries = rsiChart.addLineSeries({ color: 'rgba(4, 232, 36, 1)', lineWidth: 1 });
-//             rsiSeries.setData(rsiData);
-//         }
-//     } else {
-//         if (rsiSeries) {
-//             rsiChart.removeSeries(rsiSeries);
-//             rsiSeries = null;
-//         }
-//     }
-
-//     if (showSMA.value) {
-//         if (!macdChart) {
-//             await createMACDChart()
-//         }
-//         const smaData = await indicators.calculateSMA(formattedData)
-//         if (smaSeries) {
-//             smaSeries.setData(smaData);
-//         } else {
-//             smaSeries = candlestickChart.addLineSeries({ color: 'rgba(0, 255, 255, 1)', lineWidth: 1 });
-//             smaSeries.setData(smaData);
-//         }
-//     } else {
-//         if (smaSeries) {
-//             candlestickChart.removeSeries(smaSeries);
-//             smaSeries = null;
-//         }
-//     }
-
-//     if (showEMA.value) {
-//         addEMA(formattedData, 7, '#f1c40f')
-//         addEMA(formattedData, 14, '#2980b9')
-//         addEMA(formattedData, 28, '#8e44ad')
-
-//     } else {
-//         const series = Object.values(emaSeries)
-//         if (series.length > 0) {
-//             series.forEach((emaSerie) => {
-
-//                 candlestickChart.removeSeries(emaSerie);
-//             })
-//             emaSeries = {};
-//         }
-//     }
-
-//     if (showVolume.value) {
-//         if (!volumeChart) {
-//             await createVolumeChart()
-//         }
-//         const volumeData = await indicators.calculateVolumes(formattedData)
-//         // console.log('🚀 ~ file: TradingChart.vue:250 ~ watchEffect ~ volumeData:', volumeData);
-//         volumeSeries?.setData(volumeData);
-//     } else {
-//         volumeSeries?.setData([]); // set data to an empty array to clear the volume data
-//     }
-
-//     if (showMACD.value) {
-//         if (!macdChart) {
-//             await createMACDChart()
-//         }
-//         const { macdData, signalData, histogramData } = await indicators.calculateMACD(formattedData)
-
-//         if (macdSeries) {
-//             macdSeries.setData(macdData);
-//         } else {
-//             macdSeries = macdChart.addLineSeries({ color: 'rgba(4, 232, 36, 1)', lineWidth: 1 });
-//             macdSeries.setData(macdData);
-//         }
-
-//         if (macdSignalSeries) {
-//             macdSignalSeries.setData(signalData);
-//         } else {
-//             macdSignalSeries = macdChart.addLineSeries({ color: 'rgba(0, 123, 255, 1)', lineWidth: 1 });
-//             macdSignalSeries.setData(signalData);
-//         }
-
-//         if (macdHistogramSeries) {
-//             macdHistogramSeries.setData(histogramData);
-//         } else {
-//             macdHistogramSeries = macdChart.addHistogramSeries({
-//                 color: 'rgba(255, 193, 7, 0.8)',
-//                 priceFormat: { type: 'volume' },
-//             });
-//             macdHistogramSeries.setData(histogramData);
-//         }
-//     } else {
-//         if (macdSeries) {
-//             macdChart.removeSeries(macdSeries);
-//             macdSeries = null;
-//         }
-
-//         if (macdSignalSeries) {
-//             macdChart.removeSeries(macdSignalSeries);
-//             macdSignalSeries = null;
-//         }
-
-//         if (macdHistogramSeries) {
-//             macdChart.removeSeries(macdHistogramSeries);
-//             macdHistogramSeries = null;
-//         }
-//     }
-
-//     // const firstTimeValue = formattedData[0].time;
-//     if (showSupport.value) {
-//         store.supportData.forEach((support) => {
-//             // console.log("🚀 ~ file: TradingChart.vue:398 ~ store.resistanceData.forEach ~ support:", support[4])
-
-//             const supportLineData = formattedData.map((value) => ({
-//                 time: value.time,
-//                 value: Object.values(support)[3],
-//                 color: 'green',
-//                 lineWidth: 2,
-//             }));
-//             supportLineSeries.setData(supportLineData);
-//         })
-
-
-//     } else {
-
-//     }
-
-//     if (showResistance.value) {
-//         store.resistanceData.forEach((resistance) => {
-//             const resistanceLineData = formattedData.map((value) => ({
-//                 time: value.time,
-//                 value: Object.values(resistance)[3],
-//                 color: 'red',
-//                 lineWidth: 2,
-//             }));;
-//             resistanceLineSeries.setData(resistanceLineData);
-//         })
-
-//     } else {
-
-//     }
-// }
 const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
     const symbolPair = store.pairs.get(symbolPairName)
     console.log("🚀 ~ file: TradingChart.vue:495 ~ updateChartsFromPair ~ symbolPair:", symbolPair, symbolPairName)
@@ -595,9 +448,15 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
     }
 
     if (showEMA.value) {
-        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema7, 7, '#f1c40f')
-        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema14, 14, '#2980b9')
-        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema28, 28, '#2980b9')
+        const EMA_COLORS = {
+            ema7: '#f1c40f',
+            ema14: '#2980b9',
+            ema28: '#8e44ad'
+
+        }
+        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema7, 7, EMA_COLORS.ema7)
+        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema14, 14, EMA_COLORS.ema14)
+        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema28, 28, EMA_COLORS.ema28)
 
 
     } else {
@@ -710,15 +569,62 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
 watchEffect(async () => {
     console.log("🚀 ~ file: TradingChart.vue:497 ~ watchEffect ~ store.pairs:", store.pairs)
     if (store.pairs.size === 0) return;
-    const symbolPair = store.pairs.get(props.inputSymbol)
-    console.log("🚀 ~ file: TradingChart.vue:693 ~ watchEffect ~ symbolPair:", symbolPair, props.inputSymbol)
-    if (!symbolPair) return;
-    updateData(symbolPair);
+    currentSymbolPair = store.pairs.get(props.inputSymbol)
+    console.log("🚀 ~ file: TradingChart.vue:693 ~ watchEffect ~ symbolPair:", currentSymbolPair, props.inputSymbol)
+    if (!currentSymbolPair) return;
+    updateData(currentSymbolPair);
     updateChartsFromPair();
 });
 
 
+const toggleSupport = () => {
+    showSupport.value = !showSupport.value;
+    updateChartsFromPair();
+};
 
+const toggleResistance = () => {
+    showResistance.value = !showResistance.value;
+};
+
+
+const toggleSMA = () => {
+    showSMA.value = !showSMA.value;
+    updateChartsFromPair();
+};
+
+const toggleEMA = () => {
+    showEMA.value = !showEMA.value;
+    if (showEMA.value) {
+        // If EMA is turned on, also check and add EMA signals
+        console.log("🚀 ~ file: TradingChart.vue:544 ~ toggleEMA ~ currentSymbolPair:", currentSymbolPair)
+        const ema28Data = currentSymbolPair.ema[selectedTimeFrame.value].ema28;  // Replace with actual EMA 28 data
+        addEMASignals(formattedData, ema28Data);
+    } else {
+        // If EMA is turned off, also remove EMA signals
+        if (emaMarkersSeries) {
+            candlestickChart.removeSeries(emaMarkersSeries);
+            emaMarkersSeries = null;
+        }
+    }
+    updateChartsFromPair();
+};
+
+
+const toggleBollingerBands = () => {
+    showBollingerBands.value = !showBollingerBands.value;
+    updateChartsFromPair();
+};
+
+const toggleVolumes = () => {
+    showVolume.value = !showVolume.value;
+    updateChartsFromPair();
+    // console.log('🚀 ~ file: TradingChart.vue:66 ~ toggleVolumes ~ showVolume.value:', showVolume.value);
+};
+
+const toggleMACD = () => {
+    showMACD.value = !showMACD.value;
+    updateChartsFromPair();
+};
 
 
 
