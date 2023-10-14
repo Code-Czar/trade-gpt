@@ -6,10 +6,14 @@ import indicators from './indicators';
 const fs = require('fs');
 const path = require('path');
 
+const binanceDataFile = 'binanceData.json';
+const bybitDataFile = 'bybitData.json';
+
 
 export class TradingBot {
     public allSymbols = [];
     public dataStore = new Map();
+    public refreshRate = 0;
 
     constructor(exchangeId: string) {
         this.dataStore.set(PAIR_TYPES.leveragePairs, new Map());
@@ -34,7 +38,6 @@ export class TradingBot {
     async fetchOHLCV(symbol: string, timeframe: string) {
         const formattedSymbol = symbol.replace('/', '-');
         const isForex = FOREX_PAIRS.includes(formattedSymbol);
-        console.log('🚀 ~ file: bot.ts:44 ~ TradingBot ~ fetchOHLCV ~ formattedSymbol:', formattedSymbol, isForex);
         if (isForex) {
             return await forexFetcher.fetchFOREXOHLC(formattedSymbol.replace('-', ''), timeframe);
         } else {
@@ -49,11 +52,36 @@ export class TradingBot {
             let ohlcvs: OHLCV | number[] | null = null;
             if (pairType === PAIR_TYPES.leveragePairs) {
                 const symbolName = (symbol as BasicObject).name;
-                ohlcvs = await cryptoFetcher.getBinanceHistoricalData(symbolName, timeframe);
+
+                try {
+                    ohlcvs = await cryptoFetcher.getBinanceHistoricalData(symbolName, timeframe);
+                    console.log("using BINANCE for:", symbolName);
+
+                    if (ohlcvs) {
+                        // const filePath = path.resolve(__dirname, binanceDataFile);
+                        // fs.writeFileSync(filePath, JSON.stringify(ohlcvs));
+                        // console.log("Data written to:", filePath);
+                    } else {
+                        try {
+
+                            ohlcvs = await cryptoFetcher.fetchByBitOHLCV(symbolName, timeframe);
+                            console.log("using BYBIT for : ", symbolName);
+                        } catch (error) {
+                            console.error(error)
+                        }
+
+                        if (ohlcvs) {
+                            // const filePath = path.resolve(__dirname, bybitDataFile);
+                            // fs.writeFileSync(filePath, JSON.stringify(ohlcvs));
+                            // console.log("Data written to:", filePath);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error fetching/writing data:", error);
+                }
             } else {
                 ohlcvs = await forexFetcher.fetchFOREXOHLC(symbol as string, timeframe);
             }
-            // console.log("🚀 ~ file: bot.ts:224 ~ TradingBot ~ populateDataStoreForPair ~ ohlcvs:", ohlcvs, pairType)
             if (!ohlcvs) {
                 return;
             }
@@ -88,7 +116,6 @@ export class TradingBot {
 
             if (symbolData.rsi.has(timeframe)) {
                 const existingRsi = symbolData.rsi.get(timeframe);
-                console.log("🚀 ~ file: bot.ts:91 ~ TradingBot ~ populateDataStoreForPair ~ existingRsi:", existingRsi)
                 const combinedRsi = existingRsi.rsi.concat(rsi);
                 const combinedRsiData = existingRsi.rsiData.concat(rsiData);
                 symbolData.rsi.set(timeframe, { rsi: combinedRsi.slice(-200), rsiData: combinedRsiData.slice(-200) }); // Only store the last 200 values
@@ -119,14 +146,12 @@ export class TradingBot {
                 this.dataStore.get(pairType).set(symbol, symbolData);
 
             }
-            // console.log("🚀 ~ file: bot.ts:259 ~ TradingBot ~ populateDataStoreForPair ~ symbolData:", this.dataStore.get(pairType))
         } catch (error) {
             console.error(`Error populating data store for ${typeof symbol === 'object' ? symbol.name : symbol} and ${timeframe}:`, error);
         }
     }
 
     async populateDataStore(timeframes = ['1d', '1h', '5m']) {
-        console.log("🚀 ~ file: bot.ts:264 ~ TradingBot ~ populateDataStore ~ populateDataStore:")
         const leveragePairs = await cryptoFetcher.getBybitPairsWithLeverage();
         // Placeholder for forex and crypto pairs
         const forexPairs: Array<string> = [];
@@ -134,11 +159,10 @@ export class TradingBot {
 
         // Loop indefinitely to keep fetching data for all pairs
         while (true) {
+            const startTime = new Date().getTime();
             for (const pair of leveragePairs) {
                 for (const timeframe of timeframes) {
-                    // console.log("🚀 ~ file: bot.ts:264 ~ TradingBot ~ populateDataStore ~ populateDataStore:", pair, timeframe)
                     await this.populateDataStoreForPair(PAIR_TYPES.leveragePairs, pair, timeframe);
-                    // console.log("🚀 ~ file: bot.ts:279 ~ TradingBot ~ populateDataStore ~ this.dataStore:", pair, timeframe)
                 }
             }
             for (const pair of forexPairs) {
@@ -152,8 +176,52 @@ export class TradingBot {
                     await this.populateDataStoreForPair(PAIR_TYPES.cryptoPairs, pair, timeframe);
                 }
             }
+
+            const endTime = new Date().getTime();  // Store end time of the iteration
+            this.refreshRate = endTime - startTime; // Calculate the time taken to fetch data for all pairs
+            console.log("🚀 ~ file: bot.ts:177 ~ TradingBot ~ populateDataStore ~  this.refreshRate:", this.refreshRate)
         }
     }
+    async populateDataStoreParallel(timeframes = ['1d', '1h', '5m', '1m']) {
+        const leveragePairs = await cryptoFetcher.getBybitPairsWithLeverage();
+        // Placeholder for forex and crypto pairs
+        const forexPairs = [];
+        const cryptoPairs = [];
+
+        // Loop indefinitely to keep fetching data for all pairs
+        while (true) {
+            const startTime = new Date().getTime();
+
+            const createPromises = (pairs, pairType) => pairs.flatMap(pair =>
+                timeframes.map(timeframe =>
+                    this.populateDataStoreForPair(pairType, pair, timeframe)
+                )
+            );
+
+            const leveragePromises = createPromises(leveragePairs, PAIR_TYPES.leveragePairs);
+            const forexPromises = createPromises(forexPairs, PAIR_TYPES.forexPairs);
+            const cryptoPromises = createPromises(cryptoPairs, PAIR_TYPES.cryptoPairs);
+
+            // Combine all promises into one array
+            const allPromises = [
+                ...leveragePromises,
+                // ...forexPromises,
+                // ...cryptoPromises,
+            ];
+
+            // Execute promises in batches of 100, waiting 2 seconds between each batch
+            while (allPromises.length > 0) {
+                const batch = allPromises.splice(0, 100); // Get the next batch of 100 promises (and remove them from allPromises)
+                await Promise.all(batch); // Execute current batch of promises in parallel
+                await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 2 seconds before next batch
+            }
+
+            const endTime = new Date().getTime();  // Store end time of the iteration
+            this.refreshRate = endTime - startTime; // Calculate the time taken to fetch data for all pairs
+            console.log("🚀 ~ file: bot.ts:177 ~ TradingBot ~ populateDataStore ~  this.refreshRate:", this.refreshRate);
+        }
+    }
+
 
 
 

@@ -2,9 +2,11 @@ import axios from 'axios';
 // import fetch from 'node-fetch';
 
 
-import { RSIFetcher, SERVER_URL } from "@/models"
+import { RSIFetcher, BACKEND_URL } from "@/models"
 import { dataStore } from "@/stores/example-store";
 
+
+let fetching = false;
 export const getPairsDetails = async (refresh = false) => {
     if (dataStore().pairs.size === 0 || refresh) {
         const pairs = await RSIFetcher.get_bybit_pairs_with_leverage();
@@ -84,9 +86,13 @@ export const fetchRSIData = async (addToStore = true) => {
 
 
 export const fetchRSIAndOHLCV = async (addToStore = true) => {
+    if (fetching) {
+        return;
+    }
+    fetching = true;
     getPairsDetails()
 
-    const result = await fetch(`${SERVER_URL}/api/rsi/getValues`)
+    const result = await fetch(`${BACKEND_URL}/api/rsi/getValues`)
     let data = (await result.json())
     console.log("🚀 ~ file: dataController.ts:91 ~ fetchRSIAndOHLCV ~ data:", data)
     dataStore().setAllPairs(data)

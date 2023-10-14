@@ -1,15 +1,15 @@
 import axios from 'axios';
-import { SERVER_URL } from './consts'
+import { BACKEND_URL } from './consts'
 
 
 export async function get_bybit_pairs_with_leverage(): Promise<BasicObject[]> {
-    const url = `${SERVER_URL}/api/symbols/leverage`;
+    const url = `${BACKEND_URL}/api/symbols/leverage`;
     const response = await fetch(url);
     return response.json();
 }
 
 export async function getBinanceHistoricalData(pair: string, interval: string, limit = 200): Promise<number[]> {
-    const url = `${SERVER_URL}/api/historical/${pair}/${interval}/${limit}`;
+    const url = `${BACKEND_URL}/api/historical/${pair}/${interval}/${limit}`;
     const response = await fetch(url);
     return response.json();
 }
@@ -20,7 +20,7 @@ export async function calculate_rsi(pair: string, interval: string, period = 14)
 }
 
 export async function calculate_rsi_bulk(symbols: string[], timeframes: string[]): Promise<any> {
-    const url = `${SERVER_URL}/api/rsi/bulk`;
+    const url = `${BACKEND_URL}/api/rsi/bulk`;
     const response = await axios.post(url, { symbols, timeframes });
     return response.data;
 }

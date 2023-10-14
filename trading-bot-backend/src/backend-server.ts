@@ -153,14 +153,24 @@ app.post('/set-rsi', async (req: Request, res: Response) => {
     res.status(200).json({ message: 'RSI values updated successfully' });
 });
 
+app.get('/health', (req, res) => {
+    try {
+        res.status(200).json({
+            refreshRate: bot.refreshRate
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Error fetching health data' });
+    }
+});
+
 
 
 const PORT = 3000;
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
-    bot.populateDataStore()
+    // bot.populateDataStore()
+    bot.populateDataStoreParallel()
 });
-// module.exports = app;
-// export default {};
 

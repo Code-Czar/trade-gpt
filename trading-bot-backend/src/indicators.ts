@@ -137,13 +137,13 @@ export const calculateVolumes = async (formattedData) => {
 };
 
 export const calculateEMA = async (formattedData, period) => {
-    const inputEMA7 = {
+    const inputEMA = {
         values: formattedData.map((data) => data.close),
         period: period,
     };
-    const ema = EMA.calculate(inputEMA7);
+    const ema = EMA.calculate(inputEMA);
 
-    const emaData = ema.map((value, index) => ({ time: formattedData[index + inputEMA7.period - 1].time, value: value }));
+    const emaData = ema.map((value, index) => ({ time: formattedData[index + inputEMA.period - 1].time, value: value }));
     return {
         ema,
         emaData

@@ -108,6 +108,9 @@ const showResistance = ref(false);
 let formattedData = null;
 
 const selectedTimeFrame = ref('5m');
+let reversalMarkers = [];
+let emaMarkers = [];
+let trendlineMarkers = {}
 
 function formatDateToYYYYMMDD(date) {
     const year = date.getFullYear();
@@ -150,7 +153,7 @@ const calculateSlope = (point1, point2) => {
 const identifyAndMarkReversals = (points, trendBand = "upper") => {
     console.log("🚀 ~ file: TradingChart.vue:149 ~ identifyAndMarkReversals ~ points:", points)
     if (points.length < 3) return; // Need at least 3 points to identify a reversal
-    const markers = [];
+    reversalMarkers = [];
 
     for (let i = 1; i < points.length - 1; i++) {
         const slope1 = calculateSlope(points[i - 1], points[i]);
@@ -160,7 +163,7 @@ const identifyAndMarkReversals = (points, trendBand = "upper") => {
         if (Math.sign(slope1) !== Math.sign(slope2)) {
             // Reversal found, add marker
             if (trendBand === "upper") {
-                markers.push({
+                reversalMarkers.push({
                     time: points[i].time,
                     position: 'aboveBar',
                     color: 'rgba(255, 0, 0, 1)',
@@ -170,7 +173,7 @@ const identifyAndMarkReversals = (points, trendBand = "upper") => {
             }
             else if (trendBand === "lower") {
 
-                markers.push({
+                reversalMarkers.push({
                     time: points[i].time,
                     position: 'belowBar',
                     color: 'rgba(0, 0, 255, 1)',
@@ -181,12 +184,14 @@ const identifyAndMarkReversals = (points, trendBand = "upper") => {
 
         }
     }
-    return markers
+    return reversalMarkers
 
 };
 
 
-
+const updateMarkser = () => {
+    candlestickSeries.setMarkers([...emaMarkers, ...trendlineMarkers.lowerMarkers, ...trendlineMarkers.higherMarkers]);
+}
 
 const drawTrendLines = (peaks, troughs) => {
     // Example of drawing a line between two points
@@ -195,14 +200,14 @@ const drawTrendLines = (peaks, troughs) => {
     downtrendLineSeries = candlestickChart.addLineSeries({ color: 'red', lineWidth: 2 });
 
     // Here we're taking two consecutive troughs to draw an uptrend line
-    const markers = {}
+    trendlineMarkers = {}
     if (troughs.length > 1) {
         const mappedTroughs = troughs.map((trough) => ({ time: trough.time, value: trough.low }))
         uptrendLineSeries.setData(
             mappedTroughs
 
         );
-        markers.lowerMarkers = identifyAndMarkReversals(mappedTroughs, 'lower');
+        trendlineMarkers.lowerMarkers = identifyAndMarkReversals(mappedTroughs, 'lower');
         console.log("🚀 ~ file: TradingChart.vue:199 ~ drawTrendLines ~ troughs:", troughs)
 
     }
@@ -218,9 +223,9 @@ const drawTrendLines = (peaks, troughs) => {
         //     { time: peaks[1].time, value: peaks[1].high },
         // ]);
         console.log("🚀 ~ file: TradingChart.vue:197 ~ drawTrendLines ~ peaks:", peaks)
-        markers.higherMarkers = identifyAndMarkReversals(mappedPeaks, 'upper');
+        trendlineMarkers.higherMarkers = identifyAndMarkReversals(mappedPeaks, 'upper');
     }
-    candlestickSeries.setMarkers([...markers.higherMarkers, ...markers.lowerMarkers]);
+    updateMarkser();
 };
 
 
@@ -250,14 +255,14 @@ const addEMASignals = (formattedData, ema28Data, period = 28) => {
                 wickUpColor: '#26a69a', wickDownColor: '#ef5350',
             });
     }
-    const markers = emaSignals.map((emaData) => ({
+    emaMarkers = emaSignals.map((emaData) => ({
         time: emaData.time,
         position: 'belowBar',
         color: '#2196F3',
         shape: 'arrowUp',
-        text: 'Buy @ ' + Math.floor(emaData.value - 2),
+        text: 'Buy ' + Math.floor(emaData.value - 2),
     }))
-    candlestickSeries.setMarkers(markers);
+    updateMarkser();
     candlestickChart.timeScale().fitContent();
 }
 
