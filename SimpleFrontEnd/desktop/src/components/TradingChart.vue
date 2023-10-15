@@ -120,6 +120,7 @@ const selectedTimeFrame = ref('5m');
 let reversalMarkers = [];
 let emaMarkers = [];
 let trendlineMarkers = {};
+let refreshInterval = null;
 
 
 
@@ -267,11 +268,18 @@ const addEMAFromData = async (
     period = 14,
     color = 'rgba(255, 0, 7, 1)'
 ) => {
+    const convertedToSeconds = emaData.map((data) => {
+        return {
+            time: data.time / 1000,
+            value: data.value
+        }
+    })
+
     if (emaSeries[period]) {
-        emaSeries[period].setData(emaData);
+        emaSeries[period].setData(convertedToSeconds);
     } else {
         emaSeries[period] = candlestickChart.addLineSeries({ color, lineWidth: 1 });
-        emaSeries[period].setData(emaData);
+        emaSeries[period].setData(convertedToSeconds);
     }
 };
 
@@ -280,8 +288,10 @@ const formatOHLCVForChartData = async (data) => {
     const result = [];
     data.forEach((row) => {
         const date = new Date(row[0]);
+        console.log(date.toISOString());  // Outputs the date in ISO format
+        console.log(date.toString());
         result.push({
-            time: row[0],
+            time: row[0] / 1000,
             // time: formatDateToYYYYMMDD(new Date(row[0])),
             open: parseFloat(row[1]),
             high: parseFloat(row[2]),
@@ -291,6 +301,13 @@ const formatOHLCVForChartData = async (data) => {
         });
     });
     return result;
+};
+const synchronizeCharts = (visibleRange) => {
+    // Update the visible time range of other charts (macdChart, rsiChart, volumeChart, etc.)
+    macdChart?.timeScale().setVisibleRange(visibleRange);
+    rsiChart?.timeScale().setVisibleRange(visibleRange);
+    volumeChart?.timeScale().setVisibleRange(visibleRange);
+    // ... any other charts you want to synchronize
 };
 
 const createCandleStickChart = async () => {
@@ -347,6 +364,8 @@ const createCandleStickChart = async () => {
         lineWidth: 1,
         lineStyle: 1,
     });
+
+
 };
 
 const createRSIChart = async () => {
@@ -451,9 +470,7 @@ const createMACDChart = async () => {
     });
 };
 
-const sortDataAscending = (data) => {
-    return data.sort((a, b) => a[0] - b[0]);
-}
+
 
 const updateData = async (symbolPairData) => {
     if (!symbolPairData) return;
@@ -494,8 +511,26 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
         const { upperBand, lowerBand, middleBand } =
             symbolPairData.bollingerBands[selectedTimeFrame.value];
 
+        const upperConvertedToSeconds = upperBand.map((data) => {
+            return {
+                time: data.time / 1000,
+                value: data.value
+            }
+        })
+        const lowerBandConvertedToSeconds = lowerBand.map((data) => {
+            return {
+                time: data.time / 1000,
+                value: data.value
+            }
+        })
+        const middleBandConvertedToSeconds = middleBand.map((data) => {
+            return {
+                time: data.time / 1000,
+                value: data.value
+            }
+        })
         if (upperBandSeries) {
-            upperBandSeries.setData(upperBand);
+            upperBandSeries.setData(upperConvertedToSeconds);
         } else {
             upperBandSeries = candlestickChart.addLineSeries({
                 color: 'rgba(4, 111, 232, 1)',
@@ -505,23 +540,23 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
         }
 
         if (middleBandSeries) {
-            middleBandSeries.setData(middleBand);
+            middleBandSeries.setData(middleBandConvertedToSeconds);
         } else {
             middleBandSeries = candlestickChart.addLineSeries({
                 color: '#2c3e50',
                 lineWidth: 1,
             });
-            middleBandSeries.setData(middleBand);
+            middleBandSeries.setData(middleBandConvertedToSeconds);
         }
 
         if (lowerBandSeries) {
-            lowerBandSeries.setData(lowerBand);
+            lowerBandSeries.setData(lowerBandConvertedToSeconds);
         } else {
             lowerBandSeries = candlestickChart.addLineSeries({
                 color: 'rgba(4, 111, 232, 1)',
                 lineWidth: 1,
             });
-            lowerBandSeries.setData(lowerBand);
+            lowerBandSeries.setData(lowerBandConvertedToSeconds);
         }
     } else {
         if (upperBandSeries) {
@@ -545,15 +580,21 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
             await createRSIChart();
         }
         const rsiData = symbolPairData.rsi[selectedTimeFrame.value].rsiData;
+        const rsiDataConvertedToSeconds = rsiData.map((data) => {
+            return {
+                time: data.time / 1000,
+                value: data.value
+            }
+        })
 
         if (rsiSeries) {
-            rsiSeries.setData(rsiData);
+            rsiSeries.setData(rsiDataConvertedToSeconds);
         } else {
             rsiSeries = rsiChart.addLineSeries({
                 color: 'rgba(4, 232, 36, 1)',
                 lineWidth: 1,
             });
-            rsiSeries.setData(rsiData);
+            rsiSeries.setData(rsiDataConvertedToSeconds);
         }
     } else {
         if (rsiSeries) {
@@ -634,35 +675,56 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
         }
         const { macdData, signalData, histogramData } =
             symbolPairData.macd[selectedTimeFrame.value];
+        console.log("🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ histogramData:", histogramData)
+        console.log("🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ signalData:", signalData)
+        console.log("🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ macdData:", macdData)
+        const macdDataConvertedToSeconds = macdData.map((data) => {
+            return {
+                time: data.time / 1000,
+                value: data.value
+            }
+        })
+        const signalDataConvertedToSeconds = signalData.map((data) => {
+            return {
+                time: data.time / 1000,
+                value: data.value
+            }
+        })
+        const histogramDataConvertedToSeconds = histogramData.map((data) => {
+            return {
+                time: data.time / 1000,
+                value: data.value
+            }
+        })
 
         if (macdSeries) {
-            macdSeries.setData(macdData);
+            macdSeries.setData(macdDataConvertedToSeconds);
         } else {
             macdSeries = macdChart?.addLineSeries({
                 color: 'rgba(4, 232, 36, 1)',
                 lineWidth: 1,
             });
-            macdSeries?.setData(macdData);
+            macdSeries?.setData(macdDataConvertedToSeconds);
         }
 
         if (macdSignalSeries) {
-            macdSignalSeries.setData(signalData);
+            macdSignalSeries.setData(signalDataConvertedToSeconds);
         } else {
             macdSignalSeries = macdChart?.addLineSeries({
                 color: 'rgba(0, 123, 255, 1)',
                 lineWidth: 1,
             });
-            macdSignalSeries?.setData(signalData);
+            macdSignalSeries?.setData(signalDataConvertedToSeconds);
         }
 
         if (macdHistogramSeries) {
-            macdHistogramSeries?.setData(histogramData);
+            macdHistogramSeries?.setData(histogramDataConvertedToSeconds);
         } else {
             macdHistogramSeries = macdChart?.addHistogramSeries({
                 color: 'rgba(255, 193, 7, 0.8)',
                 priceFormat: { type: 'volume' },
             });
-            macdHistogramSeries?.setData(histogramData);
+            macdHistogramSeries?.setData(histogramDataConvertedToSeconds);
         }
     } else {
         if (macdSeries) {
@@ -738,6 +800,7 @@ watchEffect(async () => {
 
     // await updateData(currentSymbolPair);
     await updateChartsFromPair();
+
 });
 
 const toggleSupport = () => {
@@ -785,11 +848,20 @@ const toggleMACD = () => {
     updateChartsFromPair();
 };
 
-onMounted(() => {
+onMounted(async () => {
     console.log("🚀 ~ file: TradingChart.vue:809 ~ onMounted ~ onMounted:", onMounted)
     chartWidth.value = window.innerWidth;
     // let macdChartElement = document.createElement('div');
-    createCandleStickChart();
+    await createCandleStickChart();
+    candlestickChart?.timeScale().subscribeVisibleTimeRangeChange((visibleRange) => {
+        if (visibleRange) {
+            synchronizeCharts(visibleRange);
+        }
+    });
+    refreshInterval = setInterval(async () => {
+        currentSymbolPair = await dataController.fetchSymbolData(props.inputSymbolData);
+        await updateChartsFromPair();
+    }, 1000 * 2);
 });
 
 onUnmounted(() => {
@@ -808,6 +880,10 @@ onUnmounted(() => {
     if (rsiChart) {
         rsiChart.remove();
         rsiChart = null;
+    }
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
     }
 });
 </script>

@@ -22,6 +22,19 @@ export const convertTimeFrameToByBitStandard = (interval: string) => {
     // return interval
 
 };
+export const convertTimeframeToMs = (timeframe: string): number => {
+    const unit = timeframe.charAt(timeframe.length - 1);
+    const value = parseInt(timeframe.slice(0, -1));
+
+    switch (unit) {
+        case 'm': return value * 60 * 1000;
+        case 'h': return value * 60 * 60 * 1000;
+        case 'd': return value * 24 * 60 * 60 * 1000;
+        // Add more units as needed
+        default: throw new Error(`Unknown timeframe unit: ${unit}`);
+    }
+}
+
 export const convertBybitTimeFrameToLocal = (interval: string) => {
     if (interval === '1') {
         return '1m'
@@ -123,7 +136,8 @@ export default {
     convertPairToJSON,
     convertTimeFrameToByBitStandard,
     convertBybitTimeFrameToLocal,
-    sortDataAscending
+    sortDataAscending,
+    convertTimeframeToMs
 }
 module.exports = {
     mapToObject,
@@ -131,7 +145,8 @@ module.exports = {
     convertPairToJSON,
     convertTimeFrameToByBitStandard,
     convertBybitTimeFrameToLocal,
-    sortDataAscending
+    sortDataAscending,
+    convertTimeframeToMs
 }
 
 

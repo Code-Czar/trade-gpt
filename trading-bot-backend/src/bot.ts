@@ -1,7 +1,7 @@
 
 import { PAIR_TYPES, FOREX_PAIRS } from './types/consts'
 import { cryptoFetcher, forexFetcher, byBitDataFetcher } from './dataFetchers';
-import { convertBybitTimeFrameToLocal, sortDataAscending } from './utils/convertData';
+import { convertBybitTimeFrameToLocal, sortDataAscending, convertTimeframeToMs } from './utils/convertData';
 import indicators from './indicators';
 
 const fs = require('fs');
@@ -28,28 +28,21 @@ export class TradingBot {
 
 
     async populateDataStoreForPair(pairType: string, symbolData: BasicObject | string, timeframe: string) {
-
-        const symbolDetails = symbolData.details
+        const symbolDetails = symbolData.details;
         const symbolName = symbolDetails.name;
         try {
             let ohlcvs: OHLCV | number[] | null = null;
             if (pairType === PAIR_TYPES.leveragePairs) {
                 ohlcvs = symbolData[timeframe].ohlcv;
-                ohlcvs = sortDataAscending(ohlcvs)
-
+                ohlcvs = sortDataAscending(ohlcvs);
             } else {
                 ohlcvs = await forexFetcher.fetchFOREXOHLC(symbolDetails as string, timeframe);
             }
             if (!ohlcvs) {
                 return;
             }
-            const formattedData = await indicators.formatOHLCVForChartData(ohlcvs);
-
-
-            const { rsi, rsiData } = await indicators.calculateRSI(formattedData)
 
             let storeSymbolPair = this.dataStore.get(pairType).get(symbolName);
-
             if (!storeSymbolPair) {
                 this.dataStore.get(pairType).set(symbolName, {
                     ohlcvs: new Map(),
@@ -59,82 +52,92 @@ export class TradingBot {
                     macd: new Map(),
                     volumes: new Map(),
                     bollingerBands: new Map(),
-                    details: symbolDetails
-
+                    details: symbolDetails,
                 });
                 storeSymbolPair = this.dataStore.get(pairType).get(symbolName);
             }
-
-            // if (storeSymbolPair.ohlcvs.has(timeframe)) {
-            //     const existingOhlcvs = storeSymbolPair.ohlcvs.get(timeframe);
-            //     const combinedOhlcvs = existingOhlcvs.concat(ohlcvs);
-            //     storeSymbolPair.ohlcvs.set(timeframe, combinedOhlcvs.slice(-200)); // Only store the last 200 values
-            // } else {
-            // }
             storeSymbolPair.ohlcvs.set(timeframe, ohlcvs);
 
-            if (storeSymbolPair.rsi.has(timeframe)) {
-                const existingRsi = storeSymbolPair.rsi.get(timeframe);
-                const combinedRsi = existingRsi.rsi.concat(rsi);
-                const combinedRsiData = existingRsi.rsiData.concat(rsiData);
-                storeSymbolPair.rsi.set(timeframe, { rsi: combinedRsi.slice(-200), rsiData: combinedRsiData.slice(-200) }); // Only store the last 200 values
-            } else {
-                storeSymbolPair.rsi.set(timeframe, { rsi, rsiData });
-            }
+            // Update the indicators using the factored out method
+            await this.updateIndicators(symbolName, timeframe, ohlcvs);
 
-
-            storeSymbolPair.volumes.set(timeframe, await indicators.calculateVolumes(formattedData))
-            storeSymbolPair.sma.set(timeframe, await indicators.calculateSMA(formattedData))
-
-            const EMA7 = await indicators.calculateEMA(formattedData, 7)
-            const EMA14 = await indicators.calculateEMA(formattedData, 14)
-            const EMA28 = await indicators.calculateEMA(formattedData, 28)
-            storeSymbolPair.ema.set(timeframe, { ema7: EMA7.emaData, ema14: EMA14.emaData, ema28: EMA28.emaData })
-
-            const { macdData, signalData, histogramData } = await indicators.calculateMACD(formattedData)
-            storeSymbolPair.macd.set(timeframe, { macdData, histogramData, signalData })
-
-            const { upperBand, lowerBand, middleBand } = await indicators.calculateBollingerBands(formattedData, 20)
-            storeSymbolPair.bollingerBands.set(timeframe, { upperBand, middleBand, lowerBand })
-
-            this.dataStore.get(pairType).set(symbolName, storeSymbolPair);
-            // console.log("🚀 ~ file: bot.ts:100 ~ TradingBot ~ populateDataStoreForPair ~ this.dataStore:", this.dataStore)
-            // this.dataStore.get(pairType).get(symbolName);
-            // const result = this.dataStore.get(pairType).get(symbolName)
         } catch (error) {
             console.error(`Error populating data store for ${typeof symbolDetails === 'object' ? symbolDetails.name : symbolDetails} and ${timeframe}:`, error);
         }
+    }
 
+
+    async updateIndicators(symbolName: string, timeframe: string, ohlcvs: any[]) {
+        const storePair = this.dataStore.get(PAIR_TYPES.leveragePairs).get(symbolName);
+        const formattedData = await indicators.formatOHLCVForChartData(ohlcvs); // Assuming this method exists in your indicators module
+
+        // Calculate and update RSI
+        const { rsi, rsiData } = await indicators.calculateRSI(formattedData);
+        storePair.rsi.set(timeframe, { rsi, rsiData });
+
+        // Calculate and update Volumes
+        storePair.volumes.set(timeframe, await indicators.calculateVolumes(formattedData));
+
+        // Calculate and update SMA
+        storePair.sma.set(timeframe, await indicators.calculateSMA(formattedData));
+
+        // Calculate and update EMA
+        const EMA7 = await indicators.calculateEMA(formattedData, 7);
+        const EMA14 = await indicators.calculateEMA(formattedData, 14);
+        const EMA28 = await indicators.calculateEMA(formattedData, 28);
+        storePair.ema.set(timeframe, { ema7: EMA7.emaData, ema14: EMA14.emaData, ema28: EMA28.emaData });
+
+        // Calculate and update MACD
+        const { macdData, signalData, histogramData } = await indicators.calculateMACD(formattedData);
+        storePair.macd.set(timeframe, { macdData, histogramData, signalData });
+
+        // Calculate and update Bollinger Bands
+        const { upperBand, lowerBand, middleBand } = await indicators.calculateBollingerBands(formattedData, 20);
+        storePair.bollingerBands.set(timeframe, { upperBand, middleBand, lowerBand });
     }
     async newOHLCVDataAvailable(eventData) {
-        // console.log("🚀 ~ file: bot.ts:108 ~ TradingBot ~ newOHLCVDataAvailable ~ eventData:", eventData)
-        const symbolName = (await eventData).topic.split('.')[2]
-        const timeframe = convertBybitTimeFrameToLocal(eventData.topic.split('.')[1])
-        const dataValues = (await eventData).data.map((item) => {
-            return [
+        const symbolName = (await eventData).topic.split('.')[2];
+        const timeframeStr = eventData.topic.split('.')[1];
+        const timeframe = convertBybitTimeFrameToLocal(timeframeStr);
+        const timeframeMs = convertTimeframeToMs(timeframe);
 
-                parseFloat(item.timestamp),
-                parseFloat(item.open),
-                parseFloat(item.high),
-                parseFloat(item.low),
-                parseFloat(item.close),
-                parseFloat(item.volume),
-            ]
-            // }
-        })
-        const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs)
-        const storePair = this.dataStore.get(PAIR_TYPES.leveragePairs).get(symbolName)
-        const ohlcvs = storePair.ohlcvs.get(timeframe)
+        const dataValues = (await eventData).data.map((item) => [
+            parseFloat(item.timestamp),
+            parseFloat(item.open),
+            parseFloat(item.high),
+            parseFloat(item.low),
+            parseFloat(item.close),
+            parseFloat(item.volume),
+        ]);
+
+        const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs);
+        const storePair = leveragePairs.get(symbolName);
+        const ohlcvs = storePair.ohlcvs.get(timeframe);
+
         if (!ohlcvs) {
-            console.log("🚀 ~ file: bot.ts:122 ~ TradingBot ~ newOHLCVDataAvailable ~ storePair:", storePair, [...storePair.ohlcvs?.keys()], storePair.details.name, symbolName, timeframe)
+            console.log("🚀 ~ file: bot.ts:122 ~ TradingBot ~ newOHLCVDataAvailable ~ storePair:", storePair, [...storePair.ohlcvs?.keys()], storePair.details.name, symbolName, timeframe);
         }
-        dataValues.forEach((item) => {
-            // ohlcvs.push(item)
-        }
-        );
-        // storePair.ohlcvs.set(timeframe, ohlcvs.slice(-200)); // Only store the last 200 values
-        console.log("🚀 ~ file: bot.ts:123 ~ TradingBot ~ newOHLCVDataAvailable ~ symbolName:", symbolName)
+
+        dataValues.forEach((newItem) => {
+            if (ohlcvs.length === 0 || newItem[0] >= ohlcvs[ohlcvs.length - 1][0] + timeframeMs) {
+                // If ohlcvs is empty or new item is beyond the last candle, push it
+                ohlcvs.push(newItem);
+            } else if (newItem[0] >= ohlcvs[ohlcvs.length - 1][0]) {
+                // If new item is within the last candle, replace it
+                ohlcvs[ohlcvs.length - 1] = newItem;
+            } else {
+                // Handle the case where new data is not for the last candle (if needed)
+            }
+        });
+
+        await this.updateIndicators(symbolName, timeframe, ohlcvs);
+
+        // Optionally: Only store the last 200 values
+        storePair.ohlcvs.set(timeframe, ohlcvs.slice(-200));
+        console.log("🚀 ~ file: bot.ts:123 ~ TradingBot ~ newOHLCVDataAvailable ~ symbolName:", symbolName);
     };
+
+
 
 
 
