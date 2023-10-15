@@ -176,35 +176,54 @@ app.get('/api/leverage/:symbol/:subdata/:timeframe', function (req, res) { retur
         }
     });
 }); });
-app.post('/api/rsi/bulk', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, symbols, timeframes, rsiValues, _i, symbols_1, symbol, _b, timeframes_1, timeframe, symbolData;
-    return __generator(this, function (_c) {
-        _a = req.body, symbols = _a.symbols, timeframes = _a.timeframes;
-        if (!symbols || !timeframes) {
-            return [2 /*return*/, res.status(400).send({ error: 'Symbols and timeframes are required.' })];
+// app.post('/api/rsi/bulk', async (req: Request, res: Response) => {
+//     const { symbols, timeframes } = req.body;
+//     if (!symbols || !timeframes) {
+//         return res.status(400).send({ error: 'Symbols and timeframes are required.' });
+//     }
+//     const rsiValues = {};
+//     for (let symbol of symbols) {
+//         rsiValues[symbol] = {};
+//         for (let timeframe of timeframes) {
+//             try {
+//                 const symbolData = bot.dataStore.get(PAIR_TYPES.leveragePairs).get(symbol);  // Change PAIR_TYPES.cryptoPairs based on your needs
+//                 if (symbolData && symbolData.rsi && symbolData.rsi.has(timeframe)) {
+//                     rsiValues[symbol][timeframe] = symbolData.rsi.get(timeframe).rsi;
+//                 } else {
+//                     rsiValues[symbol][timeframe] = null;
+//                 }
+//             } catch (error) {
+//                 console.error(`Error fetching RSI from datastore for ${symbol} and ${timeframe}:`, error);
+//             }
+//         }
+//     }
+//     res.json(rsiValues);
+// });
+app.get('/api/lastRsi/bulk', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var leveragePairsResult, result;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, (0, convertData_1.stringifyMap)(bot.dataStore.get(consts_1.PAIR_TYPES.leveragePairs))];
+            case 1:
+                leveragePairsResult = _a.sent();
+                result = {};
+                Object.entries(leveragePairsResult).forEach(function (_a) {
+                    var symbol = _a[0], pair = _a[1];
+                    result[symbol] = { rsi: {}, details: pair.details };
+                    Object.entries(pair.rsi).forEach(function (_a) {
+                        var timeFrameKey = _a[0], data = _a[1];
+                        var lastRSI = data.rsiData;
+                        // console.log("🚀 ~ file: backend-server.ts:130 ~ Object.entries ~ timeFrameKey:", timeFrameKey, lastRSI, lastRSI.length)
+                        if (data.rsiData.length > 0) {
+                            result[symbol].rsi[timeFrameKey] = data.rsiData[data.rsiData.length - 1].value;
+                        }
+                        else {
+                            result[symbol].rsi[timeFrameKey] = null;
+                        }
+                    });
+                });
+                return [2 /*return*/, res.status(200).json(result)];
         }
-        rsiValues = {};
-        for (_i = 0, symbols_1 = symbols; _i < symbols_1.length; _i++) {
-            symbol = symbols_1[_i];
-            rsiValues[symbol] = {};
-            for (_b = 0, timeframes_1 = timeframes; _b < timeframes_1.length; _b++) {
-                timeframe = timeframes_1[_b];
-                try {
-                    symbolData = bot.dataStore.get(consts_1.PAIR_TYPES.leveragePairs).get(symbol);
-                    if (symbolData && symbolData.rsi && symbolData.rsi.has(timeframe)) {
-                        rsiValues[symbol][timeframe] = symbolData.rsi.get(timeframe).rsi;
-                    }
-                    else {
-                        rsiValues[symbol][timeframe] = null;
-                    }
-                }
-                catch (error) {
-                    console.error("Error fetching RSI from datastore for ".concat(symbol, " and ").concat(timeframe, ":"), error);
-                }
-            }
-        }
-        res.json(rsiValues);
-        return [2 /*return*/];
     });
 }); });
 app.get('/api/getDataStore', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
@@ -227,6 +246,29 @@ app.get('/api/rsi/getValues', function (req, res) { return __awaiter(void 0, voi
             case 1:
                 leveragePairsResult = _a.sent();
                 return [2 /*return*/, res.status(200).json(leveragePairsResult)];
+        }
+    });
+}); });
+app.get('/api/getSymbolValues/:symbol', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var symbol, symbolData, error_6;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                symbol = req.params.symbol;
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, (0, convertData_1.convertPairToJSON)(bot.dataStore.get(consts_1.PAIR_TYPES.leveragePairs).get(symbol))];
+            case 2:
+                symbolData = _a.sent();
+                res.status(200).json(symbolData);
+                return [3 /*break*/, 4];
+            case 3:
+                error_6 = _a.sent();
+                console.error(error_6);
+                res.status(500).json({ error: '/api/leverage/fullData : Error fetching data' });
+                return [3 /*break*/, 4];
+            case 4: return [2 /*return*/];
         }
     });
 }); });

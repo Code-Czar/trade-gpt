@@ -5,6 +5,15 @@ const exchangeId = 'binance';
 const exchange: ccxt.Exchange = new (ccxt as any)[exchangeId]();
 const bybitAPIEndpoint = 'https://api.bybit.com/v5/market/mark-price-kline';
 
+
+let bybitQueryCount = 0;
+let lastBatchStartingTime = null;
+const bybitMaxQueryPerSecond = 100;
+
+
+let binanceQueryCount = 0;
+
+
 export const getBybitPairsWithLeverage = async () => {
     const url = 'https://api.bybit.com/v2/public/symbols';
     const response = await axios.get(url);
@@ -78,25 +87,10 @@ export const getBinanceHistoricalData = async (pair, interval, limit = 200) => {
 
     }
 }
-export const fetchCryptoOHLCV = async (symbol: string, timeframe: string) => {
-    while (true) {
-        try {
-            await exchange.loadMarkets();
-            return exchange.fetchOHLCV(symbol, timeframe);
-        } catch (error) {
-            if (error instanceof ccxt.DDoSProtection) {
-                // console.log('Rate limit hit, waiting before retrying...');
-                await new Promise((resolve) => setTimeout(resolve, 1000)); // wait for 1 second
-            } else {
-                throw error; // re-throw the error if it's not a rate limit error
-            }
-        }
-    }
-}
+
 
 export default {
     getBybitPairsWithLeverage,
     getBinanceHistoricalData,
-    fetchCryptoOHLCV,
     fetchByBitOHLCV
 }

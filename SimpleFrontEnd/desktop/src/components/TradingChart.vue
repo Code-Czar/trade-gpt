@@ -38,9 +38,10 @@ import { createChart, CrosshairMode } from 'lightweight-charts';
 import { dataStore } from '@/stores/example-store';
 import { SMA, EMA, RSI, MACD } from 'technicalindicators';
 import { indicators } from '@/models'
+import { dataController } from '@/controllers';
 
 const props = defineProps({
-    inputSymbol: {
+    inputSymbolData: {
         type: String,
         required: true,
     },
@@ -89,11 +90,12 @@ let bullishFractalSeries = null;
 let bearishFractalSeries = null;
 let bullishFractalLines = [];
 let bearishFractalLines = [];
-let currentSymbolPair = null;
 let emaMarkersSeries = null;
 let uptrendLineSeries = null;
 let downtrendLineSeries = null;
 
+let currentSymbolPair = props.inputSymbolData//await dataController.fetchSymbolData(props.inputSymbolData);
+console.log("🚀 ~ file: TradingChart.vue:98 ~ currentSymbolPair:", currentSymbolPair)
 
 
 // const supportData = store.supportData[0];
@@ -302,7 +304,7 @@ const createCandleStickChart = async () => {
         timeScale: {
             timeVisible: true,
             // Use timeFormat to format the date as per your preference
-            timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
+            // timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
         },
         rightPriceScale: {
             borderColor: '#D1D4DC',
@@ -349,7 +351,7 @@ const createRSIChart = async () => {
         timeScale: {
             timeVisible: true,
             // Use timeFormat to format the date as per your preference
-            timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
+            // timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
         },
     });
 }
@@ -360,7 +362,7 @@ const createVolumeChart = async () => {
         timeScale: {
             timeVisible: true,
             // Use timeFormat to format the date as per your preference
-            timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
+            // timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
         },
     });
     volumeSeries = volumeChart.addHistogramSeries({ color: 'rgba(4, 232, 36, 0.8)', priceFormat: { type: 'volume' } });
@@ -398,7 +400,7 @@ const createMACDChart = async () => {
             timeScale: {
                 timeVisible: true,
                 // Use timeFormat to format the date as per your preference
-                timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
+                // timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
             },
         });
     } else {
@@ -441,17 +443,17 @@ const createMACDChart = async () => {
     });
 }
 
-const updateData = async (symbolPair) => {
-    if (!symbolPair) return;
-    const seriesValues = symbolPair.ohlcvs[selectedTimeFrame.value];
+const updateData = async (symbolPairData) => {
+    if (!symbolPairData) return;
+    const seriesValues = symbolPairData.ohlcvs[selectedTimeFrame.value];
     const firstSerie = seriesValues;
     if (!firstSerie || !candlestickChart) return;
 
     formattedData = await formatOHLCVForChartData(firstSerie);
 }
 
-const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
-    const symbolPair = store.pairs.get(symbolPairName)
+const updateChartsFromPair = async (symbolPairData = props.inputSymbolData) => {
+
     if (!formattedData) return;
     if (candlestickSeries) {
         if (uptrendLineSeries) {
@@ -469,7 +471,7 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
 
     }
     if (showBollingerBands.value) {
-        const { upperBand, lowerBand, middleBand } = symbolPair.bollingerBands[selectedTimeFrame.value]
+        const { upperBand, lowerBand, middleBand } = symbolPairData.bollingerBands[selectedTimeFrame.value]
 
         if (upperBandSeries) {
             upperBandSeries.setData(upperBand);
@@ -512,7 +514,7 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
         if (!rsiChart) {
             await createRSIChart()
         }
-        const rsiData = symbolPair.rsi[selectedTimeFrame.value].rsiData
+        const rsiData = symbolPairData.rsi[selectedTimeFrame.value].rsiData
 
         if (rsiSeries) {
             rsiSeries.setData(rsiData);
@@ -531,7 +533,7 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
         if (!macdChart) {
             await createMACDChart()
         }
-        const smaData = symbolPair.sma[selectedTimeFrame.value].smaData
+        const smaData = symbolPairData.sma[selectedTimeFrame.value].smaData
         if (smaSeries) {
             smaSeries.setData(smaData);
         } else {
@@ -552,9 +554,9 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
             ema28: '#8e44ad'
 
         }
-        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema7, 7, EMA_COLORS.ema7)
-        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema14, 14, EMA_COLORS.ema14)
-        addEMAFromData(symbolPair.ema[selectedTimeFrame.value].ema28, 28, EMA_COLORS.ema28)
+        addEMAFromData(symbolPairData.ema[selectedTimeFrame.value].ema7, 7, EMA_COLORS.ema7)
+        addEMAFromData(symbolPairData.ema[selectedTimeFrame.value].ema14, 14, EMA_COLORS.ema14)
+        addEMAFromData(symbolPairData.ema[selectedTimeFrame.value].ema28, 28, EMA_COLORS.ema28)
 
 
     } else {
@@ -572,7 +574,7 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
         if (!volumeChart) {
             await createVolumeChart()
         }
-        const volumeData = symbolPair.volumes[selectedTimeFrame.value]
+        const volumeData = symbolPairData.volumes[selectedTimeFrame.value]
         volumeSeries?.setData(volumeData);
     } else {
         volumeSeries?.setData([]); // set data to an empty array to clear the volume data
@@ -582,7 +584,7 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
         if (!macdChart) {
             await createMACDChart()
         }
-        const { macdData, signalData, histogramData } = symbolPair.macd[selectedTimeFrame.value]
+        const { macdData, signalData, histogramData } = symbolPairData.macd[selectedTimeFrame.value]
 
         if (macdSeries) {
             macdSeries.setData(macdData);
@@ -664,9 +666,11 @@ const updateChartsFromPair = async (symbolPairName = props.inputSymbol) => {
 
 
 watchEffect(async () => {
-    if (store.pairs.size === 0) return;
-    currentSymbolPair = store.pairs.get(props.inputSymbol)
+    // if (store.pairs.size === 0) return;
+    currentSymbolPair = props.inputSymbolData
+    console.log("🚀 ~ file: TradingChart.vue:671 ~ watchEffect ~ currentSymbolPair:", currentSymbolPair)
     if (!currentSymbolPair) return;
+
     updateData(currentSymbolPair);
     updateChartsFromPair();
 });

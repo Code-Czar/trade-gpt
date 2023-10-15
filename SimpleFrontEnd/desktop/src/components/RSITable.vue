@@ -5,7 +5,7 @@
     </q-tabs>
 
     <q-separator />
-    <TradingChart v-if="showChart" :input-symbol="symbolToChart" />
+    <TradingChart v-if="showChart" :input-symbol-data="symbolToChartData" />
 
     <q-tab-panels v-model="tab">
       <q-tab-panel name="table">
@@ -21,7 +21,7 @@
           </template>
           <template v-slot:body-cell-view="props">
             <q-td :props="props">
-              <q-btn @click="openChart(props.row.name)" label="Chart" />
+              <q-btn @click="openChart(props.row.details.name)" label="Chart" />
             </q-td>
             <q-td :props="props">
               <q-btn @click="openByBit(props.row.name)" label="View on ByBit" />
@@ -43,9 +43,9 @@ const tableData = ref([]);
 const pagination = ref({
   sortBy: 'maxLeverage',
   ascending: true,
-  rowsPerPage: 200
+  rowsPerPage: 500
 });
-const symbolToChart = ref('BTCUSDT')
+const symbolToChartData = ref('BTCUSDT')
 const showChart = ref(false)
 
 const columns = [
@@ -62,10 +62,13 @@ const REFRESH_RATE = 20000;
 const openByBit = (pairName) => {
   window.open(`https://www.bybit.com/trade/usdt/${pairName}`, '_blank');
 };
-const openChart = (pairName) => {
+const openChart = async (pairName) => {
+  showChart.value = false
   console.log("🚀 ~ file: RSITable.vue:62 ~ openChart ~ pairName: SHOWING CHART", pairName)
-  symbolToChart.value = pairName
+  const inputSymbolData = await dataController.fetchSymbolData(pairName);
+  symbolToChartData.value = inputSymbolData
   showChart.value = true
+
 
   // Get a reference to the TradingChart div
   const tradingChartDiv = document.querySelector('#trading-chart');

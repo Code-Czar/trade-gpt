@@ -1,4 +1,5 @@
 import { FOREX_PAIRS } from "../types";
+import fetch from "node-fetch";
 
 const fs = require('fs');
 

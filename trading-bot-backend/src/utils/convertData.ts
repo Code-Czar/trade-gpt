@@ -1,5 +1,53 @@
 // Explicitly type the parameters and return types
+export const convertTimeFrameToByBitStandard = (interval: string) => {
+    if (interval.includes('m')) {
+        return interval.replace('m', '')
+    }
+    if (interval === "1h") {
+        return '60'
+    }
+    if (interval.includes('d')) {
+        return 'D'
+    }
+    if (interval.includes('M')) {
+        return 'M'
+    }
+    if (interval.includes('W')) {
+        return 'W'
+    }
+    // return interval
 
+};
+export const convertBybitTimeFrameToLocal = (interval: string) => {
+    if (interval === '1') {
+        return '1m'
+    }
+    if (interval === '3') {
+        return '3m'
+    }
+    if (interval === '5') {
+        return '5m'
+    }
+    if (interval === '15') {
+        return '15m'
+    }
+    if (interval === '30') {
+        return '30m'
+    }
+    if (interval === '60') {
+        return '1h'
+    }
+    if (interval === 'D') {
+        return '1d'
+    }
+    if (interval === 'W') {
+        return 'W'
+    }
+    if (interval === 'M') {
+        return 'M'
+    }
+
+};
 
 // Explicitly type the parameters and return types
 export const objectToObject = (obj: { [key: string]: any }): { [key: string]: any } => {
@@ -68,12 +116,16 @@ export const convertPairToJSON = async (pair: any) => {
 export default {
     mapToObject,
     stringifyMap,
-    convertPairToJSON
+    convertPairToJSON,
+    convertTimeFrameToByBitStandard,
+    convertBybitTimeFrameToLocal
 }
 module.exports = {
     mapToObject,
     stringifyMap,
-    convertPairToJSON
+    convertPairToJSON,
+    convertTimeFrameToByBitStandard,
+    convertBybitTimeFrameToLocal
 }
 
 

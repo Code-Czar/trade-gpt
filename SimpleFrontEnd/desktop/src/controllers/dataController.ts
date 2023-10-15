@@ -116,9 +116,18 @@ export const fetchLastRSI = async () => {
 
 };
 
+export const fetchSymbolData = async (symbolName: string) => {
+
+    const result = await fetch(`${BACKEND_URL}/api/getSymbolValues/${symbolName}`)
+    const data = (await result.json())
+    return data
+};
+
+
 export default {
     fetchRSIData,
     fetchLastRSI,
     fetchRSIAndOHLCV,
-    getRSILastData
+    getRSILastData,
+    fetchSymbolData
 }
