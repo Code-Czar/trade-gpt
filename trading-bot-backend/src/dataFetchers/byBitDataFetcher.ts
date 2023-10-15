@@ -2,7 +2,7 @@ const axios = require('axios');
 import { webSocketRegisterToAllOHLCVDataUpdates } from "./ByBitWebSocket";
 import { convertTimeFrameToByBitStandard } from "../utils/convertData";
 
-const bybitAPIEndpoint = 'https://api.bybit.com/v5/market/mark-price-kline';
+const bybitAPIEndpoint = 'https://api.bybit.com/v5/market/kline';
 
 
 
@@ -32,14 +32,13 @@ export const getInitialOHLCV = async (symbolDetails, timeframe, limit = 200, fro
         )
         if (response.data) {
             response.data = response.data.map((item) => {
-                return {
-                    timestamp: parseFloat(item[0]),
-                    open: parseFloat(item[1]),
-                    high: parseFloat(item[2]),
-                    low: parseFloat(item[3]),
-                    close: parseFloat(item[4]),
-                    volume: parseFloat(item[5]),
-                }
+                return [parseFloat(item[0]),
+                parseFloat(item[1]),
+                parseFloat(item[2]),
+                parseFloat(item[3]),
+                parseFloat(item[4]),
+                parseFloat(item[5])]
+
             })
         }
         else {
@@ -73,7 +72,7 @@ export const getInitialOHLCVs = async (symbols, timeframes, limit = 200, from = 
     const shouldRetry = []
 
     while (fetchPromises.length > 0) {
-        const batch = fetchPromises.splice(0, 50); // Get the next batch of 10 promises (and remove them from allPromises)
+        const batch = fetchPromises.splice(0, 100); // Get the next batch of 10 promises (and remove them from allPromises)
         const batchResults = await Promise.all(batch.map(fn => fn())); // Execute current batch of promises in parallel
         batchResults.forEach((batchResult, index) => {
             const { symbolDetails, timeframe, data } = batchResult

@@ -1,7 +1,7 @@
 
 import { PAIR_TYPES, FOREX_PAIRS } from './types/consts'
 import { cryptoFetcher, forexFetcher, byBitDataFetcher } from './dataFetchers';
-import { convertBybitTimeFrameToLocal } from './utils/convertData';
+import { convertBybitTimeFrameToLocal, sortDataAscending } from './utils/convertData';
 import indicators from './indicators';
 
 const fs = require('fs');
@@ -35,6 +35,7 @@ export class TradingBot {
             let ohlcvs: OHLCV | number[] | null = null;
             if (pairType === PAIR_TYPES.leveragePairs) {
                 ohlcvs = symbolData[timeframe].ohlcv;
+                ohlcvs = sortDataAscending(ohlcvs)
 
             } else {
                 ohlcvs = await forexFetcher.fetchFOREXOHLC(symbolDetails as string, timeframe);
@@ -64,13 +65,13 @@ export class TradingBot {
                 storeSymbolPair = this.dataStore.get(pairType).get(symbolName);
             }
 
-            if (storeSymbolPair.ohlcvs.has(timeframe)) {
-                const existingOhlcvs = storeSymbolPair.ohlcvs.get(timeframe);
-                const combinedOhlcvs = existingOhlcvs.concat(ohlcvs);
-                storeSymbolPair.ohlcvs.set(timeframe, combinedOhlcvs.slice(-200)); // Only store the last 200 values
-            } else {
-                storeSymbolPair.ohlcvs.set(timeframe, ohlcvs);
-            }
+            // if (storeSymbolPair.ohlcvs.has(timeframe)) {
+            //     const existingOhlcvs = storeSymbolPair.ohlcvs.get(timeframe);
+            //     const combinedOhlcvs = existingOhlcvs.concat(ohlcvs);
+            //     storeSymbolPair.ohlcvs.set(timeframe, combinedOhlcvs.slice(-200)); // Only store the last 200 values
+            // } else {
+            // }
+            storeSymbolPair.ohlcvs.set(timeframe, ohlcvs);
 
             if (storeSymbolPair.rsi.has(timeframe)) {
                 const existingRsi = storeSymbolPair.rsi.get(timeframe);
@@ -110,14 +111,16 @@ export class TradingBot {
         const symbolName = (await eventData).topic.split('.')[2]
         const timeframe = convertBybitTimeFrameToLocal(eventData.topic.split('.')[1])
         const dataValues = (await eventData).data.map((item) => {
-            return {
-                timestamp: parseFloat(item.timestamp),
-                open: parseFloat(item.open),
-                high: parseFloat(item.high),
-                low: parseFloat(item.low),
-                close: parseFloat(item.close),
-                volume: parseFloat(item.volume),
-            }
+            return [
+
+                parseFloat(item.timestamp),
+                parseFloat(item.open),
+                parseFloat(item.high),
+                parseFloat(item.low),
+                parseFloat(item.close),
+                parseFloat(item.volume),
+            ]
+            // }
         })
         const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs)
         const storePair = this.dataStore.get(PAIR_TYPES.leveragePairs).get(symbolName)
@@ -126,10 +129,10 @@ export class TradingBot {
             console.log("🚀 ~ file: bot.ts:122 ~ TradingBot ~ newOHLCVDataAvailable ~ storePair:", storePair, [...storePair.ohlcvs?.keys()], storePair.details.name, symbolName, timeframe)
         }
         dataValues.forEach((item) => {
-            ohlcvs.push(item)
+            // ohlcvs.push(item)
         }
         );
-        storePair.ohlcvs.set(timeframe, ohlcvs.slice(-200)); // Only store the last 200 values
+        // storePair.ohlcvs.set(timeframe, ohlcvs.slice(-200)); // Only store the last 200 values
         console.log("🚀 ~ file: bot.ts:123 ~ TradingBot ~ newOHLCVDataAvailable ~ symbolName:", symbolName)
     };
 

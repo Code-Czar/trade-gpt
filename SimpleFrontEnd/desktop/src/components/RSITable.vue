@@ -5,7 +5,9 @@
     </q-tabs>
 
     <q-separator />
-    <TradingChart v-if="showChart" :input-symbol-data="symbolToChartData" />
+    <Suspense>
+      <TradingChart :key="forceRefresh" :input-symbol-data="symbolToChartData" />
+    </Suspense>
 
     <q-tab-panels v-model="tab">
       <q-tab-panel name="table">
@@ -46,7 +48,8 @@ const pagination = ref({
   rowsPerPage: 500
 });
 const symbolToChartData = ref('BTCUSDT')
-const showChart = ref(false)
+const showChart = ref(true)
+const forceRefresh = ref(0)
 
 const columns = [
   { name: 'name', label: 'Name', align: 'left', field: row => row?.details.name, sortable: true },
@@ -63,11 +66,13 @@ const openByBit = (pairName) => {
   window.open(`https://www.bybit.com/trade/usdt/${pairName}`, '_blank');
 };
 const openChart = async (pairName) => {
-  showChart.value = false
+  // showChart.value = false
   console.log("🚀 ~ file: RSITable.vue:62 ~ openChart ~ pairName: SHOWING CHART", pairName)
-  const inputSymbolData = await dataController.fetchSymbolData(pairName);
-  symbolToChartData.value = inputSymbolData
-  showChart.value = true
+  // const inputSymbolData = await dataController.fetchSymbolData(pairName);
+  // console.log("🚀 ~ file: RSITable.vue:70 ~ openChart ~ inputSymbolData:", inputSymbolData)
+  symbolToChartData.value = pairName//inputSymbolData
+  // showChart.value = true
+  forceRefresh.value += 1
 
 
   // Get a reference to the TradingChart div

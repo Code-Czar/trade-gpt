@@ -1,4 +1,8 @@
 // Explicitly type the parameters and return types
+export const sortDataAscending = (data) => {
+    return data.sort((a, b) => a[0] - b[0]);
+}
+
 export const convertTimeFrameToByBitStandard = (interval: string) => {
     if (interval.includes('m')) {
         return interval.replace('m', '')
@@ -118,14 +122,16 @@ export default {
     stringifyMap,
     convertPairToJSON,
     convertTimeFrameToByBitStandard,
-    convertBybitTimeFrameToLocal
+    convertBybitTimeFrameToLocal,
+    sortDataAscending
 }
 module.exports = {
     mapToObject,
     stringifyMap,
     convertPairToJSON,
     convertTimeFrameToByBitStandard,
-    convertBybitTimeFrameToLocal
+    convertBybitTimeFrameToLocal,
+    sortDataAscending
 }
 
 
