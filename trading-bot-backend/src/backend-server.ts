@@ -92,32 +92,54 @@ app.get('/api/leverage/:symbol/:subdata/:timeframe', async (req: Request, res: R
 
 
 
-app.post('/api/rsi/bulk', async (req: Request, res: Response) => {
-    const { symbols, timeframes } = req.body;
-    if (!symbols || !timeframes) {
-        return res.status(400).send({ error: 'Symbols and timeframes are required.' });
-    }
+// app.post('/api/rsi/bulk', async (req: Request, res: Response) => {
+//     const { symbols, timeframes } = req.body;
+//     if (!symbols || !timeframes) {
+//         return res.status(400).send({ error: 'Symbols and timeframes are required.' });
+//     }
 
-    const rsiValues = {};
+//     const rsiValues = {};
 
-    for (let symbol of symbols) {
-        rsiValues[symbol] = {};
-        for (let timeframe of timeframes) {
-            try {
-                const symbolData = bot.dataStore.get(PAIR_TYPES.leveragePairs).get(symbol);  // Change PAIR_TYPES.cryptoPairs based on your needs
-                if (symbolData && symbolData.rsi && symbolData.rsi.has(timeframe)) {
-                    rsiValues[symbol][timeframe] = symbolData.rsi.get(timeframe).rsi;
-                } else {
-                    rsiValues[symbol][timeframe] = null;
-                }
-            } catch (error) {
-                console.error(`Error fetching RSI from datastore for ${symbol} and ${timeframe}:`, error);
+//     for (let symbol of symbols) {
+//         rsiValues[symbol] = {};
+//         for (let timeframe of timeframes) {
+//             try {
+//                 const symbolData = bot.dataStore.get(PAIR_TYPES.leveragePairs).get(symbol);  // Change PAIR_TYPES.cryptoPairs based on your needs
+//                 if (symbolData && symbolData.rsi && symbolData.rsi.has(timeframe)) {
+//                     rsiValues[symbol][timeframe] = symbolData.rsi.get(timeframe).rsi;
+//                 } else {
+//                     rsiValues[symbol][timeframe] = null;
+//                 }
+//             } catch (error) {
+//                 console.error(`Error fetching RSI from datastore for ${symbol} and ${timeframe}:`, error);
+//             }
+//         }
+//     }
+//     res.json(rsiValues);
+// });
+
+app.get('/api/lastRsi/bulk', async (req: Request, res: Response) => {
+
+    const leveragePairsResult = await stringifyMap(bot.dataStore.get(PAIR_TYPES.leveragePairs))
+    const result = {}
+    Object.entries(leveragePairsResult).forEach(([symbol, pair]) => {
+        result[symbol] = { rsi: {}, details: pair.details }
+
+        Object.entries(pair.rsi).forEach(([timeFrameKey, data]) => {
+            const lastRSI = data.rsiData
+            // console.log("🚀 ~ file: backend-server.ts:130 ~ Object.entries ~ timeFrameKey:", timeFrameKey, lastRSI, lastRSI.length)
+            if (data.rsiData.length > 0) {
+
+                result[symbol].rsi[timeFrameKey] = data.rsiData[data.rsiData.length - 1].value
             }
-        }
-    }
-    res.json(rsiValues);
-});
+            else {
+                result[symbol].rsi[timeFrameKey] = null
+            }
+        });
+    })
 
+    return res.status(200).json(result)
+})
 app.get('/api/getDataStore', async (req: Request, res: Response) => {
     const leveragePairsResult = await stringifyMap(bot.dataStore.get(PAIR_TYPES.leveragePairs))
     return res.status(200).json(leveragePairsResult)
@@ -128,6 +150,16 @@ app.get('/api/rsi/getValues', async (req: Request, res: Response) => {
     const leveragePairsResult = await stringifyMap(bot.dataStore.get(PAIR_TYPES.leveragePairs))
     return res.status(200).json(leveragePairsResult)
 })
+app.get('/api/getSymbolValues/:symbol', async (req: Request, res: Response) => {
+    let { symbol } = req.params;
+    try {
+        const symbolData = await convertPairToJSON(bot.dataStore.get(PAIR_TYPES.leveragePairs).get(symbol))
+        res.status(200).json(symbolData);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: '/api/leverage/fullData : Error fetching data' });
+    }
+});
 
 app.post('/set-rsi', async (req: Request, res: Response) => {
     const { pair, timeframe, rsiValues } = req.body;

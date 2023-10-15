@@ -85,7 +85,7 @@ export const fetchRSIData = async (addToStore = true) => {
 }
 
 
-export const fetchRSIAndOHLCV = async (addToStore = true) => {
+export const fetchRSIAndOHLCV = async () => {
     if (fetching) {
         return;
     }
@@ -97,11 +97,28 @@ export const fetchRSIAndOHLCV = async (addToStore = true) => {
     console.log("🚀 ~ file: dataController.ts:91 ~ fetchRSIAndOHLCV ~ data:", data)
     dataStore().setAllPairs(data)
     data = null;
+    fetching = false;
+
+};
+export const fetchLastRSI = async () => {
+    if (fetching) {
+        return;
+    }
+    fetching = true;
+
+
+    const result = await fetch(`${BACKEND_URL}/api/lastRsi/bulk`)
+    const data = (await result.json())
+    console.log("🚀 ~ file: dataController.ts:91 ~ fetchRSIAndOHLCV ~ data:", data);
+
+    fetching = false;
+    return data
 
 };
 
 export default {
     fetchRSIData,
+    fetchLastRSI,
     fetchRSIAndOHLCV,
     getRSILastData
 }

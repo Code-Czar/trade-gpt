@@ -1,7 +1,10 @@
+import { FOREX_PAIRS } from "../types";
+
 const fs = require('fs');
 
 
 const FOREX_API_KEY = 'IUQ1W2DHSATKLZY9';
+
 
 
 const FOREX_API_KEYS = [

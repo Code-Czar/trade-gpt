@@ -39,7 +39,7 @@ const convertTimeFrameToByBitStandard = (interval: string) => {
 
 };
 
-export const fetchByBitOHLCV = async (symbol, interval, limit = 1000, from = null, to = null) => {
+export const fetchByBitOHLCV = async (symbol, interval, limit = 200, from = null, to = null) => {
     try {
         // Making HTTP GET request to Bybit API
         const response = await axios.get(bybitAPIEndpoint, {
@@ -65,7 +65,7 @@ export const fetchByBitOHLCV = async (symbol, interval, limit = 1000, from = nul
     }
 }
 
-export const getBinanceHistoricalData = async (pair, interval, limit = 1000) => {
+export const getBinanceHistoricalData = async (pair, interval, limit = 200) => {
     try {
         const url = `https://api.binance.com/api/v3/klines?symbol=${pair}&interval=${interval}&limit=${limit}`;
         const response = await axios.get(url);
@@ -74,7 +74,7 @@ export const getBinanceHistoricalData = async (pair, interval, limit = 1000) => 
         // const closing_prices = data.map((item) => parseFloat(item[4]));
         return data;
     } catch (error) {
-        console.error("🚀 ~ file: bot.ts:327 ~ TradingBot ~ getBinanceHistoricalData ~ error:", pair, error.response.data.msg)
+        // console.error("🚀 ~ file: bot.ts:327 ~ TradingBot ~ getBinanceHistoricalData ~ error:", pair, error.response.data.msg)
 
     }
 }

@@ -55,7 +55,7 @@ export class TradingBot {
 
                 try {
                     ohlcvs = await cryptoFetcher.getBinanceHistoricalData(symbolName, timeframe);
-                    console.log("using BINANCE for:", symbolName);
+                    // console.log("using BINANCE for:", symbolName);
 
                     if (ohlcvs) {
                         // const filePath = path.resolve(__dirname, binanceDataFile);
@@ -65,7 +65,7 @@ export class TradingBot {
                         try {
 
                             ohlcvs = await cryptoFetcher.fetchByBitOHLCV(symbolName, timeframe);
-                            console.log("using BYBIT for : ", symbolName);
+                            // console.log("using BYBIT for : ", symbolName);
                         } catch (error) {
                             console.error(error)
                         }
@@ -101,6 +101,7 @@ export class TradingBot {
                     macd: new Map(),
                     volumes: new Map(),
                     bollingerBands: new Map(),
+                    details: symbol
 
                 });
                 symbolData = this.dataStore.get(pairType).get(symbol);
@@ -146,9 +147,12 @@ export class TradingBot {
                 this.dataStore.get(pairType).set(symbol, symbolData);
 
             }
+            ohlcvs = null;
+            // delete formattedData;
         } catch (error) {
             console.error(`Error populating data store for ${typeof symbol === 'object' ? symbol.name : symbol} and ${timeframe}:`, error);
         }
+
     }
 
     async populateDataStore(timeframes = ['1d', '1h', '5m']) {

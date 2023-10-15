@@ -49,12 +49,12 @@ const symbolToChart = ref('BTCUSDT')
 const showChart = ref(false)
 
 const columns = [
-  { name: 'name', label: 'Name', align: 'left', field: 'name', sortable: true },
-  { name: 'rsi_1d', label: 'RSI 1d', align: 'center', field: 'rsi_1d', sortable: true },
-  { name: 'rsi_1h', label: 'RSI 1h', align: 'center', field: 'rsi_1h', sortable: true },
-  { name: 'rsi_5m', label: 'RSI 5m', align: 'center', field: 'rsi_5m', sortable: true },
-  { name: 'leverage', label: 'Leverage', align: 'center', field: 'maxLeverage', sortable: true },
-  { name: 'view', label: 'ByBit', align: 'center', field: row => row.name, sortable: false }
+  { name: 'name', label: 'Name', align: 'left', field: row => row?.details.name, sortable: true },
+  { name: 'rsi_1d', label: 'RSI 1d', align: 'center', field: row => row?.rsi?.['1d'], sortable: true },
+  { name: 'rsi_1h', label: 'RSI 1h', align: 'center', field: row => row?.rsi?.['1h'], sortable: true },
+  { name: 'rsi_5m', label: 'RSI 5m', align: 'center', field: row => row?.rsi?.['5m'], sortable: true },
+  { name: 'leverage', label: 'Leverage', align: 'center', field: row => row?.details?.leverage_filter?.max_leverage, sortable: true },
+  { name: 'view', label: 'ByBit', align: 'center', field: row => row?.name, sortable: false }
 ];
 let fetching = false;
 const REFRESH_RATE = 20000;
@@ -79,15 +79,17 @@ const openChart = (pairName) => {
 };
 
 const fetchRSIData = async () => {
-  const dataResult = await dataController.getRSILastData()
-  tableData.value = dataResult
+  const dataResult = await dataController.fetchLastRSI()
+  if (!dataResult) return
+  tableData.value = Object.values(dataResult)
+  console.log("🚀 ~ file: RSITable.vue:84 ~ fetchRSIData ~ tableData.value:", tableData.value)
   tableData.value.sort(customSort);  // Resort the tableData  
 };
 
-const fetchAllOHLCS = async () => {
-  const dataResult = await dataController.fetchRSIAndOHLCV()
-  // Resort the tableData  
-};
+// const fetchAllOHLCS = async () => {
+//   const dataResult = await dataController.fetchRSIAndOHLCV()
+//   // Resort the tableData  
+// };
 
 
 
@@ -126,7 +128,7 @@ const descendingCompare = (aValue, bValue) => {
 const startFetching = () => {
   fetching = true
   setInterval(() => {
-    fetchAllOHLCS();
+    // fetchAllOHLCS();
     fetchRSIData();
   }, REFRESH_RATE)
 };
@@ -141,7 +143,7 @@ const sortTable = () => {
 
 onMounted(() => {
   fetchRSIData();
-  fetchAllOHLCS();
+  // fetchAllOHLCS();
   startFetching()
 });
 onBeforeUnmount(() => {
