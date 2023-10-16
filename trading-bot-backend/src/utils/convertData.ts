@@ -34,6 +34,9 @@ export const convertTimeframeToMs = (timeframe: string): number => {
         default: throw new Error(`Unknown timeframe unit: ${unit}`);
     }
 }
+export const getStartOfTimeframe = (timestamp, timeframeMs) => {
+    return timestamp - (timestamp % timeframeMs);
+}
 
 export const convertBybitTimeFrameToLocal = (interval: string) => {
     if (interval === '1') {
@@ -112,21 +115,27 @@ export const stringifyMap = async (nestedMap: Map<string, any>) => {
 }
 
 export const convertPairToJSON = async (pair: any) => {
-    const keys = Object.keys(pair);
-    const obj = {};
-    keys.forEach((key) => {
-        const value = pair[key];
-        if (value instanceof Map) {
-            obj[key] = mapToObject(value);
-        } else if (Array.isArray(value)) {
-            obj[key] = value.map(val => (val instanceof Map ? mapToObject(val) : val));
-        } else if (typeof value === 'object' && value !== null) {
-            obj[key] = objectToObject(value);
-        } else {
-            obj[key] = value;
-        }
-    });
-    return obj;
+    try {
+
+        const keys = Object.keys(pair);
+        const obj = {};
+        keys.forEach((key) => {
+            const value = pair[key];
+            if (value instanceof Map) {
+                obj[key] = mapToObject(value);
+            } else if (Array.isArray(value)) {
+                obj[key] = value.map(val => (val instanceof Map ? mapToObject(val) : val));
+            } else if (typeof value === 'object' && value !== null) {
+                obj[key] = objectToObject(value);
+            } else {
+                obj[key] = value;
+            }
+        });
+        return obj;
+    } catch (error) {
+        console.error("🚀 ~ file: convertData.ts:136 ~ convertPairToJSON ~ error:", error)
+        return {}
+    }
 
 };
 
@@ -137,7 +146,8 @@ export default {
     convertTimeFrameToByBitStandard,
     convertBybitTimeFrameToLocal,
     sortDataAscending,
-    convertTimeframeToMs
+    convertTimeframeToMs,
+    getStartOfTimeframe
 }
 module.exports = {
     mapToObject,
@@ -146,7 +156,8 @@ module.exports = {
     convertTimeFrameToByBitStandard,
     convertBybitTimeFrameToLocal,
     sortDataAscending,
-    convertTimeframeToMs
+    convertTimeframeToMs,
+    getStartOfTimeframe
 }
 
 

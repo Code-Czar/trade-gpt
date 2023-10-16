@@ -1,11 +1,11 @@
 const axios = require('axios');
-import { webSocketRegisterToAllOHLCVDataUpdates } from "./ByBitWebSocket";
+import { webSocketRegisterToAllOHLCVDataUpdates, webSocketRegisterToOHLCVDataForPair, webSocketSetOHLCVsUpdateCallback } from "./ByBitWebSocket";
 import { convertTimeFrameToByBitStandard } from "../utils/convertData";
 
 const bybitAPIEndpoint = 'https://api.bybit.com/v5/market/kline';
 
 
-
+import ByBitWebSocket from "./ByBitWebSocket";
 
 export const getInitialOHLCV = async (symbolDetails, timeframe, limit = 200, from = null, to = null) => {
     const requestParams = {
@@ -61,6 +61,8 @@ export const getInitialOHLCV = async (symbolDetails, timeframe, limit = 200, fro
 
 };
 
+
+
 export const getInitialOHLCVs = async (symbols, timeframes, limit = 200, from = null, to = null) => {
     console.log("🚀 ~ file: ByBitDataFetcher.ts:5 ~ getInitialOHLCVs ~ timeframe:", timeframes)
     const fetchPromises = symbols.flatMap(symbol =>
@@ -99,15 +101,22 @@ export const getInitialOHLCVs = async (symbols, timeframes, limit = 200, from = 
     console.log("🚀 ~ file: ByBitDataFetcher.ts:61 ~ getInitialOHLCVs ~ allResults:", Object.keys(result).length)
     return result;
 };
-
+const setUpdateOHLCVCallback = (callback) => {
+    ByBitWebSocket.webSocketSetOHLCVsUpdateCallback(callback)
+}
 const registerToAllOHLCVDataUpdates = async (symbolNames, timeframes, callback) => {
     webSocketRegisterToAllOHLCVDataUpdates(symbolNames, timeframes, callback)
+};
+const registerToOHLCVDataUpdates = async (symbolNames, timeframes, callback) => {
+    await webSocketRegisterToOHLCVDataForPair(symbolNames, timeframes, callback)
 };
 
 
 
 export default {
     getInitialOHLCV,
+    registerToOHLCVDataUpdates,
     getInitialOHLCVs,
-    registerToAllOHLCVDataUpdates
+    registerToAllOHLCVDataUpdates,
+    setUpdateOHLCVCallback
 }

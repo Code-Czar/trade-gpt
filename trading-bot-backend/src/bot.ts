@@ -1,7 +1,7 @@
 
 import { PAIR_TYPES, FOREX_PAIRS } from './types/consts'
 import { cryptoFetcher, forexFetcher, byBitDataFetcher } from './dataFetchers';
-import { convertBybitTimeFrameToLocal, sortDataAscending, convertTimeframeToMs } from './utils/convertData';
+import { convertBybitTimeFrameToLocal, sortDataAscending, convertTimeframeToMs, getStartOfTimeframe } from './utils/convertData';
 import indicators from './indicators';
 
 const fs = require('fs');
@@ -28,12 +28,18 @@ export class TradingBot {
 
 
     async populateDataStoreForPair(pairType: string, symbolData: BasicObject | string, timeframe: string) {
+        // console.log("🚀 ~ file: bot.ts:31 ~ TradingBot ~ populateDataStoreForPair ~ symbolData:", symbolData)
         const symbolDetails = symbolData.details;
+        // console.log("🚀 ~ file: bot.ts:33 ~ TradingBot ~ populateDataStoreForPair ~ symbolDetails:", symbolDetails)
         const symbolName = symbolDetails.name;
         try {
             let ohlcvs: OHLCV | number[] | null = null;
             if (pairType === PAIR_TYPES.leveragePairs) {
                 ohlcvs = symbolData[timeframe].ohlcv;
+                if (!ohlcvs) {
+                    console.error(`No ohlcvs data found for ${symbolName} and ${timeframe}`);
+                    return;
+                }
                 ohlcvs = sortDataAscending(ohlcvs);
             } else {
                 ohlcvs = await forexFetcher.fetchFOREXOHLC(symbolDetails as string, timeframe);
@@ -95,6 +101,8 @@ export class TradingBot {
         const { upperBand, lowerBand, middleBand } = await indicators.calculateBollingerBands(formattedData, 20);
         storePair.bollingerBands.set(timeframe, { upperBand, middleBand, lowerBand });
     }
+
+
     async newOHLCVDataAvailable(eventData) {
         const symbolName = (await eventData).topic.split('.')[2];
         const timeframeStr = eventData.topic.split('.')[1];
@@ -119,63 +127,66 @@ export class TradingBot {
         }
 
         dataValues.forEach((newItem) => {
-            if (ohlcvs.length === 0 || newItem[0] >= ohlcvs[ohlcvs.length - 1][0] + timeframeMs) {
-                // If ohlcvs is empty or new item is beyond the last candle, push it
-                ohlcvs.push(newItem);
-            } else if (newItem[0] >= ohlcvs[ohlcvs.length - 1][0]) {
-                // If new item is within the last candle, replace it
+            const lastCandleStartTime = getStartOfTimeframe(ohlcvs[ohlcvs.length - 1][0], timeframeMs);
+            const newItemStartTime = getStartOfTimeframe(newItem[0], timeframeMs);
+
+            // Diagnostic logs
+            // console.log(`Last candle timestamp: ${ohlcvs[ohlcvs.length - 1][0]}, Start Time: ${lastCandleStartTime}`);
+            // console.log(`New item timestamp: ${newItem[0]}, Start Time: ${newItemStartTime}`);
+
+            if (lastCandleStartTime === newItemStartTime) {
                 ohlcvs[ohlcvs.length - 1] = newItem;
             } else {
-                // Handle the case where new data is not for the last candle (if needed)
+                ohlcvs.push(newItem);
             }
         });
+
 
         await this.updateIndicators(symbolName, timeframe, ohlcvs);
 
         // Optionally: Only store the last 200 values
         storePair.ohlcvs.set(timeframe, ohlcvs.slice(-200));
-        console.log("🚀 ~ file: bot.ts:123 ~ TradingBot ~ newOHLCVDataAvailable ~ symbolName:", symbolName);
+        console.log("🚀 ~ file: bot.ts:123 ~ TradingBot ~ newOHLCVDataAvailable ~ symbolName:", symbolName, timeframe);
     };
 
 
 
 
 
-    async populateDataStoreParallel(timeframes = [
-        '1d',
-        '1h',
-        '5m',
-        '1m'
-    ]) {
+    async populateDataStoreParallel(timeframes = ['1d', '1h', '5m', '1m']) {
         const leveragePairs = await cryptoFetcher.getBybitPairsWithLeverage();
         // Placeholder for forex and crypto pairs
         const forexPairs = [];
         const cryptoPairs = [];
 
-        // Loop indefinitely to keep fetching data for all pairs
-        const initialHOLCV = await byBitDataFetcher.getInitialOHLCVs(leveragePairs, timeframes, 200);
-        console.log("🚀 ~ file: bot.ts:151 ~ TradingBot ~ initialHOLCV:", initialHOLCV)
-
-        const populatePromises = []
-
-        Object.entries(await initialHOLCV).forEach(([symbolName, timeframes]) => {
-            Object.entries(timeframes).forEach(async ([timeframe, ohlcvData]) => {
-                if (timeframe === "details") {
-                    return;
-                }
-                console.log("🚀 ~ file: bot.ts:156 ~ TradingBot ~ Object.entries ~ timeframe:", symbolName, timeframe)
-                populatePromises.push(() => this.populateDataStoreForPair(PAIR_TYPES.leveragePairs, initialHOLCV[symbolName], timeframe))
-                // await this.populateDataStoreForPair(PAIR_TYPES.leveragePairs, initialHOLCV[symbolName], key)
-
-            })
+        const fetchPromises = [];
+        await byBitDataFetcher.setUpdateOHLCVCallback(this.newOHLCVDataAvailable.bind(this));
+        leveragePairs.forEach(symbol => {
+            timeframes.forEach(timeframe => {
+                fetchPromises.push(async () => {
+                    const result = await byBitDataFetcher.getInitialOHLCV(symbol, timeframe);
+                    if (result && result.data) {
+                        const inputData = {
+                            details: result.symbolDetails,
+                            [timeframe]: {
+                                ohlcv: result.data
+                            },
+                        }
+                        // console.log("🚀 ~ file: bot.ts:167 ~ TradingBot ~ fetchPromises.push ~ inputData:", inputData)
+                        this.populateDataStoreForPair(PAIR_TYPES.leveragePairs, inputData, timeframe);
+                        byBitDataFetcher.registerToOHLCVDataUpdates(symbol.name, timeframe, this.newOHLCVDataAvailable.bind(this));
+                    }
+                });
+            });
         });
-        Promise.all(populatePromises.map(fn => fn())).then((result) => {
 
-            console.log("🚀 ~ file: bot.ts:164 ~ TradingBot ~ Promise:", this.dataStore.get(PAIR_TYPES.leveragePairs).get('10000NFTUSDT'))
-        });
+        while (fetchPromises.length > 0) {
+            const batch = fetchPromises.splice(0, 100); // Get the next batch of 10 promises (and remove them from fetchPromises)
+            await Promise.all(batch.map(fn => fn())); // Execute current batch of promises in parallel
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before next batch
+        }
 
-        await byBitDataFetcher.registerToAllOHLCVDataUpdates(Object.keys(await initialHOLCV), timeframes, this.newOHLCVDataAvailable.bind(this));
-
+        console.log("Data store populated and subscriptions set up for all leverage pairs.");
     }
 
 

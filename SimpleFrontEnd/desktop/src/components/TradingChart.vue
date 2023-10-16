@@ -1,6 +1,6 @@
 <template>
     <div id="trading-chart">
-        <!-- <h4>{{ inputSymbolData.name }}</h4> -->
+        <h4>{{ inputSymbolData }}</h4>
         <button @click="toggleBollingerBands">
             {{ showBollingerBands.value ? 'Hide' : 'Show' }} Bollinger Bands
         </button>
@@ -35,7 +35,7 @@
             <option value="1M">1M</option>
         </select>
         <!-- <div style="min-width:150px; min-height:150px; background-color: red;"></div> -->
-        <div ref="chartContainer" style="min-width: 100px; min-height: 500px"></div>
+        <div ref="chartContainer" style="min-width: 100%; min-height: 500px"></div>
         <div v-if="showRSI" ref="rsiChartContainer" style="width: 100%; height: 200px"></div>
         <div v-if="showVolume" ref="volumeChartContainer" style="width: 100%; height: 300px"></div>
         <!-- <div ref="rsiChartContainer" style="width: 100%; height: 200px"></div>
@@ -48,7 +48,6 @@
 import { ref, onMounted, onUnmounted, watchEffect } from 'vue';
 import { createChart, CrosshairMode } from 'lightweight-charts';
 import { dataStore } from '@/stores/example-store';
-import { SMA, EMA, RSI, MACD, macd } from 'technicalindicators';
 import { indicators } from '@/models';
 import { dataController } from '@/controllers';
 
@@ -288,8 +287,8 @@ const formatOHLCVForChartData = async (data) => {
     const result = [];
     data.forEach((row) => {
         const date = new Date(row[0]);
-        console.log(date.toISOString());  // Outputs the date in ISO format
-        console.log(date.toString());
+        // console.log(date.toISOString());  // Outputs the date in ISO format
+        // console.log(date.toString());
         result.push({
             time: row[0] / 1000,
             // time: formatDateToYYYYMMDD(new Date(row[0])),
@@ -303,12 +302,20 @@ const formatOHLCVForChartData = async (data) => {
     return result;
 };
 const synchronizeCharts = (visibleRange) => {
-    // Update the visible time range of other charts (macdChart, rsiChart, volumeChart, etc.)
-    macdChart?.timeScale().setVisibleRange(visibleRange);
-    rsiChart?.timeScale().setVisibleRange(visibleRange);
-    volumeChart?.timeScale().setVisibleRange(visibleRange);
-    // ... any other charts you want to synchronize
+    if (!visibleRange) return;
+
+    const adjustVisibleRange = (chart) => {
+        if (chart) {
+            chart.timeScale().setVisibleRange(visibleRange);
+        }
+    };
+
+    adjustVisibleRange(macdChart);
+    adjustVisibleRange(rsiChart);
+    adjustVisibleRange(volumeChart);
 };
+
+
 
 const createCandleStickChart = async () => {
     candlestickChart = createChart(chartContainer.value, {
@@ -378,6 +385,9 @@ const createRSIChart = async () => {
             // timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
         },
     });
+    rsiChart?.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
+
+
 };
 const createVolumeChart = async () => {
     volumeChart = createChart(volumeChartContainer.value, {
@@ -393,6 +403,8 @@ const createVolumeChart = async () => {
         color: 'rgba(4, 232, 36, 0.8)',
         priceFormat: { type: 'volume' },
     });
+    volumeChart.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
+
 };
 const createMACDChart = async () => {
     if (macdChartContainer.value && !macdChart) {
@@ -430,6 +442,8 @@ const createMACDChart = async () => {
                 // timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
             },
         });
+        macdChart.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
+
     } else {
         console.error('macdChartContainer is null');
     }
@@ -468,6 +482,7 @@ const createMACDChart = async () => {
             macdChart.resize(chartWidth.value, 150);
         }
     });
+
 };
 
 
@@ -853,11 +868,17 @@ onMounted(async () => {
     chartWidth.value = window.innerWidth;
     // let macdChartElement = document.createElement('div');
     await createCandleStickChart();
-    candlestickChart?.timeScale().subscribeVisibleTimeRangeChange((visibleRange) => {
-        if (visibleRange) {
-            synchronizeCharts(visibleRange);
-        }
-    });
+    // candlestickChart?.timeScale().subscribeVisibleTimeRangeChange((visibleRange) => {
+    //     if (visibleRange) {
+    //         synchronizeCharts(visibleRange);
+    //     }
+    // });
+    candlestickChart?.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
+    // volumeChart?.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
+    // rsiChart?.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
+    // macdChart?.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
+
+
     refreshInterval = setInterval(async () => {
         currentSymbolPair = await dataController.fetchSymbolData(props.inputSymbolData);
         await updateChartsFromPair();
