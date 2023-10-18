@@ -6,7 +6,7 @@
   "scripts": {
     "start": "yarn build; pm2 start ./out/backend-server.js --no-daemon",
     "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "rm -rf ./out/*; tsc src/*.ts --outDir ./out",
+    "build": "rm -rf ./out/*; yarn install; tsc src/*.ts --outDir ./out",
     "test": "mocha -r ts-node/register -r tsconfig-paths/register 'src/**/*.test.ts'"
   },
   "keywords": [],

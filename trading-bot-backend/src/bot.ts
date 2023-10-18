@@ -3,6 +3,7 @@ import { PAIR_TYPES, FOREX_PAIRS } from './types/consts'
 import { cryptoFetcher, forexFetcher, byBitDataFetcher } from './dataFetchers';
 import { convertBybitTimeFrameToLocal, sortDataAscending, convertTimeframeToMs, getStartOfTimeframe } from './utils/convertData';
 import indicators from './indicators';
+import { convertPairToJSON } from './utils/convertData';
 
 const fs = require('fs');
 const path = require('path');
@@ -21,7 +22,7 @@ export class TradingBot {
         this.dataStore.set(PAIR_TYPES.leveragePairs, new Map());
         this.dataStore.set(PAIR_TYPES.forexPairs, new Map());
         this.dataStore.set(PAIR_TYPES.cryptoPairs, new Map());
-        this.webSocketStreamer = webSocketStreamer.getWebSocket();
+        this.webSocketStreamer = webSocketStreamer;
 
     }
 
@@ -98,6 +99,8 @@ export class TradingBot {
         // Calculate and update Bollinger Bands
         const { upperBand, lowerBand, middleBand } = await indicators.calculateBollingerBands(formattedData, 20);
         storePair.bollingerBands.set(timeframe, { upperBand, middleBand, lowerBand });
+
+
     }
 
 
@@ -145,6 +148,7 @@ export class TradingBot {
         // Optionally: Only store the last 200 values
         storePair.ohlcvs.set(timeframe, ohlcvs.slice(-200));
         console.log("🚀 ~ file: bot.ts:123 ~ TradingBot ~ newOHLCVDataAvailable ~ symbolName:", symbolName, timeframe);
+        this.webSocketStreamer.broadcast(`getRealTimeData`, { storePair: await convertPairToJSON(leveragePairs.get(symbolName)) })
     };
 
 

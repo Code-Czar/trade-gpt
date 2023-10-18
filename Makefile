@@ -36,6 +36,9 @@ install_apache_config:
 	# Assuming the Apache config file is located at trading-bot-backend/apache/backend-server-apache.conf
 	sudo cp trading-bot-backend/apache/backend-server-apache.conf /etc/apache2/sites-available/
 	sudo a2ensite backend-server-apache.conf
+	sudo a2enmod proxy_wstunnel
+	sudo a2enmod rewrite
+
 	sudo systemctl reload apache2
 
 install_backend: install_node

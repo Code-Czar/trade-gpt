@@ -1,33 +1,55 @@
+// import { Server as WebSocketServer } from 'ws';
 import { PAIR_TYPES } from './types/consts';
 import { stringifyMap, convertPairToJSON } from './utils/convertData';
 import { cryptoFetcher } from './dataFetchers';
 const { TradingBot } = require('./bot');
 const { WebsocketStreamer } = require('./websocketStreamer');
-
 const express = require('express');
-const cors = require('cors');
 const http = require('http');
-const WebSocketServer = require('ws').Server;
-
-
-const bodyParser = require('body-parser')
+const WebSocket = require('ws');
 
 const app = express();
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
-
+const cors = require('cors');
+const bodyParser = require('body-parser')
 
 app.use(bodyParser.json());
 
 // Enable CORS
 app.use(cors());
 
-const websocketStreamer = new WebsocketStreamer(wss);
+// Create an HTTP server by hand for WebSocket server to use later.
+const server = http.createServer(app);
+
+// Create a WebSocket server by passing the HTTP server instance to WebSocket.Server.
+// const wss = new WebSocket.Server({ server, path: '/ws' });
+
+// // Set up a connection listener to handle incoming WebSocket connections.
+// wss.on('connection', (ws) => {
+//     console.log('Client connected');
+
+//     // Send a welcome message to the newly connected client.
+//     ws.send('Welcome to the WebSocket server!');
+
+//     // Set up a message listener on this connection to receive messages from the client.
+//     ws.on('message', (message) => {
+//         console.log(`Received message: ${message}`);
+//     });
+// });
+
+app.get('/', (req, res) => {
+    res.send('Hello from Express!');
+});
+
+const websocketStreamer = new WebsocketStreamer(server);
 const bot = new TradingBot(websocketStreamer);
+const PORT = 3000;
+server.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});
 
 
-// Fetch new data every 1 minute
-let count = 0;
+
+
 
 app.get('/api/symbols/leverage', async (req: Request, res: Response) => {
     try {
@@ -169,13 +191,15 @@ app.get('/health', (req, res) => {
     }
 });
 
+bot.populateDataStoreParallel()
 
 
-const PORT = 3000;
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-    // bot.populateDataStore()
-    bot.populateDataStoreParallel()
-});
+// const PORT = 3000;
+
+// app.listen(PORT, () => {
+//     console.log(`Server is running on http://localhost:${PORT}`);
+//     // bot.populateDataStore()
+//     // bot.populateDataStoreParallel()
+// });
 

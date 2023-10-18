@@ -5,9 +5,11 @@
   // "include": ["src/types/*.d.ts"],
   "compilerOptions": {
     "noImplicitAny": false,
+    
 
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"], 
+      "shared": ["../Shared/src/index"]
     },
 
     "typeRoots": ["./node_modules/@types", "./src/types/*"],

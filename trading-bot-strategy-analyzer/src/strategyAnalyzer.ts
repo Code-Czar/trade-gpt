@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 
 import { sendSignalEmail } from './email';
 import { sendNotification } from './notificationsSender';
-import { SERVER_DATA_URL, PAIRS_LEVERAGE_URL } from './consts';
+import { BACKEND_URLS } from 'shared';
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 
 
@@ -15,8 +15,8 @@ const RSI_THRESHOLD = 35;  // You can adjust this value as per your requirements
 const notificationsSent = {};
 
 export const fetchRSI = async (timeframes = ["1d", "1h", "5m"]) => {
-    const symbolsUrl = `${SERVER_DATA_URL}/api/symbols/leverage`;
-    const rsiBulkUrl = `${SERVER_DATA_URL}/api/rsi/bulk`;
+    const symbolsUrl = BACKEND_URLS.LEVERAGE_URLS.getLeverageSymbols;
+    const rsiBulkUrl = BACKEND_URLS.RSI_URLS.getAllRSIValues;
 
     const symbolsResponse = await fetch(symbolsUrl, {
         method: 'GET',

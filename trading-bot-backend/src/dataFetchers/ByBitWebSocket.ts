@@ -16,7 +16,7 @@ const apiSecret = '3PBXd8rPDs3uju8N3t1gOrH08TezVfFw0YmB'
 const expires = Math.round(new Date().getTime() + 1000)
 
 const PONG_TIMEOUT = 40000 // 10 seconds, adjust this value as needed
-const PONG_TIMEOUT_COUNT = 2 // number of consecutive timeouts before reconnecting
+const PONG_TIMEOUT_COUNT = 10 // number of consecutive timeouts before reconnecting
 
 let pongTimeout
 let pongTimeoutCount = 0

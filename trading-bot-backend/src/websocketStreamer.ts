@@ -1,76 +1,55 @@
+import { Server as WebSocketServer } from 'ws';
+
 export class WebsocketStreamer {
-    private websocket: any;
-    private clients: Set<any>;
-    private subscriptions: Map<string, Set<any>>;
+    private websocket;
+    private clients: Set<WebSocket> = new Set();
+    private subscriptions: Map<string, Set<WebSocket>> = new Map();
 
-    constructor(webSocket) {
-        this.websocket = webSocket;
-        this.clients = new Set();
-        this.subscriptions = new Map();
+    constructor(server: any) {
+        console.log("🚀 ~ file: websocketStreamer.ts:9 ~ WebsocketStreamer ~ constructor ~ server:", server)
+        this.websocket = new WebSocketServer({ server, path: '/ws' });
 
-        this.websocket.on('connection', (ws) => {
-            console.log('Client connected');
+        this.websocket.on('connection', (ws: WebSocket) => {
+            console.log('SA connected');
             this.clients.add(ws);
 
-            // Ping/Pong mechanism every 1 second
-            const pingInterval = setInterval(() => {
-                ws.ping();
-            }, 1000);
-
-            ws.on('pong', () => {
-                console.log('Pong received');
-            });
-
-            ws.on('message', (message) => {
+            ws.on('message', (message: string) => {
                 const data = JSON.parse(message);
-                switch (data.type) {
-                    case 'subscribe':
-                        this.subscribeClient(ws, data.topic);
-                        break;
-                    case 'unsubscribe':
-                        this.unsubscribeClient(ws, data.topic);
-                        break;
-                    default:
-                        console.log('Received:', message);
-                        break;
+                console.log('Received:', data);
+                if (data.subscribe) {
+                    if (!this.subscriptions.has(data.subscribe)) {
+                        this.subscriptions.set(data.subscribe, new Set());
+                    }
+                    this.subscriptions.get(data.subscribe)?.add(ws);
+                } else if (data.unsubscribe) {
+                    this.subscriptions.get(data.unsubscribe)?.delete(ws);
                 }
             });
 
             ws.on('close', () => {
-                console.log('Client disconnected');
+                console.log('SA disconnected');
                 this.clients.delete(ws);
-                clearInterval(pingInterval);
-                this.unsubscribeClientFromAllTopics(ws);
+                // Remove this client from all subscriptions
+                for (let [, clientSet] of this.subscriptions) {
+                    clientSet.delete(ws);
+                }
             });
         });
-    }
 
-    subscribeClient(client, topic) {
-        if (!this.subscriptions.has(topic)) {
-            this.subscriptions.set(topic, new Set());
-        }
-        this.subscriptions.get(topic).add(client);
-    }
-
-    unsubscribeClient(client, topic) {
-        if (this.subscriptions.has(topic)) {
-            this.subscriptions.get(topic).delete(client);
-        }
-    }
-
-    unsubscribeClientFromAllTopics(client) {
-        for (const clientSet of this.subscriptions.values()) {
-            clientSet.delete(client);
-        }
-    }
-
-    notifyTopic(topic, data) {
-        if (this.subscriptions.has(topic)) {
-            const clients = this.subscriptions.get(topic);
-            clients.forEach(client => {
-                client.send(JSON.stringify({ type: topic, data }));
+        // Ping clients every 1 second to keep the connection alive
+        setInterval(() => {
+            this.clients.forEach((ws: WebSocket) => {
+                ws.ping();
             });
-        }
+        }, 1000);
+    }
+
+    // Function to broadcast data to all clients subscribed to a particular topic
+    broadcast(topic: string, data: any) {
+        const subscribers = this.subscriptions.get(topic);
+        subscribers?.forEach((ws: WebSocket) => {
+            ws.send(JSON.stringify(data));
+        });
     }
 
     getWebSocket() {
