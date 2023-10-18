@@ -1,27 +1,29 @@
-// // import express, { Request, Response } from 'express';
-// import cors from 'cors';
-// import bodyParser from 'body-parser';
 import { PAIR_TYPES } from './types/consts';
 import { stringifyMap, convertPairToJSON } from './utils/convertData';
 import { cryptoFetcher } from './dataFetchers';
 const { TradingBot } = require('./bot');
+const { WebsocketStreamer } = require('./websocketStreamer');
 
-
-const bot = new TradingBot('binance');
 const express = require('express');
-// const { Request, Response } = require('express');
 const cors = require('cors');
-// const bodyParser = require('bodyParser');
+const http = require('http');
+const WebSocketServer = require('ws').Server;
+
+
 const bodyParser = require('body-parser')
-// const dataConvertor = require('./utils/convertData')
 
 const app = express();
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+
 
 app.use(bodyParser.json());
 
 // Enable CORS
 app.use(cors());
 
+const websocketStreamer = new WebsocketStreamer(wss);
+const bot = new TradingBot(websocketStreamer);
 
 
 // Fetch new data every 1 minute
@@ -88,35 +90,6 @@ app.get('/api/leverage/:symbol/:subdata/:timeframe', async (req: Request, res: R
     }
 });
 
-
-
-
-
-// app.post('/api/rsi/bulk', async (req: Request, res: Response) => {
-//     const { symbols, timeframes } = req.body;
-//     if (!symbols || !timeframes) {
-//         return res.status(400).send({ error: 'Symbols and timeframes are required.' });
-//     }
-
-//     const rsiValues = {};
-
-//     for (let symbol of symbols) {
-//         rsiValues[symbol] = {};
-//         for (let timeframe of timeframes) {
-//             try {
-//                 const symbolData = bot.dataStore.get(PAIR_TYPES.leveragePairs).get(symbol);  // Change PAIR_TYPES.cryptoPairs based on your needs
-//                 if (symbolData && symbolData.rsi && symbolData.rsi.has(timeframe)) {
-//                     rsiValues[symbol][timeframe] = symbolData.rsi.get(timeframe).rsi;
-//                 } else {
-//                     rsiValues[symbol][timeframe] = null;
-//                 }
-//             } catch (error) {
-//                 console.error(`Error fetching RSI from datastore for ${symbol} and ${timeframe}:`, error);
-//             }
-//         }
-//     }
-//     res.json(rsiValues);
-// });
 
 app.get('/api/lastRsi/bulk', async (req: Request, res: Response) => {
 

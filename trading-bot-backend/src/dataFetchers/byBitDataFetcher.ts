@@ -104,11 +104,16 @@ export const getInitialOHLCVs = async (symbols, timeframes, limit = 200, from = 
 const setUpdateOHLCVCallback = (callback) => {
     ByBitWebSocket.webSocketSetOHLCVsUpdateCallback(callback)
 }
+
+const setReconnectCallback = (callback) => {
+    ByBitWebSocket.setReconnectCallback(callback)
+}
+
 const registerToAllOHLCVDataUpdates = async (symbolNames, timeframes, callback) => {
-    webSocketRegisterToAllOHLCVDataUpdates(symbolNames, timeframes, callback)
+    ByBitWebSocket.webSocketRegisterToAllOHLCVDataUpdates(symbolNames, timeframes, callback)
 };
 const registerToOHLCVDataUpdates = async (symbolNames, timeframes, callback) => {
-    await webSocketRegisterToOHLCVDataForPair(symbolNames, timeframes, callback)
+    await ByBitWebSocket.webSocketRegisterToOHLCVDataForPair(symbolNames, timeframes)
 };
 
 
@@ -118,5 +123,6 @@ export default {
     registerToOHLCVDataUpdates,
     getInitialOHLCVs,
     registerToAllOHLCVDataUpdates,
-    setUpdateOHLCVCallback
+    setUpdateOHLCVCallback,
+    setReconnectCallback
 }

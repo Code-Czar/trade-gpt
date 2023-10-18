@@ -15,17 +15,15 @@ export class TradingBot {
     public allSymbols = [];
     public dataStore = new Map();
     public refreshRate = 0;
+    private webSocketStreamer: any;
 
-    constructor(exchangeId: string) {
+    constructor(webSocketStreamer) {
         this.dataStore.set(PAIR_TYPES.leveragePairs, new Map());
         this.dataStore.set(PAIR_TYPES.forexPairs, new Map());
         this.dataStore.set(PAIR_TYPES.cryptoPairs, new Map());
+        this.webSocketStreamer = webSocketStreamer.getWebSocket();
 
     }
-
-
-
-
 
     async populateDataStoreForPair(pairType: string, symbolData: BasicObject | string, timeframe: string) {
         // console.log("🚀 ~ file: bot.ts:31 ~ TradingBot ~ populateDataStoreForPair ~ symbolData:", symbolData)
@@ -160,6 +158,7 @@ export class TradingBot {
         const cryptoPairs = [];
 
         const fetchPromises = [];
+        await byBitDataFetcher.setReconnectCallback(this.populateDataStoreParallel.bind(this));
         await byBitDataFetcher.setUpdateOHLCVCallback(this.newOHLCVDataAvailable.bind(this));
         leveragePairs.forEach(symbol => {
             timeframes.forEach(timeframe => {
