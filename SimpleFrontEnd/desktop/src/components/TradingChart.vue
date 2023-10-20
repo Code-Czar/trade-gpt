@@ -46,6 +46,12 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, watchEffect } from 'vue';
+import {
+    findPeaksAndTroughs,
+    identifyAndMarkReversals,
+    computeEMASignals,
+    formatOHLCVForChartData,
+} from 'trading-shared';
 import { createChart, CrosshairMode } from 'lightweight-charts';
 import { dataStore } from '@/stores/example-store';
 import { indicators } from '@/models';
@@ -57,7 +63,10 @@ const props = defineProps({
         required: true,
     },
 });
-console.log("🚀 ~ file: TradingChart.vue:56 ~ inputSymbolData:", props.inputSymbolData)
+console.log(
+    '🚀 ~ file: TradingChart.vue:56 ~ inputSymbolData:',
+    props.inputSymbolData
+);
 
 let rsiSeries = null;
 const showRSI = ref(false);
@@ -74,7 +83,6 @@ let middleBandSeries = null;
 let lowerBandSeries = null;
 
 const chartContainer = ref(null);
-
 
 let smaSeries = null;
 let emaSeries = {};
@@ -108,8 +116,9 @@ const showBollingerBands = ref(false);
 const showSMA = ref(false);
 const showEMA = ref(false);
 const showVolume = ref(true);
-let currentSymbolPair = await dataController.fetchSymbolData(props.inputSymbolData);
-
+let currentSymbolPair = await dataController.fetchSymbolData(
+    props.inputSymbolData
+);
 
 const showSupport = ref(false);
 const showResistance = ref(false);
@@ -120,60 +129,6 @@ let reversalMarkers = [];
 let emaMarkers = [];
 let trendlineMarkers = {};
 let refreshInterval = null;
-
-
-
-const findPeaksAndTroughs = (data) => {
-    const peaks = [];
-    const troughs = [];
-    for (let i = 1; i < data.length - 1; i++) {
-        if (data[i].high > data[i - 1].high && data[i].high > data[i + 1].high) {
-            peaks.push(data[i]);
-        } else if (data[i].low < data[i - 1].low && data[i].low < data[i + 1].low) {
-            troughs.push(data[i]);
-        }
-    }
-    peaks.push(data[data.length - 1]);
-    troughs.push(data[data.length - 1]);
-    return { peaks, troughs };
-};
-
-const calculateSlope = (point1, point2) => {
-    return (point2.value - point1.value) / (point2.time - point1.time);
-};
-
-const identifyAndMarkReversals = (points, trendBand = 'upper') => {
-    if (points.length < 3) return; // Need at least 3 points to identify a reversal
-    reversalMarkers = [];
-
-    for (let i = 1; i < points.length - 1; i++) {
-        const slope1 = calculateSlope(points[i - 1], points[i]);
-        const slope2 = calculateSlope(points[i], points[i + 1]);
-
-        // Check for reversal
-        if (Math.sign(slope1) !== Math.sign(slope2)) {
-            // Reversal found, add marker
-            if (trendBand === 'upper') {
-                reversalMarkers.push({
-                    time: points[i].time,
-                    position: 'aboveBar',
-                    color: 'rgba(255, 0, 0, 1)',
-                    shape: 'circle',
-                    text: 'R - upper',
-                });
-            } else if (trendBand === 'lower') {
-                reversalMarkers.push({
-                    time: points[i].time,
-                    position: 'belowBar',
-                    color: 'rgba(0, 0, 255, 1)',
-                    shape: 'circle',
-                    text: 'R - lower',
-                });
-            }
-        }
-    }
-    return reversalMarkers;
-};
 
 const updateMarkser = () => {
     candlestickSeries.setMarkers([
@@ -216,10 +171,7 @@ const drawTrendLines = (peaks, troughs) => {
             value: peak.high,
         }));
         downtrendLineSeries.setData(mappedPeaks);
-        // downtrendLineSeries.setData([
-        //     { time: peaks[0].time, value: peaks[0].high },
-        //     { time: peaks[1].time, value: peaks[1].high },
-        // ]);
+
         trendlineMarkers.higherMarkers = identifyAndMarkReversals(
             mappedPeaks,
             'upper'
@@ -229,19 +181,7 @@ const drawTrendLines = (peaks, troughs) => {
 };
 
 const addEMASignals = (formattedData, ema28Data, period = 28) => {
-    const emaSignals = [];
-    const emaData = ema28Data; //.map((value, index) => ({ time: formattedData[index + period - 1].time, value: value.value }));
-    formattedData.forEach((dataPoint, index) => {
-        if (index < period - 1) return;
-
-        if (dataPoint.close < emaData[index - period + 1].value) {
-            emaSignals.push({
-                time: dataPoint.time,
-                value: dataPoint.low,
-                color: 'rgba(255, 0, 0, 1)',
-            });
-        }
-    });
+    const emaSignals = computeEMASignals(formattedData, ema28Data, period);
     if (!emaMarkersSeries) {
         emaMarkersSeries = candlestickChart.addCandlestickSeries({
             upColor: '#26a69a',
@@ -270,9 +210,9 @@ const addEMAFromData = async (
     const convertedToSeconds = emaData.map((data) => {
         return {
             time: data.time / 1000,
-            value: data.value
-        }
-    })
+            value: data.value,
+        };
+    });
 
     if (emaSeries[period]) {
         emaSeries[period].setData(convertedToSeconds);
@@ -287,11 +227,9 @@ const formatOHLCVForChartData = async (data) => {
     const result = [];
     data.forEach((row) => {
         const date = new Date(row[0]);
-        // console.log(date.toISOString());  // Outputs the date in ISO format
-        // console.log(date.toString());
+
         result.push({
             time: row[0] / 1000,
-            // time: formatDateToYYYYMMDD(new Date(row[0])),
             open: parseFloat(row[1]),
             high: parseFloat(row[2]),
             low: parseFloat(row[3]),
@@ -315,16 +253,13 @@ const synchronizeCharts = (visibleRange) => {
     adjustVisibleRange(volumeChart);
 };
 
-
-
 const createCandleStickChart = async () => {
     candlestickChart = createChart(chartContainer.value, {
         width: chartContainer.value.offsetWidth,
         height: chartContainer.value.offsetHeight,
         timeScale: {
             timeVisible: true,
-            // Use timeFormat to format the date as per your preference
-            // timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
+
         },
         rightPriceScale: {
             borderColor: '#D1D4DC',
@@ -345,7 +280,10 @@ const createCandleStickChart = async () => {
             },
         },
     });
-    console.log("🚀 ~ file: TradingChart.vue:318 ~ createCandleStickChart ~ candlestickChart:", candlestickChart)
+    console.log(
+        '🚀 ~ file: TradingChart.vue:318 ~ createCandleStickChart ~ candlestickChart:',
+        candlestickChart
+    );
     candlestickSeries = candlestickChart.addCandlestickSeries({
         upColor: 'rgb(38,166,154)',
         downColor: 'rgb(255,82,82)',
@@ -371,8 +309,6 @@ const createCandleStickChart = async () => {
         lineWidth: 1,
         lineStyle: 1,
     });
-
-
 };
 
 const createRSIChart = async () => {
@@ -386,8 +322,6 @@ const createRSIChart = async () => {
         },
     });
     rsiChart?.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
-
-
 };
 const createVolumeChart = async () => {
     volumeChart = createChart(volumeChartContainer.value, {
@@ -404,7 +338,6 @@ const createVolumeChart = async () => {
         priceFormat: { type: 'volume' },
     });
     volumeChart.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
-
 };
 const createMACDChart = async () => {
     if (macdChartContainer.value && !macdChart) {
@@ -443,7 +376,6 @@ const createMACDChart = async () => {
             },
         });
         macdChart.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
-
     } else {
         console.error('macdChartContainer is null');
     }
@@ -482,28 +414,31 @@ const createMACDChart = async () => {
             macdChart.resize(chartWidth.value, 150);
         }
     });
-
 };
-
-
 
 const updateData = async (symbolPairData) => {
     if (!symbolPairData) return;
 
     const seriesValues = symbolPairData.ohlcvs[selectedTimeFrame.value];
-    console.log("🚀 ~ file: TradingChart.vue:481 ~ updateData ~ seriesValues:", seriesValues)
+    console.log(
+        '🚀 ~ file: TradingChart.vue:481 ~ updateData ~ seriesValues:',
+        seriesValues
+    );
     const firstSerie = seriesValues;
     if (!firstSerie || !candlestickChart) return;
 
     formattedData = await formatOHLCVForChartData(firstSerie);
-    return formattedData
+    return formattedData;
     // formattedData = formattedData.reverse()
 };
 
-
 const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
     const formatted = await updateData(symbolPairData);
-    console.log("🚀 ~ file: TradingChart.vue:491 ~ updateChartsFromPair ~ formatted:", symbolPairData, formatted)
+    console.log(
+        '🚀 ~ file: TradingChart.vue:491 ~ updateChartsFromPair ~ formatted:',
+        symbolPairData,
+        formatted
+    );
     if (!symbolPairData?.ohlcvs?.[selectedTimeFrame.value]) return;
     if (candlestickSeries) {
         if (uptrendLineSeries) {
@@ -517,7 +452,9 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
         // ];
         // const sorted = sortDataAscending(duplicate)
 
-        let formatted1 = await formatOHLCVForChartData(symbolPairData.ohlcvs[selectedTimeFrame.value]);
+        let formatted1 = await formatOHLCVForChartData(
+            symbolPairData.ohlcvs[selectedTimeFrame.value]
+        );
         candlestickSeries.setData(formatted1);
         const { peaks, troughs } = findPeaksAndTroughs(formatted1);
         drawTrendLines(peaks, troughs);
@@ -529,21 +466,21 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
         const upperConvertedToSeconds = upperBand.map((data) => {
             return {
                 time: data.time / 1000,
-                value: data.value
-            }
-        })
+                value: data.value,
+            };
+        });
         const lowerBandConvertedToSeconds = lowerBand.map((data) => {
             return {
                 time: data.time / 1000,
-                value: data.value
-            }
-        })
+                value: data.value,
+            };
+        });
         const middleBandConvertedToSeconds = middleBand.map((data) => {
             return {
                 time: data.time / 1000,
-                value: data.value
-            }
-        })
+                value: data.value,
+            };
+        });
         if (upperBandSeries) {
             upperBandSeries.setData(upperConvertedToSeconds);
         } else {
@@ -598,9 +535,9 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
         const rsiDataConvertedToSeconds = rsiData.map((data) => {
             return {
                 time: data.time / 1000,
-                value: data.value
-            }
-        })
+                value: data.value,
+            };
+        });
 
         if (rsiSeries) {
             rsiSeries.setData(rsiDataConvertedToSeconds);
@@ -675,9 +612,7 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
             await createVolumeChart();
         }
         const volumeData = symbolPairData.volumes[selectedTimeFrame.value];
-        const duplicate = [
-            ...volumeData,
-        ];
+        const duplicate = [...volumeData];
         // const sorted = sortDataAscending(duplicate)
         volumeSeries?.setData(duplicate);
     } else {
@@ -690,27 +625,36 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
         }
         const { macdData, signalData, histogramData } =
             symbolPairData.macd[selectedTimeFrame.value];
-        console.log("🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ histogramData:", histogramData)
-        console.log("🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ signalData:", signalData)
-        console.log("🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ macdData:", macdData)
+        console.log(
+            '🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ histogramData:',
+            histogramData
+        );
+        console.log(
+            '🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ signalData:',
+            signalData
+        );
+        console.log(
+            '🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ macdData:',
+            macdData
+        );
         const macdDataConvertedToSeconds = macdData.map((data) => {
             return {
                 time: data.time / 1000,
-                value: data.value
-            }
-        })
+                value: data.value,
+            };
+        });
         const signalDataConvertedToSeconds = signalData.map((data) => {
             return {
                 time: data.time / 1000,
-                value: data.value
-            }
-        })
+                value: data.value,
+            };
+        });
         const histogramDataConvertedToSeconds = histogramData.map((data) => {
             return {
                 time: data.time / 1000,
-                value: data.value
-            }
-        })
+                value: data.value,
+            };
+        });
 
         if (macdSeries) {
             macdSeries.setData(macdDataConvertedToSeconds);
@@ -815,7 +759,6 @@ watchEffect(async () => {
 
     // await updateData(currentSymbolPair);
     await updateChartsFromPair();
-
 });
 
 const toggleSupport = () => {
@@ -864,7 +807,10 @@ const toggleMACD = () => {
 };
 
 onMounted(async () => {
-    console.log("🚀 ~ file: TradingChart.vue:809 ~ onMounted ~ onMounted:", onMounted)
+    console.log(
+        '🚀 ~ file: TradingChart.vue:809 ~ onMounted ~ onMounted:',
+        onMounted
+    );
     chartWidth.value = window.innerWidth;
     // let macdChartElement = document.createElement('div');
     await createCandleStickChart();
@@ -873,14 +819,17 @@ onMounted(async () => {
     //         synchronizeCharts(visibleRange);
     //     }
     // });
-    candlestickChart?.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
+    candlestickChart
+        ?.timeScale()
+        .subscribeVisibleTimeRangeChange(synchronizeCharts);
     // volumeChart?.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
     // rsiChart?.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
     // macdChart?.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
 
-
     refreshInterval = setInterval(async () => {
-        currentSymbolPair = await dataController.fetchSymbolData(props.inputSymbolData);
+        currentSymbolPair = await dataController.fetchSymbolData(
+            props.inputSymbolData
+        );
         await updateChartsFromPair();
     }, 1000 * 2);
 });

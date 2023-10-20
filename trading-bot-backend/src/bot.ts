@@ -17,6 +17,7 @@ export class TradingBot {
     public dataStore = new Map();
     public refreshRate = 0;
     private webSocketStreamer: any;
+    public isUpdating = false;
 
     constructor(webSocketStreamer) {
         this.dataStore.set(PAIR_TYPES.leveragePairs, new Map());
@@ -156,6 +157,11 @@ export class TradingBot {
 
 
     async populateDataStoreParallel(timeframes = ['1d', '1h', '5m', '1m']) {
+        if (this.isUpdating) {
+            return
+        }
+        this.isUpdating = true
+
         const leveragePairs = await cryptoFetcher.getBybitPairsWithLeverage();
         // Placeholder for forex and crypto pairs
         const forexPairs = [];
@@ -190,6 +196,7 @@ export class TradingBot {
         }
 
         console.log("Data store populated and subscriptions set up for all leverage pairs.");
+        this.isUpdating = false;
     }
 
 

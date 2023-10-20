@@ -21,12 +21,26 @@ const PONG_TIMEOUT_COUNT = 10 // number of consecutive timeouts before reconnect
 let pongTimeout
 let pongTimeoutCount = 0
 
-export const publicClient = new WebSocket(WEB_SOCKETS_URLS.FUTURES)
+export let publicClient = new WebSocket(WEB_SOCKETS_URLS.FUTURES)
 const privateClient = new WebSocket(WEB_SOCKETS_URLS.PRIVATE)
 
 const callbacks = {
     OHLCVsUpdateCallback: null,
     restartCallback: null,
+}
+function initPublicClient() {
+    publicClient = new WebSocket(WEB_SOCKETS_URLS.FUTURES)
+    publicClient.on('open', function () {
+        console.log('"open" event!')
+        console.log('WebSocket Client Connected')
+        const expires = new Date().getTime() + 10000
+        const signature = crypto
+            .createHmac('sha256', apiSecret)
+            .update('GET/realtime' + expires)
+            .digest('hex')
+
+        setupPingPongHandlers(publicClient, WEB_SOCKETS_URLS.FUTURES)
+    })
 }
 
 function setupPingPongHandlers(client, url) {
@@ -46,7 +60,8 @@ function setupPingPongHandlers(client, url) {
             pongTimeoutCount++;
             if (pongTimeoutCount >= PONG_TIMEOUT_COUNT) {
                 console.error('Pong not received, reconnecting')
-                client.terminate()
+                publicClient.terminate()
+                initPublicClient()
                 callbacks.restartCallback?.()
             }
             // client.terminate(); // This will trigger the close event and your reconnection logic
@@ -85,24 +100,6 @@ privateClient.on('pong', function (data, flags) {
     console.log('pong received')
 })
 
-publicClient.on('open', function () {
-    console.log('"open" event!')
-    console.log('WebSocket Client Connected')
-    const expires = new Date().getTime() + 10000
-    const signature = crypto
-        .createHmac('sha256', apiSecret)
-        .update('GET/realtime' + expires)
-        .digest('hex')
-
-    setupPingPongHandlers(publicClient, WEB_SOCKETS_URLS.FUTURES)
-})
-
-publicClient.on('ping', function (data, flags) {
-    console.log('ping received')
-})
-publicClient.on('pong', function (data, flags) {
-    console.log('pong received')
-})
 export const webSocketSetOHLCVsUpdateCallback = (callback) => {
     callbacks.OHLCVsUpdateCallback = callback
     publicClient.on('message', function (data) {
@@ -155,6 +152,7 @@ export const webSocketRegisterToAllOHLCVDataUpdates = async (
         })
     })
 }
+initPublicClient()
 
 export default {
     webSocketRegisterToAllOHLCVDataUpdates,

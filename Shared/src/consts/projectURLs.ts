@@ -1,13 +1,26 @@
-const dotenv = require('dotenv');
-const path = require('path');
-const dotenvPath = path.resolve(__dirname, '.env_shared');
-dotenv.config({ path: dotenvPath });
+import config from './config.json';
 
-console.log("Current directory LIBRARY :", dotenvPath);
+let REMOTE_URL: string;
+let REMOTE_WSS_URL: string;
 
+// Check if we are in a Node.js environment
+if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+    const fs = require('fs');
+    const path = require('path');
+    const configPath = path.resolve(__dirname, 'config.json');
+    const jsonData = fs.readFileSync(configPath, 'utf-8');
+    const loadedConfig = JSON.parse(jsonData);
 
-export const REMOTE_URL = 'https://' + process.env.REMOTE_URL;
-export const REMOTE_WSS_URL = 'wss://' + process.env.REMOTE_URL;
+    REMOTE_URL = 'https://' + loadedConfig.REMOTE_URL;
+    REMOTE_WSS_URL = 'wss://' + loadedConfig.REMOTE_URL;
+} else {
+    // In a browser environment, use the imported config
+    REMOTE_URL = 'https://' + config.REMOTE_URL;
+    REMOTE_WSS_URL = 'wss://' + config.REMOTE_URL;
+}
+
+// ... rest of the code remains unchanged
+
 
 
 export const SERVER_PORTS = {

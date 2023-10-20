@@ -38,8 +38,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.analyzeData = exports.fetchRSIAndCheckThreshold = exports.checkRSIThresholds = exports.fetchRSI = void 0;
 var fetch = require('node-fetch');
-var email_1 = require("./email");
-var notificationsSender_1 = require("./notificationsSender");
+var email_1 = require("./notifiers/email");
+var notificationsSender_1 = require("./notifiers/notificationsSender");
 var shared_1 = require("shared");
 var positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 var RSIUpperThreshold = 51;

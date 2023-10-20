@@ -6,11 +6,12 @@ console.log("🚀 ~ file: backendWebSocket.ts:2 ~ BACKEND_URLS:", shared_1.BACKE
 // const WebSocket = require('ws')
 var WebSocket = require("ws");
 var BackendClient = /** @class */ (function () {
-    function BackendClient(BACKEND_WEBSOCKET_URL) {
+    function BackendClient(strategyAnalyzer, BACKEND_WEBSOCKET_URL) {
         if (BACKEND_WEBSOCKET_URL === void 0) { BACKEND_WEBSOCKET_URL = shared_1.BACKEND_URLS.WEBSOCKET; }
         this.ws = null;
         this.RECONNECT_INTERVAL = 5000; // 5 seconds
         this.isConnected = false;
+        this.strategyAnalyzer = strategyAnalyzer;
         this.BACKEND_WEBSOCKET_URL = BACKEND_WEBSOCKET_URL;
         console.log("🚀 ~ file: backendWebSocket.ts:15 ~ BackendClient ~ constructor ~ this.BACKEND_WEBSOCKET_URL:", this.BACKEND_WEBSOCKET_URL);
         this.connect();
@@ -39,20 +40,20 @@ var BackendClient = /** @class */ (function () {
         this.subscribeToTopic('getKlines');
         this.subscribeToTopic('getRealTimeData');
     };
-    BackendClient.prototype.onClose = function () {
-        var _this = this;
-        console.log('Disconnected from BE');
-        this.isConnected = false;
-        // Attempt to reconnect after some time
-        setTimeout(function () {
-            console.log('Attempting to reconnect...');
-            _this.connect();
-        }, this.RECONNECT_INTERVAL);
-    };
     BackendClient.prototype.onMessage = function (data) {
+        var _a, _b;
         var dataObject = JSON.parse(data);
-        console.log("Received data from BE: ".concat(data));
-        console.log("Data Object: ".concat(dataObject));
+        console.log("Received data from BE");
+        try {
+            console.log("🚀 ~ file: backendWebSocket.ts:64 ~ BackendClient ~ dataObject:", dataObject.topic);
+            if (dataObject.topic === 'getRealTimeData') {
+                (_a = this.strategyAnalyzer) === null || _a === void 0 ? void 0 : _a.analyzeRSIRealTime(dataObject.data);
+                (_b = this.strategyAnalyzer) === null || _b === void 0 ? void 0 : _b.analyzeRSIPastData(dataObject.data);
+            }
+        }
+        catch (error) {
+            console.log("🚀 ~ file: backendWebSocket.ts:71 ~ BackendClient ~ onMessage ~ error:", error, dataObject);
+        }
     };
     BackendClient.prototype.onPong = function () {
         console.log('Received pong from BE');
@@ -67,6 +68,16 @@ var BackendClient = /** @class */ (function () {
         if (this.ws) {
             this.ws.send(JSON.stringify({ unsubscribe: topic }));
         }
+    };
+    BackendClient.prototype.onClose = function () {
+        var _this = this;
+        console.log('Disconnected from BE');
+        this.isConnected = false;
+        // Attempt to reconnect after some time
+        setTimeout(function () {
+            console.log('Attempting to reconnect...');
+            _this.connect();
+        }, this.RECONNECT_INTERVAL);
     };
     return BackendClient;
 }());

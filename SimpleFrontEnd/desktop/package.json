@@ -6,10 +6,12 @@
   "author": "Benjamin Tourrette <benjamintourrettepro@gmail.com>",
   "private": true,
   "scripts": {
+    "linkShared": "yarn link ../../Shared; yarn add --force ../../Shared",
     "lint": "eslint --ext .js,.ts,.vue ./",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "echo \"No test specified\" && exit 0",
-    "dev": "quasar dev",
+    "dev": "yarn linkShared; quasar dev",
+    "prebuild": "yarn buildShared && yarn linkShared",
     "build": "quasar build"
   },
   "dependencies": {
@@ -17,13 +19,14 @@
     "@quasar/app": "^3.3.3",
     "@quasar/cli": "^2.3.0",
     "@quasar/extras": "^1.16.4",
-  
     "axios": "^1.5.0",
     "onesignal": "^0.1.2",
     "onesignal-sdk": "^0.0.1",
     "onesignal-vue": "^2.0.1",
     "pinia": "^2.0.11",
     "quasar": "^2.6.0",
+    "shared": "../../Shared",
+    "trading-shared": "../../Shared",
     "vue": "^3.0.0",
     "vue-i18n": "^9.2.2",
     "vue-router": "^4.0.0"

@@ -48,7 +48,7 @@ export class WebsocketStreamer {
     broadcast(topic: string, data: any) {
         const subscribers = this.subscriptions.get(topic);
         subscribers?.forEach((ws: WebSocket) => {
-            ws.send(JSON.stringify(data));
+            ws.send(JSON.stringify({ topic, data: data }));
         });
     }
 

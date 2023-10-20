@@ -10,8 +10,10 @@ export class BackendClient {
     private BACKEND_WEBSOCKET_URL: string;
     private readonly RECONNECT_INTERVAL: number = 5000;  // 5 seconds
     private isConnected: boolean = false;
+    private strategyAnalyzer: any;
 
-    constructor(BACKEND_WEBSOCKET_URL: string = BACKEND_URLS.WEBSOCKET) {
+    constructor(strategyAnalyzer, BACKEND_WEBSOCKET_URL: string = BACKEND_URLS.WEBSOCKET) {
+        this.strategyAnalyzer = strategyAnalyzer;
         this.BACKEND_WEBSOCKET_URL = BACKEND_WEBSOCKET_URL;
         console.log("🚀 ~ file: backendWebSocket.ts:15 ~ BackendClient ~ constructor ~ this.BACKEND_WEBSOCKET_URL:", this.BACKEND_WEBSOCKET_URL)
         this.connect();
@@ -44,21 +46,21 @@ export class BackendClient {
         this.subscribeToTopic('getRealTimeData');
     }
 
-    private onClose() {
-        console.log('Disconnected from BE');
-        this.isConnected = false;
-
-        // Attempt to reconnect after some time
-        setTimeout(() => {
-            console.log('Attempting to reconnect...');
-            this.connect();
-        }, this.RECONNECT_INTERVAL);
-    }
 
     private onMessage(data: any) {
         const dataObject = JSON.parse(data);
-        console.log(`Received data from BE: ${data}`);
-        console.log(`Data Object: ${dataObject}`);
+        console.log(`Received data from BE`);
+        try {
+            console.log("🚀 ~ file: backendWebSocket.ts:64 ~ BackendClient ~ dataObject:", dataObject.topic)
+            if (dataObject.topic === 'getRealTimeData') {
+                this.strategyAnalyzer?.analyzeRSIRealTime(dataObject.data);
+                this.strategyAnalyzer?.analyzeRSIPastData(dataObject.data);
+            }
+
+        } catch (error) {
+            console.log("🚀 ~ file: backendWebSocket.ts:71 ~ BackendClient ~ onMessage ~ error:", error, dataObject)
+
+        }
     }
 
     private onPong() {
@@ -77,5 +79,16 @@ export class BackendClient {
             this.ws.send(JSON.stringify({ unsubscribe: topic }));
         }
     }
+    private onClose() {
+        console.log('Disconnected from BE');
+        this.isConnected = false;
+
+        // Attempt to reconnect after some time
+        setTimeout(() => {
+            console.log('Attempting to reconnect...');
+            this.connect();
+        }, this.RECONNECT_INTERVAL);
+    }
+
 }
 

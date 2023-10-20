@@ -9,7 +9,7 @@
 
     "paths": {
       "@/*": ["./src/*"], 
-      "shared": ["../Shared/src/index"]
+      "trading-shared": ["../Shared/src/index"]
     },
 
     "typeRoots": ["./node_modules/@types", "./src/types/*"],
