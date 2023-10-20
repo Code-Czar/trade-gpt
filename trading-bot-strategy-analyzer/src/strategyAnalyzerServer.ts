@@ -61,6 +61,16 @@ app.get('/api/getRSISignals/:symbolName', (req, res) => {
             res.status(200).json(strategyAnalyzer.pastRSISignals[symbolName]);
         }
     }
+    res.status(404).send('No RSI signals found for this symbol');
+});
+app.get('/api/getEMA28Signals/:symbolName', (req, res) => {
+    const { symbolName } = req.params;
+    if (strategyAnalyzer.pastEMA28Signals[symbolName]) {
+        {
+            res.status(200).json(strategyAnalyzer.pastEMA28Signals[symbolName]);
+        }
+    }
+    res.status(404).send('No EMA28 signals found for this symbol');
 });
 
 export default app;

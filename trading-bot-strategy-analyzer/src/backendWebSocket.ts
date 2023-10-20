@@ -55,6 +55,7 @@ export class BackendClient {
             if (dataObject.topic === 'getRealTimeData') {
                 this.strategyAnalyzer?.analyzeRSIRealTime(dataObject.data);
                 this.strategyAnalyzer?.analyzeRSIPastData(dataObject.data);
+                this.strategyAnalyzer?.analyzeEMAPastData(dataObject.data);
             }
 
         } catch (error) {

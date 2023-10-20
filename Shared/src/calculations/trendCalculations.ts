@@ -50,6 +50,8 @@ export const identifyAndMarkReversals = (points: any, trendBand = 'upper') => {
     return reversalMarkers;
 };
 
+
+
 export const computeEMASignals = (formattedData: any, ema28Data: any, period: number = 28) => {
     const emaSignals: any = [];
     const emaData = ema28Data; //.map((value, index) => ({ time: formattedData[index + period - 1].time, value: value.value }));

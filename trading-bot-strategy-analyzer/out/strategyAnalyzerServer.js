@@ -40,7 +40,7 @@ app.use(cors());
 var strategyAnalyzer = new strategyAnalyzerClass_1.StrategyAnalyzer();
 var client = new backendWebSocket_1.BackendClient(strategyAnalyzer);
 app.get('/health', function (req, res) {
-    res.status(200).send('Hello over HTTPS!');
+    res.status(200).send('Hello from SA!');
 });
 app.get('/api/getRSISignals/:symbolName', function (req, res) {
     var symbolName = req.params.symbolName;
@@ -49,5 +49,15 @@ app.get('/api/getRSISignals/:symbolName', function (req, res) {
             res.status(200).json(strategyAnalyzer.pastRSISignals[symbolName]);
         }
     }
+    res.status(404).send('No RSI signals found for this symbol');
+});
+app.get('/api/getEMA28Signals/:symbolName', function (req, res) {
+    var symbolName = req.params.symbolName;
+    if (strategyAnalyzer.pastEMA28Signals[symbolName]) {
+        {
+            res.status(200).json(strategyAnalyzer.pastEMA28Signals[symbolName]);
+        }
+    }
+    res.status(404).send('No EMA28 signals found for this symbol');
 });
 exports.default = app;

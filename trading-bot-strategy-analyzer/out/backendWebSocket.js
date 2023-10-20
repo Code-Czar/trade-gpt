@@ -41,7 +41,7 @@ var BackendClient = /** @class */ (function () {
         this.subscribeToTopic('getRealTimeData');
     };
     BackendClient.prototype.onMessage = function (data) {
-        var _a, _b;
+        var _a, _b, _c;
         var dataObject = JSON.parse(data);
         console.log("Received data from BE");
         try {
@@ -49,6 +49,7 @@ var BackendClient = /** @class */ (function () {
             if (dataObject.topic === 'getRealTimeData') {
                 (_a = this.strategyAnalyzer) === null || _a === void 0 ? void 0 : _a.analyzeRSIRealTime(dataObject.data);
                 (_b = this.strategyAnalyzer) === null || _b === void 0 ? void 0 : _b.analyzeRSIPastData(dataObject.data);
+                (_c = this.strategyAnalyzer) === null || _c === void 0 ? void 0 : _c.analyzeEMAPastData(dataObject.data);
             }
         }
         catch (error) {

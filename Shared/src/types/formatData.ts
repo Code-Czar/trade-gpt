@@ -1,7 +1,7 @@
-export const formatOHLCVForChartData = async (data) => {
+export const formatOHLCVForChartData = (data: any) => {
     if (!data) return [];
-    const result = [];
-    data.forEach((row) => {
+    const result: any = [];
+    data.forEach((row: any) => {
         const date = new Date(row[0]);
 
         result.push({
