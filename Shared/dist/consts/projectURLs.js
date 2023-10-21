@@ -44,12 +44,12 @@ exports.BACKEND_ENDPOINTS = {
         getAllRSIValues: '/api/rsi/getValues',
     }
 };
-// export const STRATEGY_ANALYZER_URLS = {
-//     SIGNALS: {
-//         getEMA28Signals: PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals',
-//     }
-// };
-exports.STRATEGY_ANALYZER_URLS = exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals';
+exports.STRATEGY_ANALYZER_URLS = {
+    SIGNALS: {
+        getEMA28Signals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals',
+        getRSISignals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getRSISignals',
+    }
+};
 exports.BACKEND_URLS = {
     ROOT: exports.PROJECT_URLS.BACKEND_URL,
     WEBSOCKET: exports.PROJECT_URLS.BACKEND_WEBSOCKET,

@@ -47,12 +47,12 @@ export const BACKEND_ENDPOINTS = {
     }
 };
 
-// export const STRATEGY_ANALYZER_URLS = {
-//     SIGNALS: {
-//         getEMA28Signals: PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals',
-//     }
-// };
-export const STRATEGY_ANALYZER_URLS = PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals';
+export const STRATEGY_ANALYZER_URLS = {
+    SIGNALS: {
+        getEMA28Signals: PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals',
+        getRSISignals: PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getRSISignals',
+    }
+};
 
 export const BACKEND_URLS = {
     ROOT: PROJECT_URLS.BACKEND_URL,

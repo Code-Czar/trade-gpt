@@ -1,6 +1,19 @@
 <template>
     <div id="trading-chart">
-        <h4>{{ inputSymbolData }}</h4>
+        <div style="display: flex; flex-direction: row">
+            <h4 style="display: flex; flex-grow: 1">{{ inputSymbolData }}</h4>
+            <select v-model="selectedTimeFrame" @change="() => changeActiveTimeframe()">
+                <option value="1m">1m</option>
+                <option value="5m">5m</option>
+                <option value="15m">15m</option>
+                <option value="30m">30m</option>
+                <option value="1h">1h</option>
+                <option value="4h">4h</option>
+                <option value="1d">1d</option>
+                <option value="1w">1w</option>
+                <option value="1M">1M</option>
+            </select>
+        </div>
         <button @click="toggleBollingerBands">
             {{ showBollingerBands.value ? 'Hide' : 'Show' }} Bollinger Bands
         </button>
@@ -23,17 +36,10 @@
         <button @click="toggleResistance">
             {{ showResistance.value ? 'Hide' : 'Show' }} Resistance
         </button>
-        <select v-model="selectedTimeFrame" @change="() => updateChartsFromPair()">
-            <option value="1m">1m</option>
-            <option value="5m">5m</option>
-            <option value="15m">15m</option>
-            <option value="30m">30m</option>
-            <option value="1h">1h</option>
-            <option value="4h">4h</option>
-            <option value="1d">1d</option>
-            <option value="1w">1w</option>
-            <option value="1M">1M</option>
-        </select>
+        <button @click="toggleRSISignals">
+            {{ showRSISignals.value ? 'Hide' : 'Show' }} RSI Signals
+        </button>
+
         <!-- <div style="min-width:150px; min-height:150px; background-color: red;"></div> -->
         <div ref="chartContainer" style="min-width: 100%; min-height: 500px"></div>
         <div v-if="showRSI" ref="rsiChartContainer" style="width: 100%; height: 200px"></div>
@@ -48,6 +54,7 @@
 import { ref, onMounted, onUnmounted, watchEffect } from 'vue';
 import {
     findPeaksAndTroughs,
+    findRSIPeaksAndTroughs,
     identifyAndMarkReversals,
     computeEMASignals,
     indicators,
@@ -113,6 +120,8 @@ let bearishFractalLines = [];
 let emaMarkersSeries = null;
 let uptrendLineSeries = null;
 let downtrendLineSeries = null;
+let rsiLevel30Series = null;
+let rsiLevel70Series = null;
 
 const showMACD = ref(true);
 const showBollingerBands = ref(false);
@@ -125,20 +134,55 @@ let currentSymbolPair = await dataController.fetchSymbolData(
 
 const showSupport = ref(false);
 const showResistance = ref(false);
+const showRSISignals = ref(false);
 let formattedData = null;
 
 const selectedTimeFrame = ref('5m');
 let reversalMarkers = [];
 let emaMarkers = [];
+let rsiMarkers = [];
 let trendlineMarkers = {};
 let refreshInterval = null;
+let rsiUptrendLineSeries = null;
+let rsiDowntrendLineSeries = null;
+let bullishDivergences = [];
+let bearishDivergences = [];
 
 const updateMarkser = () => {
-    candlestickSeries.setMarkers([
+    candlestickSeries?.setMarkers([
+        ...bullishDivergences,
         ...emaMarkers,
+        ...rsiMarkers,
         ...trendlineMarkers.lowerMarkers,
         ...trendlineMarkers.higherMarkers,
     ]);
+};
+const drawRSITrendLines = (peaks, troughs) => {
+    // Draw uptrend lines on RSI chart
+    rsiUptrendLineSeries = rsiChart.addLineSeries({
+        color: 'green',
+        lineWidth: 2,
+    });
+    rsiDowntrendLineSeries = rsiChart.addLineSeries({
+        color: 'red',
+        lineWidth: 2,
+    });
+
+    if (troughs.length > 1) {
+        const mappedTroughs = troughs.map((trough) => ({
+            time: trough.time,
+            value: trough.value,
+        }));
+        rsiUptrendLineSeries.setData(mappedTroughs);
+    }
+
+    if (peaks.length > 1) {
+        const mappedPeaks = peaks.map((peak) => ({
+            time: peak.time,
+            value: peak.value,
+        }));
+        rsiDowntrendLineSeries.setData(mappedPeaks);
+    }
 };
 
 const drawTrendLines = (peaks, troughs) => {
@@ -191,12 +235,13 @@ const addEMASignals = async (formattedData, ema28Data, period = 28) => {
         STRATEGY_ANALYZER_URLS
     );
     const result = await fetch(
-        `${STRATEGY_ANALYZER_URLS}/${currentSymbolPair.details.name}`
+        `${STRATEGY_ANALYZER_URLS.SIGNALS.getEMA28Signals}/${currentSymbolPair.details.name}`
     ); // computeEMASignals(formattedData, ema28Data, period);
-    const emaSignals = (await result.json())[selectedTimeFrame.value].ema28signals;
+    const emaSignals = (await result.json())[selectedTimeFrame.value]
+        .ema28signals;
     console.log(
         '🚀 ~ file: TradingChart.vue:187 ~ addEMASignals ~ emaSignals:',
-        emaSignals,
+        emaSignals
     );
     if (!emaMarkersSeries) {
         emaMarkersSeries = candlestickChart.addCandlestickSeries({
@@ -239,17 +284,15 @@ const addEMAFromData = async (
 };
 
 const synchronizeCharts = (visibleRange) => {
-    if (!visibleRange) return;
-
-    const adjustVisibleRange = (chart) => {
-        if (chart) {
-            chart.timeScale().setVisibleRange(visibleRange);
-        }
-    };
-
-    adjustVisibleRange(macdChart);
-    adjustVisibleRange(rsiChart);
-    adjustVisibleRange(volumeChart);
+    // if (!visibleRange) return;
+    // const adjustVisibleRange = (chart) => {
+    //     if (chart) {
+    //         chart.timeScale().setVisibleRange(visibleRange);
+    //     }
+    // };
+    // adjustVisibleRange(macdChart);
+    // adjustVisibleRange(rsiChart);
+    // adjustVisibleRange(volumeChart);
 };
 
 const createCandleStickChart = async () => {
@@ -319,6 +362,8 @@ const createRSIChart = async () => {
             // timeFormat: 'yyyy-MM-dd HH:mm', // Example format, adjust as needed
         },
     });
+    if (showRSI.value) {
+    }
     rsiChart?.timeScale().subscribeVisibleTimeRangeChange(synchronizeCharts);
 };
 const createVolumeChart = async () => {
@@ -414,14 +459,132 @@ const createMACDChart = async () => {
     });
 };
 
+const findRSIPeaksAndTroughsLocal = (data, sensitivity = 2) => {
+    const peaks = [];
+    const troughs = [];
+
+    // console.log("🚀 ~ file: TradingChart.vue:493 ~ findRSIPeaksAndTroughsLocal ~ a:", data, data.length)
+    if (data.length < 3) {
+        return { peaks, troughs }; // Not enough data to determine peaks or troughs
+    }
+
+    let previousSlope = data[1].value - data[0].value;
+
+    for (let i = 1; i < data.length - 1; i++) {
+        let currentSlope = data[i + 1].value - data[i].value;
+        // console.log("🚀 ~ file: TradingChart.vue:477 ~ findRSIPeaksAndTroughsLocal ~ currentSlope:", currentSlope)
+
+        if (previousSlope > 0 && currentSlope < 0) {
+            peaks.push(data[i]); // Peak at data[i]
+        } else if (previousSlope < 0 && currentSlope > 0) {
+            troughs.push(data[i]); // Trough at data[i]
+        }
+
+        previousSlope = currentSlope;
+    }
+
+    // console.log("🚀 ~ file: findRSIPeaksAndTroughsLocal.ts:30 ~ findRSIPeaksAndTroughs ~ troughs:", troughs)
+    // console.log("🚀 ~ file: findRSIPeaksAndTroughsLocal.ts:30 ~ findRSIPeaksAndTroughs ~ peaks:", peaks)
+    return { peaks, troughs };
+};
+
+const findClosestOhlcv = (ohlcvData, targetTime) => {
+    let closest = null;
+    let closestDiff = Infinity;
+
+    for (let i = 0; i < ohlcvData.length; i++) {
+        // console.log("🚀 ~ file: TradingChart.vue:497 ~ findClosestOhlcv ~ ohlcvData[i][0]:", ohlcvData[i][0], targetTime)
+        if (ohlcvData[i][0] / 1000 === targetTime)
+            return ohlcvData[i]
+
+    }
+
+    return closest;
+};
+const findRSIBottoms = (rsiTroughs) => {
+    let rsiBottoms = [];
+
+    for (let i = 1; i < rsiTroughs.length - 1; i++) {
+        if (rsiTroughs[i].value < rsiTroughs[i - 1].value && rsiTroughs[i].value < rsiTroughs[i + 1].value) {
+            rsiBottoms.push(rsiTroughs[i]);
+        }
+    }
+
+    return rsiBottoms;
+};
+
+const checkBullishDivergence = (rsiTroughs, ohlcvs) => {
+    let bullishDivergences = [];
+    let rsiBottoms = findRSIBottoms(rsiTroughs);
+    console.log("🚀 ~ file: TradingChart.vue:526 ~ checkBullishDivergence ~ rsiBottoms:", rsiBottoms)
+
+    for (let i = 0; i < rsiBottoms.length; i++) {
+        let previousBottom = rsiBottoms[i];
+        let previousPriceData = findClosestOhlcv(ohlcvs, previousBottom.time);
+        console.log("🚀 ~ file: TradingChart.vue:530 ~ checkBullishDivergence ~ previousBottom:", previousBottom, previousPriceData)
+
+        for (let j = i + 1; j < rsiBottoms.length; j++) {
+            let currentBottom = rsiBottoms[j];
+            let currentPriceData = findClosestOhlcv(ohlcvs, currentBottom.time);
+
+            if (previousPriceData[4] && currentPriceData[4]) {
+                if (
+                    currentBottom.value > previousBottom.value &&
+                    currentPriceData[4] < previousPriceData[4]
+                ) {
+                    bullishDivergences.push({
+                        previous: previousBottom,
+                        current: currentBottom,
+                    });
+                }
+            }
+        }
+    }
+
+    console.log(
+        '🚀 ~ file: TradingChart.vue:526 ~ checkBullishDivergence ~ bullishDivergences:',
+        bullishDivergences
+    );
+    return bullishDivergences;
+};
+
+
+
+const checkBearishDivergence = (pricePeaks, rsiTroughs) => {
+    // Check for bearish divergence
+    bearishDivergences = [];
+    for (let i = 0; i < pricePeaks.length; i++) {
+        let pricePeak = pricePeaks[i];
+        for (let j = 0; j < rsiTroughs.length; j++) {
+            let rsiTrough = rsiTroughs[j];
+            // console.log(
+            //     '🚀 ~ file: TradingChart.vue:521 ~ checkBearishDivergence ~ rsiTrough:',
+            //     rsiTrough
+            // );
+            if (
+                rsiTrough.time > pricePeak.time &&
+                rsiTrough?.value < rsiTroughs[j - 1]?.value
+            ) {
+                bearishDivergences.push({
+                    pricePeak,
+                    rsiTrough,
+                    number: bearishDivergences.length,
+                });
+                break;
+            }
+        }
+    }
+    return bearishDivergences;
+};
+
 const updateData = async (symbolPairData) => {
     if (!symbolPairData) return;
 
     const seriesValues = symbolPairData.ohlcvs[selectedTimeFrame.value];
-    console.log(
-        '🚀 ~ file: TradingChart.vue:481 ~ updateData ~ seriesValues:',
-        seriesValues
-    );
+    // console.log(
+    //     '🚀 ~ file: TradingChart.vue:481 ~ updateData ~ seriesValues:',
+    //     seriesValues
+    // );
     const firstSerie = seriesValues;
     if (!firstSerie || !candlestickChart) return;
 
@@ -432,12 +595,14 @@ const updateData = async (symbolPairData) => {
 
 const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
     const formatted = await updateData(symbolPairData);
-    console.log(
-        '🚀 ~ file: TradingChart.vue:491 ~ updateChartsFromPair ~ formatted:',
-        symbolPairData,
-        formatted
-    );
+    // console.log(
+    //     '🚀 ~ file: TradingChart.vue:491 ~ updateChartsFromPair ~ formatted:',
+    //     symbolPairData,
+    //     formatted
+    // );
     if (!symbolPairData?.ohlcvs?.[selectedTimeFrame.value]) return;
+    let pricePeaks = null;
+    let priceTroughs = null;
     if (candlestickSeries) {
         if (uptrendLineSeries) {
             candlestickChart?.removeSeries(uptrendLineSeries);
@@ -455,7 +620,9 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
         );
         candlestickSeries.setData(formatted1);
         const { peaks, troughs } = findPeaksAndTroughs(formatted1);
-        drawTrendLines(peaks, troughs);
+        pricePeaks = peaks;
+        priceTroughs = troughs;
+        drawTrendLines(pricePeaks, priceTroughs);
     }
     if (showBollingerBands.value) {
         const { upperBand, lowerBand, middleBand } =
@@ -539,6 +706,108 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
 
         if (rsiSeries) {
             rsiSeries.setData(rsiDataConvertedToSeconds);
+            const rsiData = symbolPairData.rsi[selectedTimeFrame.value].rsiData;
+            console.log(
+                '🚀 ~ file: TradingChart.vue:337 ~ createRSIChart ~ rsiData:',
+                rsiData
+            );
+
+            if (rsiData && rsiData.length > 0) {
+                const startTime = rsiData[0].time;
+                const endTime = rsiData[rsiData.length - 1].time;
+
+                const rsiLevel70Series = rsiChart.addLineSeries({
+                    color: 'rgba(255, 0, 0, 1)', // Red color for the 70 level
+                    lineWidth: 1,
+                });
+
+                const rsiLevel30Series = rsiChart.addLineSeries({
+                    color: 'rgba(0, 255, 0, 1)', // Green color for the 30 level
+                    lineWidth: 1,
+                });
+
+                rsiLevel70Series.setData([
+                    { time: startTime, value: 70 },
+                    { time: endTime, value: 70 },
+                ]);
+
+                rsiLevel30Series.setData([
+                    { time: startTime, value: 30 },
+                    { time: endTime, value: 30 },
+                ]);
+            }
+
+            const { peaks: rsiPeaks, troughs: rsiTroughs } =
+                findRSIPeaksAndTroughsLocal(rsiDataConvertedToSeconds);
+            console.log(
+                '🚀 ~ file: TradingChart.vue:618 ~ updateChartsFromPair ~ troughs:',
+                rsiTroughs
+            );
+            console.log(
+                '🚀 ~ file: TradingChart.vue:618 ~ updateChartsFromPair ~ peaks:',
+                rsiPeaks
+            );
+
+            console.log(
+                '🚀 ~ file: TradingChart.vue:691 ~ updateChartsFromPair ~ Price peaks troughs:',
+                pricePeaks,
+                priceTroughs
+            );
+
+            bearishDivergences = checkBearishDivergence(pricePeaks, rsiTroughs);
+            bullishDivergences = checkBullishDivergence(
+                rsiTroughs,
+                symbolPairData?.ohlcvs?.[selectedTimeFrame.value]
+            );
+            if (bullishDivergences && bullishDivergences.length > 0) {
+                // const bullishSeries = rsiChart.addLineSeries({
+                //     color: 'orange',
+                //     lineWidth: 2
+                // });
+
+                // And you have your divergence pairs in a variable called `divergencePairs`
+                const bullishSeries = []
+                bullishDivergences.forEach(pair => {
+                    const newSerie = rsiChart.addLineSeries({
+                        color: 'orange',
+                        lineWidth: 2
+                    });
+                    newSerie.setData([{
+                        time: pair.previous.time,
+                        value: pair.previous.value
+                    }, {
+                        time: pair.current.time,
+                        value: pair.current.value
+                    }]);
+                    bullishSeries.push(newSerie);
+                    // bullishSeries.createLine({
+                    //     x1: pair.previous.time,
+                    //     y1: pair.previous.value,
+                    //     x2: pair.current.time,
+                    //     y2: pair.current.value,
+                    //     color: 'orange',
+                    //     width: 2
+                    // });
+                });
+
+                // bullishDivergences = bullishDivergences.map((item) => {
+                //     return {
+                //         time: item.priceTrough.time,
+                //         position: 'belowBar',
+                //         color: 'orange',
+                //         shape: 'arrowUp',
+                //         text: 'Divergence ' + item.number,
+                //     };
+                // });
+                // updateMarkser();
+            }
+            console.log(
+                '🚀 ~ file: TradingChart.vue:691 ~ updateChartsFromPair ~ bearishDivergences:',
+                bullishDivergences,
+                bearishDivergences
+            );
+
+            drawRSITrendLines(rsiPeaks, rsiTroughs);
         } else {
             rsiSeries = rsiChart.addLineSeries({
                 color: 'rgba(4, 232, 36, 1)',
@@ -595,6 +864,11 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
             28,
             EMA_COLORS.ema28
         );
+        if (emaMarkers.length === 0) {
+            const ema28Data = currentSymbolPair.ema[selectedTimeFrame.value].ema28; // Replace with actual EMA 28 data
+            addEMASignals(formattedData, ema28Data);
+            updateMarkser();
+        }
     } else {
         const series = Object.values(emaSeries);
         if (series.length > 0) {
@@ -603,6 +877,8 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
             });
             emaSeries = {};
         }
+        emaMarkers = [];
+        updateMarkser();
     }
 
     if (showVolume.value) {
@@ -623,18 +899,18 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
         }
         const { macdData, signalData, histogramData } =
             symbolPairData.macd[selectedTimeFrame.value];
-        console.log(
-            '🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ histogramData:',
-            histogramData
-        );
-        console.log(
-            '🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ signalData:',
-            signalData
-        );
-        console.log(
-            '🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ macdData:',
-            macdData
-        );
+        // console.log(
+        //     '🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ histogramData:',
+        //     histogramData
+        // );
+        // console.log(
+        //     '🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ signalData:',
+        //     signalData
+        // );
+        // console.log(
+        //     '🚀 ~ file: TradingChart.vue:645 ~ updateChartsFromPair ~ macdData:',
+        //     macdData
+        // );
         const macdDataConvertedToSeconds = macdData.map((data) => {
             return {
                 time: data.time,
@@ -775,17 +1051,7 @@ const toggleSMA = () => {
 
 const toggleEMA = () => {
     showEMA.value = !showEMA.value;
-    if (showEMA.value) {
-        // If EMA is turned on, also check and add EMA signals
-        const ema28Data = currentSymbolPair.ema[selectedTimeFrame.value].ema28; // Replace with actual EMA 28 data
-        addEMASignals(formattedData, ema28Data);
-    } else {
-        // If EMA is turned off, also remove EMA signals
-        if (emaMarkersSeries) {
-            candlestickChart.removeSeries(emaMarkersSeries);
-            emaMarkersSeries = null;
-        }
-    }
+
     updateChartsFromPair();
 };
 
@@ -801,6 +1067,53 @@ const toggleVolumes = () => {
 
 const toggleMACD = () => {
     showMACD.value = !showMACD.value;
+    updateChartsFromPair();
+};
+
+const toggleRSISignals = async () => {
+    showRSISignals.value = !showRSISignals.value;
+    if (showRSISignals.value) {
+        const response = await fetch(
+            `${STRATEGY_ANALYZER_URLS.SIGNALS.getRSISignals}/${currentSymbolPair.details.name}`
+        );
+        const RSISignals = await response.json();
+        const RSISignalsTimeframe = RSISignals[selectedTimeFrame.value];
+        console.log(
+            '🚀 ~ file: TradingChart.vue:818 ~ toggleRSISignals ~ RSISignals:',
+            RSISignals
+        );
+
+        if (RSISignalsTimeframe) {
+            rsiMarkers = [];
+            updateMarkser();
+
+            rsiMarkers = Object.entries(RSISignalsTimeframe).map(
+                ([time, rsiData]) => ({
+                    time: parseFloat(time),
+                    position: 'belowBar',
+                    color: 'green',
+                    shape: 'arrowUp',
+                    text: 'RSI Buy ' + rsiData,
+                })
+            );
+
+            updateMarkser();
+            // updateChartsFromPair();
+        }
+    } else {
+        rsiMarkers = [];
+        updateMarkser();
+    }
+};
+
+const changeActiveTimeframe = () => {
+    emaMarkers = [];
+    console.log(
+        '🚀 ~ file: TradingChart.vue:812 ~ changeActiveTimeframe ~ changeActiveTimeframe:',
+        changeActiveTimeframe
+    );
+    updateMarkser();
+
     updateChartsFromPair();
 };
 

@@ -13,6 +13,24 @@ export const findPeaksAndTroughs = (data: any) => {
     return { peaks, troughs };
 };
 
+export const findRSIPeaksAndTroughs = (data, sensitivity = 1) => {
+    const peaks = [];
+    const troughs = [];
+
+    for (let i = 1; i < data.length - 1; i++) {
+        if (data[i] - data[i - 1] > sensitivity && data[i] - data[i + 1] > sensitivity) {
+            peaks.push(i);
+        } else if (data[i - 1] - data[i] > sensitivity && data[i + 1] - data[i] > sensitivity) {
+            troughs.push(i);
+        }
+    }
+
+    console.log("🚀 ~ file: trendCalculations.ts:30 ~ findRSIPeaksAndTroughs ~ troughs:", troughs)
+    console.log("🚀 ~ file: trendCalculations.ts:30 ~ findRSIPeaksAndTroughs ~ peaks:", peaks)
+    return { peaks, troughs };
+};
+
+
 export const calculateSlope = (point1: any, point2: any) => {
     return (point2.value - point1.value) / (point2.time - point1.time);
 };
