@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BACKEND_URLS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = void 0;
+exports.BACKEND_URLS = exports.STRATEGY_ANALYZER_URLS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = void 0;
 const config_json_1 = __importDefault(require("./config.json"));
 let REMOTE_URL;
 let REMOTE_WSS_URL;
@@ -44,6 +44,12 @@ exports.BACKEND_ENDPOINTS = {
         getAllRSIValues: '/api/rsi/getValues',
     }
 };
+// export const STRATEGY_ANALYZER_URLS = {
+//     SIGNALS: {
+//         getEMA28Signals: PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals',
+//     }
+// };
+exports.STRATEGY_ANALYZER_URLS = exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals';
 exports.BACKEND_URLS = {
     ROOT: exports.PROJECT_URLS.BACKEND_URL,
     WEBSOCKET: exports.PROJECT_URLS.BACKEND_WEBSOCKET,
@@ -54,4 +60,4 @@ exports.BACKEND_URLS = {
         getAllRSIValues: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.RSI_ENDPOINTS.getAllRSIValues,
     },
 };
-exports.default = { PROJECT_URLS: exports.PROJECT_URLS };
+// export default { PROJECT_URLS }

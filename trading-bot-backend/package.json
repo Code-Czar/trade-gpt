@@ -47,6 +47,7 @@
     "onesignal-node": "^3.4.0",
     "p-limit": "^4.0.0",
     "technicalindicators": "^3.1.0",
+    "trading-shared": "../Shared/",
     "websocket": "^1.0.34",
     "ws": "^8.14.2"
   }

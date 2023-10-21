@@ -36,26 +36,44 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-// // import express, { Request, Response } from 'express';
-// import cors from 'cors';
-// import bodyParser from 'body-parser';
+// import { Server as WebSocketServer } from 'ws';
 var consts_1 = require("./types/consts");
 var convertData_1 = require("./utils/convertData");
 var dataFetchers_1 = require("./dataFetchers");
 var TradingBot = require('./bot').TradingBot;
-var bot = new TradingBot('binance');
+var WebsocketStreamer = require('./websocketStreamer').WebsocketStreamer;
 var express = require('express');
-// const { Request, Response } = require('express');
-var cors = require('cors');
-// const bodyParser = require('bodyParser');
-var bodyParser = require('body-parser');
-// const dataConvertor = require('./utils/convertData')
+var http = require('http');
+var WebSocket = require('ws');
 var app = express();
+var cors = require('cors');
+var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 // Enable CORS
 app.use(cors());
-// Fetch new data every 1 minute
-var count = 0;
+// Create an HTTP server by hand for WebSocket server to use later.
+var server = http.createServer(app);
+// Create a WebSocket server by passing the HTTP server instance to WebSocket.Server.
+// const wss = new WebSocket.Server({ server, path: '/ws' });
+// // Set up a connection listener to handle incoming WebSocket connections.
+// wss.on('connection', (ws) => {
+//     console.log('Client connected');
+//     // Send a welcome message to the newly connected client.
+//     ws.send('Welcome to the WebSocket server!');
+//     // Set up a message listener on this connection to receive messages from the client.
+//     ws.on('message', (message) => {
+//         console.log(`Received message: ${message}`);
+//     });
+// });
+app.get('/', function (req, res) {
+    res.send('Hello from Express!');
+});
+var websocketStreamer = new WebsocketStreamer(server);
+var bot = new TradingBot(websocketStreamer);
+var PORT = 3000;
+server.listen(PORT, function () {
+    console.log("Server is running on http://localhost:".concat(PORT));
+});
 app.get('/api/symbols/leverage', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var symbolsWithLeverage, error_1;
     return __generator(this, function (_a) {
@@ -176,29 +194,6 @@ app.get('/api/leverage/:symbol/:subdata/:timeframe', function (req, res) { retur
         }
     });
 }); });
-// app.post('/api/rsi/bulk', async (req: Request, res: Response) => {
-//     const { symbols, timeframes } = req.body;
-//     if (!symbols || !timeframes) {
-//         return res.status(400).send({ error: 'Symbols and timeframes are required.' });
-//     }
-//     const rsiValues = {};
-//     for (let symbol of symbols) {
-//         rsiValues[symbol] = {};
-//         for (let timeframe of timeframes) {
-//             try {
-//                 const symbolData = bot.dataStore.get(PAIR_TYPES.leveragePairs).get(symbol);  // Change PAIR_TYPES.cryptoPairs based on your needs
-//                 if (symbolData && symbolData.rsi && symbolData.rsi.has(timeframe)) {
-//                     rsiValues[symbol][timeframe] = symbolData.rsi.get(timeframe).rsi;
-//                 } else {
-//                     rsiValues[symbol][timeframe] = null;
-//                 }
-//             } catch (error) {
-//                 console.error(`Error fetching RSI from datastore for ${symbol} and ${timeframe}:`, error);
-//             }
-//         }
-//     }
-//     res.json(rsiValues);
-// });
 app.get('/api/lastRsi/bulk', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var leveragePairsResult, result;
     return __generator(this, function (_a) {
@@ -305,9 +300,10 @@ app.get('/health', function (req, res) {
         res.status(500).json({ error: 'Error fetching health data' });
     }
 });
-var PORT = 3000;
-app.listen(PORT, function () {
-    console.log("Server is running on http://localhost:".concat(PORT));
-    // bot.populateDataStore()
-    bot.populateDataStoreParallel();
-});
+bot.populateDataStoreParallel();
+// const PORT = 3000;
+// app.listen(PORT, () => {
+//     console.log(`Server is running on http://localhost:${PORT}`);
+//     // bot.populateDataStore()
+//     // bot.populateDataStoreParallel()
+// });

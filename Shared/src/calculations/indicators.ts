@@ -1,25 +1,9 @@
 import { SMA, EMA, RSI, MACD } from 'technicalindicators';
 
-export const formatOHLCVForChartData = async (data) => {
-    if (!data) return [];
-    const result = []
-    data.forEach((row) => {
-        result.push({
-            time: row[0],
-            // time: formatDateToYYYYMMDD(new Date(row[0])),
-            open: parseFloat(row[1]),
-            high: parseFloat(row[2]),
-            low: parseFloat(row[3]),
-            close: parseFloat(row[4]),
-            volume: parseFloat(row[5]),
-        })
 
-    })
-    return result;
-};
 
 const sma = (arr, windowSize) => {
-    const result = [];
+    const result: any = [];
     for (let i = windowSize - 1; i < arr.length; i++) {
         const window = arr.slice(i - windowSize + 1, i + 1);
         const average = window.reduce((sum, num) => sum + num, 0) / windowSize;
@@ -29,7 +13,7 @@ const sma = (arr, windowSize) => {
 };
 
 const standardDeviation = (arr, windowSize, smaValues) => {
-    const result = [];
+    const result: any = [];
     for (let i = windowSize - 1; i < arr.length; i++) {
         const window = arr.slice(i - windowSize + 1, i + 1);
         const variance =
@@ -128,7 +112,7 @@ export const calculateMACD = async (formattedData) => {
 
 export const calculateVolumes = async (formattedData) => {
     const volumeData = formattedData.map((data) => ({
-        time: data.time / 1000,
+        time: data.time,
         value: data.volume,
         color: data.open > data.close ? 'rgba(255, 82, 82, 0.8)' : 'rgba(4, 232, 36, 0.8)',
     }));
@@ -137,19 +121,49 @@ export const calculateVolumes = async (formattedData) => {
 };
 
 export const calculateEMA = async (formattedData, period) => {
-    const inputEMA = {
+    const inputEMA7 = {
         values: formattedData.map((data) => data.close),
         period: period,
     };
-    const ema = EMA.calculate(inputEMA);
+    const ema = EMA.calculate(inputEMA7);
 
-    const emaData = ema.map((value, index) => ({ time: formattedData[index + inputEMA.period - 1].time, value: value }));
+    const emaData = ema.map((value, index) => ({ time: formattedData[index + inputEMA7.period - 1].time, value: value }));
     return {
         ema,
         emaData
     }
 }
 
+export const calculateRSIMoreAccuratly = (prices: number[], period = 14): number[] => {
+    if (prices.length < period + 1) {
+        throw new Error('Not enough data to compute RSI');
+    }
+
+    const deltas = prices.slice(1).map((price, i) => price - prices[i]);
+    const gains = deltas.map((delta) => Math.max(delta, 0));
+    const losses = deltas.map((delta) => Math.abs(Math.min(delta, 0)));
+
+    let avg_gain = gains.slice(0, period).reduce((a, b) => a + b) / period;
+    let avg_loss = losses.slice(0, period).reduce((a, b) => a + b) / period;
+
+    let rsis: number[] = [];
+
+    for (let idx = period; idx < prices.length; idx++) {
+        if (idx > period) {
+            avg_gain = (avg_gain * (period - 1) + gains[idx - 1]) / period;
+            avg_loss = (avg_loss * (period - 1) + losses[idx - 1]) / period;
+        }
+
+        if (avg_loss === 0) {
+            rsis.push(100);
+        } else {
+            const rs = avg_gain / avg_loss;
+            rsis.push(100 - 100 / (1 + rs));
+        }
+    }
+
+    return rsis;
+};
 
 export const calculateRSI = async (formattedData) => {
     const inputRSI = {
@@ -163,14 +177,66 @@ export const calculateRSI = async (formattedData) => {
 
 };
 
+// export const calculateRSI = async (formattedData) => {
+//     const closePrices = formattedData.map((data) => data.close);
+//     console.log("🚀 ~ file: indicators.ts:171 ~ calculateRSI ~ closePrices:", closePrices.length)
+//     const rsiValues = calculateRSIMoreAccuratly(closePrices);
+
+//     const rsiData = rsiValues.map((value, index) => ({
+//         time: formattedData[index].time,
+//         value: value,
+//     }));
+
+//     return { rsiData, rsi: rsiValues };
+// };
+
+
+
+
+
+const findFractals = (data) => {
+    const bullishFractals: any = [];
+    const bearishFractals: any = [];
+
+    // Starting from the 2nd index because we need two preceding candles to evaluate
+    // Ending at length - 2 because we need two following candles to evaluate
+    for (let i = 2; i < data.length - 2; i++) {
+        const [prevPrevCandle, prevCandle, currentCandle, nextCandle, nextNextCandle] = data.slice(i - 2, i + 3);
+
+        // Bullish Fractal: a low preceded and followed by higher lows
+        if (
+            currentCandle.low < prevCandle.low &&
+            currentCandle.low < prevPrevCandle.low &&
+            currentCandle.low < nextCandle.low &&
+            currentCandle.low < nextNextCandle.low
+        ) {
+            bullishFractals.push({ time: currentCandle.time, value: currentCandle.low });
+        }
+
+        // Bearish Fractal: a high preceded and followed by lower highs
+        if (
+            currentCandle.high > prevCandle.high &&
+            currentCandle.high > prevPrevCandle.high &&
+            currentCandle.high > nextCandle.high &&
+            currentCandle.high > nextNextCandle.high
+        ) {
+            bearishFractals.push({ time: currentCandle.time, value: currentCandle.high });
+        }
+    }
+
+    return { bullishFractals, bearishFractals };
+};
+
+
+
 
 
 export default {
-    formatOHLCVForChartData,
     calculateBollingerBands,
     calculateSMA,
     calculateMACD,
     calculateVolumes,
     calculateEMA,
-    calculateRSI
+    calculateRSI,
+    findFractals
 }

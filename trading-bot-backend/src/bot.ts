@@ -2,7 +2,7 @@
 import { PAIR_TYPES, FOREX_PAIRS } from './types/consts'
 import { cryptoFetcher, forexFetcher, byBitDataFetcher } from './dataFetchers';
 import { convertBybitTimeFrameToLocal, sortDataAscending, convertTimeframeToMs, getStartOfTimeframe } from './utils/convertData';
-import indicators from './indicators';
+import { indicators, formatOHLCVForChartData } from 'trading-shared';
 import { convertPairToJSON } from './utils/convertData';
 
 const fs = require('fs');
@@ -75,7 +75,7 @@ export class TradingBot {
 
     async updateIndicators(symbolName: string, timeframe: string, ohlcvs: any[]) {
         const storePair = this.dataStore.get(PAIR_TYPES.leveragePairs).get(symbolName);
-        const formattedData = await indicators.formatOHLCVForChartData(ohlcvs); // Assuming this method exists in your indicators module
+        const formattedData = formatOHLCVForChartData(ohlcvs); // Assuming this method exists in your indicators module
 
         // Calculate and update RSI
         const { rsi, rsiData } = await indicators.calculateRSI(formattedData);

@@ -47,6 +47,13 @@ export const BACKEND_ENDPOINTS = {
     }
 };
 
+// export const STRATEGY_ANALYZER_URLS = {
+//     SIGNALS: {
+//         getEMA28Signals: PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals',
+//     }
+// };
+export const STRATEGY_ANALYZER_URLS = PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals';
+
 export const BACKEND_URLS = {
     ROOT: PROJECT_URLS.BACKEND_URL,
     WEBSOCKET: PROJECT_URLS.BACKEND_WEBSOCKET,
@@ -58,4 +65,5 @@ export const BACKEND_URLS = {
     },
 };
 
-export default { PROJECT_URLS }
+
+// export default { PROJECT_URLS }

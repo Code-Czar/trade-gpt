@@ -50,11 +50,14 @@ import {
     findPeaksAndTroughs,
     identifyAndMarkReversals,
     computeEMASignals,
+    indicators,
     formatOHLCVForChartData,
+    STRATEGY_ANALYZER_URLS,
+    PROJECT_URLS,
+    BACKEND_URLS,
 } from 'trading-shared';
 import { createChart, CrosshairMode } from 'lightweight-charts';
 import { dataStore } from '@/stores/example-store';
-import { indicators } from '@/models';
 import { dataController } from '@/controllers';
 
 const props = defineProps({
@@ -180,8 +183,21 @@ const drawTrendLines = (peaks, troughs) => {
     updateMarkser();
 };
 
-const addEMASignals = (formattedData, ema28Data, period = 28) => {
-    const emaSignals = computeEMASignals(formattedData, ema28Data, period);
+const addEMASignals = async (formattedData, ema28Data, period = 28) => {
+    console.log(
+        '🚀 ~ file: TradingChart.vue:187 ~ addEMASignals ~ STRATEGY_ANALYZER_URLS:',
+        PROJECT_URLS,
+        BACKEND_URLS,
+        STRATEGY_ANALYZER_URLS
+    );
+    const result = await fetch(
+        `${STRATEGY_ANALYZER_URLS}/${currentSymbolPair.details.name}`
+    ); // computeEMASignals(formattedData, ema28Data, period);
+    const emaSignals = (await result.json())[selectedTimeFrame.value].ema28signals;
+    console.log(
+        '🚀 ~ file: TradingChart.vue:187 ~ addEMASignals ~ emaSignals:',
+        emaSignals,
+    );
     if (!emaMarkersSeries) {
         emaMarkersSeries = candlestickChart.addCandlestickSeries({
             upColor: '#26a69a',
@@ -209,7 +225,7 @@ const addEMAFromData = async (
 ) => {
     const convertedToSeconds = emaData.map((data) => {
         return {
-            time: data.time / 1000,
+            time: data.time,
             value: data.value,
         };
     });
@@ -222,23 +238,6 @@ const addEMAFromData = async (
     }
 };
 
-const formatOHLCVForChartData = async (data) => {
-    if (!data) return [];
-    const result = [];
-    data.forEach((row) => {
-        const date = new Date(row[0]);
-
-        result.push({
-            time: row[0] / 1000,
-            open: parseFloat(row[1]),
-            high: parseFloat(row[2]),
-            low: parseFloat(row[3]),
-            close: parseFloat(row[4]),
-            volume: parseFloat(row[5]),
-        });
-    });
-    return result;
-};
 const synchronizeCharts = (visibleRange) => {
     if (!visibleRange) return;
 
@@ -259,7 +258,6 @@ const createCandleStickChart = async () => {
         height: chartContainer.value.offsetHeight,
         timeScale: {
             timeVisible: true,
-
         },
         rightPriceScale: {
             borderColor: '#D1D4DC',
@@ -465,19 +463,19 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
 
         const upperConvertedToSeconds = upperBand.map((data) => {
             return {
-                time: data.time / 1000,
+                time: data.time,
                 value: data.value,
             };
         });
         const lowerBandConvertedToSeconds = lowerBand.map((data) => {
             return {
-                time: data.time / 1000,
+                time: data.time,
                 value: data.value,
             };
         });
         const middleBandConvertedToSeconds = middleBand.map((data) => {
             return {
-                time: data.time / 1000,
+                time: data.time,
                 value: data.value,
             };
         });
@@ -534,7 +532,7 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
         const rsiData = symbolPairData.rsi[selectedTimeFrame.value].rsiData;
         const rsiDataConvertedToSeconds = rsiData.map((data) => {
             return {
-                time: data.time / 1000,
+                time: data.time,
                 value: data.value,
             };
         });
@@ -639,19 +637,19 @@ const updateChartsFromPair = async (symbolPairData = currentSymbolPair) => {
         );
         const macdDataConvertedToSeconds = macdData.map((data) => {
             return {
-                time: data.time / 1000,
+                time: data.time,
                 value: data.value,
             };
         });
         const signalDataConvertedToSeconds = signalData.map((data) => {
             return {
-                time: data.time / 1000,
+                time: data.time,
                 value: data.value,
             };
         });
         const histogramDataConvertedToSeconds = histogramData.map((data) => {
             return {
-                time: data.time / 1000,
+                time: data.time,
                 value: data.value,
             };
         });
