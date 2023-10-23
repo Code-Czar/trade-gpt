@@ -25,7 +25,8 @@ export class InfluxDBWrapper {
 
         this.client = new InfluxDB({
             url: 'http://localhost:8086',
-            token: INFLUXDB_TOKEN
+            token: INFLUXDB_TOKEN,
+            timeout: 60000
         });
 
         this.writeApi = this.client.getWriteApi(INFLUXDB_ORG, INFLUXDB_BUCKET);
@@ -71,16 +72,17 @@ export class InfluxDBWrapper {
         if (!pairName) {
             return;
         }
-        await this.clearBucketData();
-        console.log("🚀 ~ file: InfluxDBWrapper.ts:28 ~ InfluxDBWrapper ~ insertPairData ~ pair:", pairName)
+        // await this.clearBucketData();
+        console.log("🚀 ~ file: InfluxDBWrapper.ts:28 ~ InfluxDBWrapper ~ insertPairData ~ pair:", data)
         try {
 
             this.writeApi.writePoints(createOHLCVSDataPoints(pairName, data.ohlcvs));
             this.writeApi.flush();
-            await this.writeApi.close();
+            // await this.writeApi.close();
         } catch (error) {
             console.error('Error while writing to InfluxDB:', error);
             fs.appendFileSync('error.log', `${new Date().toISOString()} - ${error.message}\n`);
+            fs.appendFileSync('error.log', `${await stringifyMap(data)}`);
             throw error;
         }
     }

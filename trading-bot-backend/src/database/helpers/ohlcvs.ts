@@ -1,11 +1,14 @@
-export function createOHLCVSDataPoints(pairName, ohlcvs) {
+import { Point } from '@influxdata/influxdb-client';
+
+
+export function createOHLCVSDataPoints(pairName, allTimeFramesOHLCVS) {
     const points: Point[] = [];
 
     // Iterating through the timeframes (e.g., 1h, 1d)
-    ohlcvs.forEach((ohlcvs, timeframe) => {
+    allTimeFramesOHLCVS.forEach((ohlcvs, timeframe) => {
 
         // console.log("🚀 ~ file: InfluxDBWrapper.ts:38 ~ InfluxDBWrapper ~ Object.entries ~ timeframe:", timeframe)
-        ohlcvs.get(timeframe).forEach((entry: any) => {
+        allTimeFramesOHLCVS.get(timeframe).forEach((entry: any) => {
             const [timestamp, open, high, low, close, volume] = entry;
             // console.log("🚀 ~ file: InfluxDBWrapper.ts:42 ~ InfluxDBWrapper ~ data.ohlcvs.get ~ volume:", volume)
             // console.log("🚀 ~ file: InfluxDBWrapper.ts:42 ~ InfluxDBWrapper ~ data.ohlcvs.get ~ close:", close)
@@ -18,7 +21,7 @@ export function createOHLCVSDataPoints(pairName, ohlcvs) {
 
 
             const point = new Point('pair_data')
-                .tag('pair', pair)
+                .tag('pair', pairName)
                 .tag('timeframe', timeframe)
                 .tag('key', 'ohlcvs')
                 // .timestamp(timestamp * 1e6)

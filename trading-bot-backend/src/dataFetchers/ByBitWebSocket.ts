@@ -57,12 +57,20 @@ function setupPingPongHandlers(client, url) {
         client.ping()
         pongTimeout = setTimeout(() => {
             console.log('Pong not received')
-            pongTimeoutCount++;
+            pongTimeoutCount++
             if (pongTimeoutCount >= PONG_TIMEOUT_COUNT) {
                 console.error('Pong not received, reconnecting')
-                publicClient.terminate()
-                initPublicClient()
-                callbacks.restartCallback?.()
+                try {
+                    publicClient.terminate()
+                    initPublicClient()
+                    callbacks.restartCallback?.()
+                    pongTimeoutCount = 0
+                } catch (error) {
+                    console.log(
+                        '🚀 ~ file: ByBitWebSocket.ts:69 ~ pongTimeout=setTimeout ~ error:',
+                        error,
+                    )
+                }
             }
             // client.terminate(); // This will trigger the close event and your reconnection logic
         }, PONG_TIMEOUT)
@@ -116,7 +124,6 @@ export const webSocketRegisterToOHLCVDataForPair = async (
     timeframe,
 ) => {
     try {
-
         publicClient.send(
             JSON.stringify({
                 op: 'subscribe',
@@ -126,8 +133,7 @@ export const webSocketRegisterToOHLCVDataForPair = async (
             }),
         )
     } catch (error) {
-        console.log("🚀 ~ file: ByBitWebSocket.ts:129 ~ error:", error, symbolName)
-
+        console.log('🚀 ~ file: ByBitWebSocket.ts:129 ~ error:', error, symbolName)
     }
 }
 
@@ -164,5 +170,5 @@ export default {
     webSocketRegisterToAllOHLCVDataUpdates,
     webSocketRegisterToOHLCVDataForPair,
     webSocketSetOHLCVsUpdateCallback,
-    setReconnectCallback
+    setReconnectCallback,
 }

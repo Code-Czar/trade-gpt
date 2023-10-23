@@ -197,18 +197,19 @@ export class TradingBot {
         });
 
         while (fetchPromises.length > 0) {
-            const batch = fetchPromises.splice(0, 2); // Get the next batch of 10 promises (and remove them from fetchPromises)
+            const batch = fetchPromises.splice(0, 100); // Get the next batch of 10 promises (and remove them from fetchPromises)
             await Promise.all(batch.map(fn => fn())); // Execute current batch of promises in parallel
 
             if (once) {
-                await this.writePairsToDatabase()
-                await this.writePairToDatabase(fetchPromises[0]?.details?.name, fetchPromises[0].data)
+
+                // await this.writePairToDatabase(fetchPromises[0]?.details?.name, fetchPromises[0].data)
                 once = false;
             }
             await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before next batch
         }
 
         console.log("Data store populated and subscriptions set up for all leverage pairs.");
+        await this.writePairsToDatabase()
         this.isUpdating = false;
 
 
@@ -228,13 +229,13 @@ export class TradingBot {
         });
     }
 
-    async writePairToDatabase(samplePairName, sampleData) {
+    async writePairToDatabase(pairName, pairData) {
 
-        await dbWrapper.insertPairData(samplePairName, sampleData);
+        await dbWrapper.insertPairData(pairName, pairData);
 
         // Retrieve data
-        const data = await dbWrapper.getPairData(await samplePairName);
-        console.log("🚀 ~ file: bot.ts:234 ~ TradingBot ~ writePairToDatabase ~ data:", data)
+        // const data = await dbWrapper.getPairData(await samplePairName);
+        console.log("🚀 ~ file: bot.ts:234 ~ TradingBot ~ writePairToDatabase ~ data:", pairName)
     }
 
     async writePairsToDatabase() {
