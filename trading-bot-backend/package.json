@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "yarn build; pm2 start ./out/backend-server.js --no-daemon",
+    "start": "yarn build; pm2 start ./dist/backend-server.js --no-daemon",
     "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "rm -rf ./out/*; yarn install; tsc src/*.ts --outDir ./out",
+    "prebuild": "rm -rf ./dist/*; yarn install; copyfiles -u 1 src/**/*.json dist/",
+    "build": " tsc src/*.ts --outDir ./dist",
     "test": "mocha -r ts-node/register -r tsconfig-paths/register 'src/**/*.test.ts'"
   },
   "keywords": [],
@@ -38,11 +39,15 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@influxdata/influxdb-client": "^1.33.2",
     "axios": "^1.4.0",
     "ccxt": "^3.1.50",
     "cli-chart": "^0.3.1",
+    "copyfiles": "^2.4.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "influx": "^5.9.3",
+    "lodash": "^4.17.21",
     "node-fetch": "2",
     "onesignal-node": "^3.4.0",
     "p-limit": "^4.0.0",

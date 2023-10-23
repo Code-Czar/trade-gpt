@@ -115,14 +115,20 @@ export const webSocketRegisterToOHLCVDataForPair = async (
     symbolName,
     timeframe,
 ) => {
-    publicClient.send(
-        JSON.stringify({
-            op: 'subscribe',
-            args: [
-                `kline.${convertTimeFrameToByBitStandard(timeframe)}.${symbolName}`,
-            ],
-        }),
-    )
+    try {
+
+        publicClient.send(
+            JSON.stringify({
+                op: 'subscribe',
+                args: [
+                    `kline.${convertTimeFrameToByBitStandard(timeframe)}.${symbolName}`,
+                ],
+            }),
+        )
+    } catch (error) {
+        console.log("🚀 ~ file: ByBitWebSocket.ts:129 ~ error:", error, symbolName)
+
+    }
 }
 
 export const webSocketRegisterToAllOHLCVDataUpdates = async (

@@ -150,7 +150,6 @@ let bearishDivergences = [];
 
 const updateMarkser = () => {
     candlestickSeries?.setMarkers([
-        ...bullishDivergences,
         ...emaMarkers,
         ...rsiMarkers,
         ...trendlineMarkers.lowerMarkers,

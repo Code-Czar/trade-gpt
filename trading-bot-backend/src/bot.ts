@@ -2,16 +2,23 @@
 import { PAIR_TYPES, FOREX_PAIRS } from './types/consts'
 import { cryptoFetcher, forexFetcher, byBitDataFetcher } from './dataFetchers';
 import { convertBybitTimeFrameToLocal, sortDataAscending, convertTimeframeToMs, getStartOfTimeframe } from './utils/convertData';
-import { indicators, formatOHLCVForChartData } from 'trading-shared';
+import { indicators, formatOHLCVForChartData, stringifyMap } from 'trading-shared';
 import { convertPairToJSON } from './utils/convertData';
+import { InfluxDBWrapper } from './database';
 
 const fs = require('fs');
 const path = require('path');
 
+const dataStorePath = './dist/database/dataStore.json';
+const dbWrapper = new InfluxDBWrapper(dataStorePath);
+// dbWrapper.dropDatabase();
+// dbWrapper.initDB();
+
+
 const binanceDataFile = 'binanceData.json';
 const bybitDataFile = 'bybitData.json';
 
-
+let once = true;
 export class TradingBot {
     public allSymbols = [];
     public dataStore = new Map();
@@ -148,7 +155,7 @@ export class TradingBot {
 
         // Optionally: Only store the last 200 values
         storePair.ohlcvs.set(timeframe, ohlcvs.slice(-200));
-        console.log("🚀 ~ file: bot.ts:123 ~ TradingBot ~ newOHLCVDataAvailable ~ symbolName:", symbolName, timeframe);
+        // console.log("🚀 ~ file: bot.ts:123 ~ TradingBot ~ newOHLCVDataAvailable ~ symbolName:", symbolName, timeframe);
         this.webSocketStreamer.broadcast(`getRealTimeData`, { storePair: await convertPairToJSON(leveragePairs.get(symbolName)) })
     };
 
@@ -190,16 +197,57 @@ export class TradingBot {
         });
 
         while (fetchPromises.length > 0) {
-            const batch = fetchPromises.splice(0, 100); // Get the next batch of 10 promises (and remove them from fetchPromises)
+            const batch = fetchPromises.splice(0, 2); // Get the next batch of 10 promises (and remove them from fetchPromises)
             await Promise.all(batch.map(fn => fn())); // Execute current batch of promises in parallel
+
+            if (once) {
+                await this.writePairsToDatabase()
+                await this.writePairToDatabase(fetchPromises[0]?.details?.name, fetchPromises[0].data)
+                once = false;
+            }
             await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before next batch
         }
 
         console.log("Data store populated and subscriptions set up for all leverage pairs.");
         this.isUpdating = false;
+
+
     }
 
+    async writeDataStore() {
+        console.log("🚀 ~ file: bot.ts:209 ~ TradingBot ~ WRITTING DATASTORE ~ writeDataStore:")
+        const convertedDataStore = await stringifyMap(this.dataStore)
+        console.log("🚀 ~ file: bot.ts:203 ~ TradingBot ~ populateDataStoreParallel ~ convertedDataStore:", convertedDataStore)
+        // fs.writeFile(dataStorePath, JSON.stringify(convertedDataStore, null, 4), 'utf8');
+        fs.writeFile(dataStorePath, JSON.stringify(convertedDataStore, null, 4), (err) => {
+            if (err) {
+                console.error('Error writing file:', err);
+            } else {
+                console.log('File written successfully.');
+            }
+        });
+    }
 
+    async writePairToDatabase(samplePairName, sampleData) {
+
+        await dbWrapper.insertPairData(samplePairName, sampleData);
+
+        // Retrieve data
+        const data = await dbWrapper.getPairData(await samplePairName);
+        console.log("🚀 ~ file: bot.ts:234 ~ TradingBot ~ writePairToDatabase ~ data:", data)
+    }
+
+    async writePairsToDatabase() {
+        const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs);
+        // console.log("🚀 ~ file: bot.ts:239 ~ TradingBot ~ writePairsToDatabase ~ leveragePairs:", leveragePairs)
+        leveragePairs.forEach(async (pairData, pairName) => {
+            // console.log("🚀 ~ file: bot.ts:244 ~ TradingBot ~ leveragePairs.entries ~ pairName:", pairName)
+            // console.log("🚀 ~ file: bot.ts:244 ~ TradingBot ~ leveragePairs.entries ~ pairData:", pairData)
+
+            await this.writePairToDatabase(pairName, pairData);
+        })
+
+    }
 
 
     calculateRSI(prices: number[] | null, period = 14): number | null {
