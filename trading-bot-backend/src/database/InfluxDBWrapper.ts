@@ -6,7 +6,9 @@ import {
     createRSIDataPoints,
     createEMADataPoints,
     extractRSIData,
-    createMACDDataPoints
+    createMACDDataPoints,
+    createVolumesDataPoints,
+    createBoillingerBandsDataPoints
 } from './helpers'
 // import lodash from 'lodash';
 
@@ -92,6 +94,8 @@ export class InfluxDBWrapper {
             this.writeApi.writePoints(createRSIDataPoints(pairName, data.rsi))
             this.writeApi.writePoints(createEMADataPoints(pairName, data.ema))
             this.writeApi.writePoints(createMACDDataPoints(pairName, data.macd))
+            this.writeApi.writePoints(createVolumesDataPoints(pairName, data.volumes))
+            this.writeApi.writePoints(createBoillingerBandsDataPoints(pairName, data.bollingerBands))
             this.writeApi.flush()
             // await this.writeApi.close();
         } catch (error) {
