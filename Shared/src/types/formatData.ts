@@ -5,7 +5,7 @@ export const formatOHLCVForChartData = (data: any) => {
         const date = new Date(row[0]);
 
         result.push({
-            time: row[0] / 1000,
+            time: row[0],
             open: parseFloat(row[1]),
             high: parseFloat(row[2]),
             low: parseFloat(row[3]),

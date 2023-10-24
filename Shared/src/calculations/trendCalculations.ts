@@ -14,8 +14,8 @@ export const findPeaksAndTroughs = (data: any) => {
 };
 
 export const findRSIPeaksAndTroughs = (data, sensitivity = 1) => {
-    const peaks = [];
-    const troughs = [];
+    const peaks: any = [];
+    const troughs: any = [];
 
     for (let i = 1; i < data.length - 1; i++) {
         if (data[i] - data[i - 1] > sensitivity && data[i] - data[i + 1] > sensitivity) {
