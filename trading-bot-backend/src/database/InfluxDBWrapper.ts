@@ -6,6 +6,7 @@ import {
     createRSIDataPoints,
     createEMADataPoints,
     extractRSIData,
+    createMACDDataPoints
 } from './helpers'
 // import lodash from 'lodash';
 
@@ -90,6 +91,7 @@ export class InfluxDBWrapper {
             this.writeApi.writePoints(createOHLCVSDataPoints(pairName, data.ohlcvs))
             this.writeApi.writePoints(createRSIDataPoints(pairName, data.rsi))
             this.writeApi.writePoints(createEMADataPoints(pairName, data.ema))
+            this.writeApi.writePoints(createMACDDataPoints(pairName, data.macd))
             this.writeApi.flush()
             // await this.writeApi.close();
         } catch (error) {
