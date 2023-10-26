@@ -1,5 +1,5 @@
 import { BACKEND_URLS, REMOTE_URL, REMOTE_WSS_URL } from 'shared';
-console.log("🚀 ~ file: backendWebSocket.ts:2 ~ BACKEND_URLS:", BACKEND_URLS, REMOTE_URL, REMOTE_WSS_URL)
+global.logger.debug("🚀 ~ file: backendWebSocket.ts:2 ~ BACKEND_URLS:", BACKEND_URLS, REMOTE_URL, REMOTE_WSS_URL)
 
 // const WebSocket = require('ws')
 import * as WebSocket from 'ws';
@@ -15,7 +15,7 @@ export class BackendClient {
     constructor(strategyAnalyzer, BACKEND_WEBSOCKET_URL: string = BACKEND_URLS.WEBSOCKET) {
         this.strategyAnalyzer = strategyAnalyzer;
         this.BACKEND_WEBSOCKET_URL = BACKEND_WEBSOCKET_URL;
-        console.log("🚀 ~ file: backendWebSocket.ts:15 ~ BackendClient ~ constructor ~ this.BACKEND_WEBSOCKET_URL:", this.BACKEND_WEBSOCKET_URL)
+        global.logger.debug("🚀 ~ file: backendWebSocket.ts:15 ~ BackendClient ~ constructor ~ this.BACKEND_WEBSOCKET_URL:", this.BACKEND_WEBSOCKET_URL)
         this.connect();
     }
 
@@ -38,7 +38,7 @@ export class BackendClient {
     }
 
     private onOpen() {
-        console.log('Connected to BE');
+        global.logger.debug('Connected to BE');
         this.isConnected = true;
 
         // Subscribe to topics
@@ -49,9 +49,9 @@ export class BackendClient {
 
     private onMessage(data: any) {
         const dataObject = JSON.parse(data);
-        console.log(`Received data from BE`);
+        global.logger.debug(`Received data from BE`);
         try {
-            console.log("🚀 ~ file: backendWebSocket.ts:64 ~ BackendClient ~ dataObject:", dataObject.topic)
+            global.logger.debug("🚀 ~ file: backendWebSocket.ts:64 ~ BackendClient ~ dataObject:", dataObject.topic)
             if (dataObject.topic === 'getRealTimeData') {
                 this.strategyAnalyzer?.analyzeRSIRealTime(dataObject.data);
                 this.strategyAnalyzer?.analyzeRSIPastData(dataObject.data);
@@ -59,13 +59,13 @@ export class BackendClient {
             }
 
         } catch (error) {
-            console.log("🚀 ~ file: backendWebSocket.ts:71 ~ BackendClient ~ onMessage ~ error:", error, dataObject)
+            global.logger.debug("🚀 ~ file: backendWebSocket.ts:71 ~ BackendClient ~ onMessage ~ error:", error, dataObject)
 
         }
     }
 
     private onPong() {
-        console.log('Received pong from BE');
+        global.logger.debug('Received pong from BE');
         this.isConnected = true;
     }
 
@@ -81,12 +81,12 @@ export class BackendClient {
         }
     }
     private onClose() {
-        console.log('Disconnected from BE');
+        global.logger.debug('Disconnected from BE');
         this.isConnected = false;
 
         // Attempt to reconnect after some time
         setTimeout(() => {
-            console.log('Attempting to reconnect...');
+            global.logger.debug('Attempting to reconnect...');
             this.connect();
         }, this.RECONNECT_INTERVAL);
     }

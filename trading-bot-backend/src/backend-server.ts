@@ -8,8 +8,7 @@ import { cryptoFetcher } from './dataFetchers'
 const { TradingBot } = require('./bot')
 const { WebsocketStreamer } = require('./websocketStreamer')
 
-console.log("🚀 ~ file: backend-server.ts:12 ~ global.logger:");
-global.logger = new VersatileLogger('BackendServer', true, true);
+global.logger = new VersatileLogger('BackendServer', true, false);
 
 
 const express = require('express')
@@ -33,7 +32,6 @@ const websocketStreamer = new WebsocketStreamer(server)
 const bot = new TradingBot(websocketStreamer)
 const PORT = 3000
 server.listen(PORT, () => {
-    console.log("🚀 ~ file: backend-server.ts:38 ~ global.logger:", global.logger);
     global.logger.info(`Server is running on http:`)
 })
 

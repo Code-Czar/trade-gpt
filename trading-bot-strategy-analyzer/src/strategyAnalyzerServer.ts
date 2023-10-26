@@ -1,3 +1,6 @@
+import { VersatileLogger } from "trading-shared"
+global.logger = new VersatileLogger('StrategyAnalyzerServer', true, true);
+
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -10,7 +13,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env') });
 
-console.log('Current directory:', process.cwd());
+global.logger.debug('Current directory:', process.cwd());
 
 import { SERVER_PORTS } from 'trading-shared';
 
@@ -28,7 +31,7 @@ if (mode === 'PRODUCTION') {
     const certificatePath = '/etc/letsencrypt/live/beniben.hopto.org/';
     const key = fs.readFileSync(`${certificatePath}/privkey.pem`);
     const cert = fs.readFileSync(`${certificatePath}/fullchain.pem`);
-    console.log('🚀 ~ file: strategyAnalyzerServer.ts:13 ~ key:', key, cert);
+    global.logger.debug('🚀 ~ file: strategyAnalyzerServer.ts:13 ~ key:', key, cert);
     httpsOptions = {
         key: key,
         cert: cert,
@@ -40,7 +43,7 @@ else {
     server = http.createServer(app);
 }
 server.listen(SERVER_PORTS.STRATEGY_ANALYZER_PORT, () => {
-    console.log(`SA Server running on port ${SERVER_PORTS.STRATEGY_ANALYZER_PORT}`);
+    global.logger.debug(`SA Server running on port ${SERVER_PORTS.STRATEGY_ANALYZER_PORT}`);
 });
 app.use(cors());
 

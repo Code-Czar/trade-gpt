@@ -7,7 +7,7 @@ import { fetchRSI, checkRSIThresholds } from '@/strategyAnalyzer'
 // const app = require('../../backend-server'); // Import your app
 
 
-console.log("🚀 ~ file: app.test.ts:6 ~ app:", app)
+global.logger.debug("🚀 ~ file: app.test.ts:6 ~ app:", app)
 
 // Destructure the expect function from Chai
 const { expect } = chai;

@@ -1,4 +1,4 @@
-import { stringifyMap, BINANCE_TIMEFRAMES } from 'trading-shared'
+import { stringifyMap, BINANCE_TIMEFRAMES, convertPairToDataArray, convertPointArrayToInfluxPoints } from 'trading-shared'
 import { InfluxDB, Point } from '@influxdata/influxdb-client'
 import {
     extractOHLCV,
@@ -8,7 +8,8 @@ import {
     extractRSIData,
     createMACDDataPoints,
     createVolumesDataPoints,
-    createBoillingerBandsDataPoints
+    createBoillingerBandsDataPoints,
+    flattenPairData
 } from './helpers'
 
 const lodash = require('lodash')
@@ -39,7 +40,7 @@ export class InfluxDBWrapper {
 
 
     constructor(sampleFilePath: string = 'dataStore.json') {
-        this.sampleData = JSON.parse(fs.readFileSync(sampleFilePath, 'utf-8'))
+        // this.sampleData = JSON.parse(fs.readFileSync(sampleFilePath, 'utf-8'))
 
         // this.client = new InfluxDB({
         //     url: 'http://localhost:8086',
@@ -97,17 +98,68 @@ export class InfluxDBWrapper {
     }
 
     sendDataToTelegraf(data) {
+        console.log("🚀 ~ file: InfluxDBWrapper.ts:101 ~ data:", data);
         this.client.write(data + '\n');
     }
 
 
+    async writePairToDatabase(inputPair) {
+        const result = await convertPairToDataArray(await inputPair)
+        const points = await convertPointArrayToInfluxPoints(await result)
+        console.log("🚀 ~ file: InfluxDBWrapper.ts:108 ~ points:", points.length);
 
+        this.isProcessing = true;
+        points.forEach((point) => this.sendDataToTelegraf(point))
+
+        // // Check if buffer size is over the threshold
+        // while (points.length >= this.BUFFER_THRESHOLD) {
+        //     let retryCount = 0;
+        //     while (retryCount < MAX_RETRIES) {
+        //         try {
+        //             // global.logger.info("🚀 ~ file: InfluxDBWrapper.ts:137 ~ InfluxDBWrapper ~ insertPairData ~ this.dataBuffer:", this.dataBuffer.length)
+        //             const dataToSend = points.splice(0, this.BUFFER_THRESHOLD);
+        //             for (const point of dataToSend) {
+        //                 const line = point.toLineProtocol();
+        //                 this.sendDataToTelegraf(line);
+        //             }
+        //             break; // Exit the loop if successful
+        //         } catch (error) {
+        //             retryCount++;
+        //             if (retryCount >= MAX_RETRIES) {
+        //                 console.error('Error while writing to InfluxDB:', error);
+        //                 fs.appendFileSync(
+        //                     'error.log',
+        //                     `${new Date().toISOString()} - ${error.message}\n`,
+        //                 );
+        //                 fs.appendFileSync('error.log', `${await stringifyMap(data)}`);
+        //                 this.isProcessing = false;
+        //                 throw error;
+        //             } else {
+        //                 await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+        //             }
+        //         }
+        //     }
+        // }
+
+        this.isProcessing = false;
+
+
+
+    }
 
     async insertPairData(pairName: string, data: any) {
         if (!pairName) {
             return;
         }
 
+        // const dataPoints = [
+        //     ...createOHLCVSDataPoints(pairName, data.ohlcvs),
+        //     ...createRSIDataPoints(pairName, data.rsi),
+        //     ...createEMADataPoints(pairName, data.ema),
+        //     ...createMACDDataPoints(pairName, data.macd),
+        //     ...createVolumesDataPoints(pairName, data.volumes),
+        //     ...createBoillingerBandsDataPoints(pairName, data.bollingerBands)
+        // ];
         const dataPoints = [
             ...createOHLCVSDataPoints(pairName, data.ohlcvs),
             ...createRSIDataPoints(pairName, data.rsi),

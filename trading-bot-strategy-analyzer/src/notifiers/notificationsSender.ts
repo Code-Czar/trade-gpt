@@ -36,5 +36,5 @@ export const sendNotification = async (message: string) => {
         message
     };
     const { id } = await client.createNotification(notification);
-    console.log("🚀 ~ file: notificationsSender.ts:35 ~ sendNofitication ~ id:", id)
+    global.logger.debug("🚀 ~ file: notificationsSender.ts:35 ~ sendNofitication ~ id:", id)
 };

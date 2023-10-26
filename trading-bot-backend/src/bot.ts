@@ -1,17 +1,17 @@
-
 import { PAIR_TYPES, FOREX_PAIRS } from './types/consts'
 import { cryptoFetcher, forexFetcher, byBitDataFetcher } from './dataFetchers';
 import { convertBybitTimeFrameToLocal, sortDataAscending, convertTimeframeToMs, getStartOfTimeframe } from './utils/convertData';
 import { indicators, formatOHLCVForChartData, stringifyMap } from 'trading-shared';
 import { convertPairToJSON } from './utils/convertData';
 import { InfluxDBWrapper } from './database';
+import ByBitDataFetcher from './dataFetchers/byBitDataFetcher';
 
 const fs = require('fs');
 const path = require('path');
 
 const dataStorePath = './dist/database/dataStore.json';
 const dbWrapper = new InfluxDBWrapper(dataStorePath);
-dbWrapper.clearBucketData();
+
 // dbWrapper.dropDatabase();
 // dbWrapper.initDB();
 
@@ -22,6 +22,11 @@ const bybitDataFile = 'bybitData.json';
 const ACTIVE_TIMEFRAMES = ['1d', '1h', '5m', '1m']
 
 let once = true;
+
+interface DataFetchers {
+    bybitDataFetcher?: ByBitDataFetcher | null
+}
+
 export class TradingBot {
     public allSymbols = [];
     public dataStore = new Map();
@@ -29,11 +34,20 @@ export class TradingBot {
     private webSocketStreamer: any;
     public isUpdating = false;
 
+    public dataFetchers: DataFetchers = {
+        bybitDataFetcher: null
+    };
+
     constructor(webSocketStreamer) {
         this.dataStore.set(PAIR_TYPES.leveragePairs, new Map());
         this.dataStore.set(PAIR_TYPES.forexPairs, new Map());
         this.dataStore.set(PAIR_TYPES.cryptoPairs, new Map());
         this.webSocketStreamer = webSocketStreamer;
+
+        this.dataFetchers.bybitDataFetcher = new ByBitDataFetcher()
+        this.dataFetchers.bybitDataFetcher.setReconnectCallback(this.populateDataStoreParallel.bind(this));
+        this.dataFetchers.bybitDataFetcher.setUpdateOHLCVCallback(this.newOHLCVDataAvailable.bind(this));
+
 
     }
 
@@ -80,7 +94,7 @@ export class TradingBot {
         // Optionally: Only store the last 200 values
         storePair.ohlcvs.set(timeframe, ohlcvs.slice(-200));
         this.webSocketStreamer.broadcast(`getRealTimeData`, { storePair: await convertPairToJSON(leveragePairs.get(symbolName)) })
-        // this.writePairToDatabase(symbolName, storePair);
+        this.writePairToDatabase(storePair);
     };
 
     async updateIndicators(symbolName: string, timeframe: string, ohlcvs: any[]) {
@@ -110,12 +124,11 @@ export class TradingBot {
         // Calculate and update Bollinger Bands
         const { upperBand, lowerBand, middleBand } = await indicators.calculateBollingerBands(formattedData, 20);
         storePair.bollingerBands.set(timeframe, { upperBand, middleBand, lowerBand });
-
-
     }
 
 
     async populateDataStoreForPair(pairType: string, symbolData: BasicObject | string, timeframe: string) {
+
         const symbolDetails = symbolData.details;
         const symbolName = symbolDetails.name;
         try {
@@ -152,34 +165,37 @@ export class TradingBot {
 
             // Update the indicators using the factored out method
             await this.updateIndicators(symbolName, timeframe, ohlcvs);
+            // global.logger.debug("", await convertPairToJSON(storeSymbolPair), `${symbolName}.json`);
 
         } catch (error) {
             console.error(`Error populating data store for ${typeof symbolDetails === 'object' ? symbolDetails.name : symbolDetails} and ${timeframe}:`, error);
         }
     }
 
-
-
-
     async populateDataStoreParallel(timeframes = ACTIVE_TIMEFRAMES) {
+        await dbWrapper.clearBucketData();
 
         if (this.isUpdating) {
             return
         }
+        const dataFetcher = this.dataFetchers.bybitDataFetcher
+
+        while (!dataFetcher?.isReady()) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+        }
+
+
         this.isUpdating = true
 
         const leveragePairs = await cryptoFetcher.getBybitPairsWithLeverage();
-        // Placeholder for forex and crypto pairs
-        const forexPairs = [];
-        const cryptoPairs = [];
+
 
         const fetchPromises = [];
-        await byBitDataFetcher.setReconnectCallback(this.populateDataStoreParallel.bind(this));
-        await byBitDataFetcher.setUpdateOHLCVCallback(this.newOHLCVDataAvailable.bind(this));
+
         leveragePairs.forEach(symbol => {
             timeframes.forEach(timeframe => {
                 fetchPromises.push(async () => {
-                    const result = await byBitDataFetcher.getInitialOHLCV(symbol, timeframe);
+                    const result = await dataFetcher.getInitialOHLCV(symbol, timeframe);
                     if (result && result.data) {
                         const inputData = {
                             details: result.symbolDetails,
@@ -188,7 +204,7 @@ export class TradingBot {
                             },
                         }
                         this.populateDataStoreForPair(PAIR_TYPES.leveragePairs, inputData, timeframe);
-                        byBitDataFetcher.registerToOHLCVDataUpdates(symbol.name, timeframe, this.newOHLCVDataAvailable.bind(this));
+                        this.dataFetchers.bybitDataFetcher?.registerToOHLCVDataUpdates(symbol.name, timeframe);
                     }
                 });
             });
@@ -274,21 +290,22 @@ export class TradingBot {
     }
 
 
-    async writeDataStore() {
-        const convertedDataStore = await stringifyMap(this.dataStore)
-        // fs.writeFile(dataStorePath, JSON.stringify(convertedDataStore, null, 4), 'utf8');
-        fs.writeFile(dataStorePath, JSON.stringify(convertedDataStore, null, 4), (err) => {
-            if (err) {
-                console.error('Error writing file:', err);
-            } else {
-                global.logger.info('File written successfully.');
-            }
-        });
-    }
+    // async writeDataStore() {
+    //     const convertedDataStore = await stringifyMap(this.dataStore)
+    //     // fs.writeFile(dataStorePath, JSON.stringify(convertedDataStore, null, 4), 'utf8');
+    //     fs.writeFile(dataStorePath, JSON.stringify(convertedDataStore, null, 4), (err) => {
+    //         if (err) {
+    //             console.error('Error writing file:', err);
+    //         } else {
+    //             global.logger.info('File written successfully.');
+    //         }
+    //     });
+    // }
 
-    async writePairToDatabase(pairName, pairData) {
+    async writePairToDatabase(pairData) {
+        global.logger.debug("🚀 ~ file: bot.ts:304 ~ writePairToDatabase:");
 
-        await dbWrapper.insertPairData(pairName, pairData);
+        await dbWrapper.writePairToDatabase(pairData);
 
         // Retrieve data
         // const data = await dbWrapper.getPairData(await samplePairName);
@@ -297,7 +314,8 @@ export class TradingBot {
     async writePairsToDatabase() {
         const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs);
         leveragePairs.forEach(async (pairData, pairName) => {
-            await this.writePairToDatabase(pairName, pairData);
+            console.log("🚀 ~ file: bot.ts:316 ~ leveragePairs:", pairData);
+            await dbWrapper.writePairToDatabase(pairData);
         })
 
     }

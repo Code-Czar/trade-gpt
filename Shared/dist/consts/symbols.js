@@ -84,3 +84,4 @@ exports.CRYPTO_SYMBOLS = [
     'ZIL-USDT',
     'ZRX-USDT',
 ];
+//# sourceMappingURL=symbols.js.map

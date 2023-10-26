@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf ./dist/* && yarn install && tsc --outDir ./dist  && cp .env_shared ./dist/",
@@ -15,6 +16,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@influxdata/influxdb-client": "^1.33.2",
     "@types/node": "^20.8.6",
     "dotenv": "^16.3.1",
     "technicalindicators": "^3.1.0",

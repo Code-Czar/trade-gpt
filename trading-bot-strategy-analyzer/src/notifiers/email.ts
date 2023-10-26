@@ -18,7 +18,7 @@ export async function sendSignalEmail(positionType: string, symbol: string, time
         service: 'gmail',
         auth: credentials
     });
-    // console.log("🚀 ~ file: email.ts:14 ~ sendSignalEmail ~ auth:", credentials)
+    // global.logger.debug("🚀 ~ file: email.ts:14 ~ sendSignalEmail ~ auth:", credentials)
     const formattedSymbol = symbol.replace("/", "").replace("-", "");
 
 
@@ -33,5 +33,5 @@ export async function sendSignalEmail(positionType: string, symbol: string, time
         <a href="${bybitURL}${formattedSymbol}"> View on Bybit </a>`, // html body
     });
 
-    // console.log('Message sent: %s', info.messageId);
+    // global.logger.debug('Message sent: %s', info.messageId);
 }

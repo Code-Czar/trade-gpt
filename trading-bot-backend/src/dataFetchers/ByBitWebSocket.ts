@@ -1,159 +1,146 @@
-import { convertTimeFrameToByBitStandard } from '../utils/convertData'
+import { convertTimeFrameToByBitStandard } from '../utils/convertData';
 
-const WEB_SOCKETS_URLS = {
+const WebSocket = require('ws')
+const crypto = require('crypto')
+
+interface WebSocketURLs {
+    FUTURES: string;
+    SPOT: string;
+    PRIVATE: string;
+}
+
+interface Callbacks {
+    OHLCVsUpdateCallback: ((message: any) => void) | null;
+    restartCallback: (() => void) | null;
+}
+
+const WEB_SOCKETS_URLS: WebSocketURLs = {
     FUTURES: 'wss://stream.bybit.com/v5/public/linear',
     SPOT: 'wss://stream.bybit.com/v5/public/spot',
     PRIVATE: 'wss://stream.bybit.com/v5/private',
-}
+};
 
-const crypto = require('crypto')
-const WebSocket = require('ws')
+const apiKey = 'T6mYLquMbR2vRU3ukL';
+const apiSecret = '3PBXd8rPDs3uju8N3t1gOrH08TezVfFw0YmB';
+const expires = Math.round(new Date().getTime() + 1000);
+const PONG_TIMEOUT = 40000;
+const PONG_TIMEOUT_COUNT = 10;
 
-const apiKey = 'T6mYLquMbR2vRU3ukL'
-const apiSecret = '3PBXd8rPDs3uju8N3t1gOrH08TezVfFw0YmB'
+export class ByBitWebSocket {
+    publicClient: WebSocket;
+    privateClient: WebSocket = new WebSocket(WEB_SOCKETS_URLS.PRIVATE);
+    pongTimeoutCount: number = 0;
+    pongTimeout = null;
+    callbacks: Callbacks = {
+        OHLCVsUpdateCallback: null,
+        restartCallback: null,
+    };
 
-// Generate expires.
-const expires = Math.round(new Date().getTime() + 1000)
+    constructor(callbacks) {
+        this.publicClient = new WebSocket(WEB_SOCKETS_URLS.FUTURES);
+        this.privateClient = new WebSocket(WEB_SOCKETS_URLS.PRIVATE);
 
-const PONG_TIMEOUT = 40000 // 10 seconds, adjust this value as needed
-const PONG_TIMEOUT_COUNT = 10 // number of consecutive timeouts before reconnecting
+        this.initPublicClient(callbacks);
+        this.initPrivateClient(callbacks);
 
-let pongTimeout
-let pongTimeoutCount = 0
+    }
 
-export let publicClient = new WebSocket(WEB_SOCKETS_URLS.FUTURES)
-const privateClient = new WebSocket(WEB_SOCKETS_URLS.PRIVATE)
+    private initPublicClient(callbacks): void {
+        this.publicClient.on('open', () => {
+            global.logger.info('"open" event!')
+            global.logger.info('WebSocket Client Connected')
+            const expires = new Date().getTime() + 10000
+            callbacks?.onPublicClientReady?.(true);
 
-const callbacks = {
-    OHLCVsUpdateCallback: null,
-    restartCallback: null,
-}
-function initPublicClient() {
-    publicClient = new WebSocket(WEB_SOCKETS_URLS.FUTURES)
-    publicClient.on('open', function () {
-        global.logger.info('"open" event!')
-        global.logger.info('WebSocket Client Connected')
-        const expires = new Date().getTime() + 10000
-        const signature = crypto
-            .createHmac('sha256', apiSecret)
-            .update('GET/realtime' + expires)
-            .digest('hex')
+        });
+        this.setupPingPongHandlers(this.publicClient, WEB_SOCKETS_URLS.FUTURES);
+    }
+    private initPrivateClient(callbacks): void {
 
-        setupPingPongHandlers(publicClient, WEB_SOCKETS_URLS.FUTURES)
-    })
-}
 
-function setupPingPongHandlers(client, url) {
-    client.on('ping', function () {
-        global.logger.info('ping sent')
-    })
-
-    client.on('pong', function () {
-        global.logger.info('pong received')
-        clearTimeout(pongTimeout)
-    })
-
-    setInterval(() => {
-        client.ping()
-        pongTimeout = setTimeout(() => {
-            global.logger.info('Pong not received')
-            pongTimeoutCount++
-            if (pongTimeoutCount >= PONG_TIMEOUT_COUNT) {
-                console.error('Pong not received, reconnecting')
-                try {
-                    publicClient.terminate()
-                    initPublicClient()
-                    callbacks.restartCallback?.()
-                    pongTimeoutCount = 0
-                } catch (error) {
-                    global.logger.info(
-                        '🚀 ~ file: ByBitWebSocket.ts:69 ~ pongTimeout=setTimeout ~ error:',
-                        error,
-                    )
-                }
+        this.privateClient.on('open', () => {
+            global.logger.info('"open" PRIVATE event!')
+            global.logger.info('WebSocket PRIVATE Client Connected')
+            const expires = new Date().getTime() + 10000
+            const signature = crypto
+                .createHmac('sha256', apiSecret)
+                .update('GET/realtime' + expires)
+                .digest('hex')
+            const payload = {
+                op: 'auth',
+                args: [apiKey, expires.toFixed(0), signature],
             }
-            // client.terminate(); // This will trigger the close event and your reconnection logic
-        }, PONG_TIMEOUT)
-    }, 30000) // Send ping every 30 seconds
-}
+            global.logger.info('🚀 ~ file: ByBitWebSocket.ts:34 ~ payload:', payload)
+            this.privateClient.send(JSON.stringify(payload))
+            this.privateClient.send(JSON.stringify({ op: 'wallet' }))
+            callbacks?.onPrivateClientReady?.(true);
 
-function setReconnectCallback(restartCallback) {
-    callbacks.restartCallback = restartCallback
-}
+        })
+        this.privateClient.on('message', function (data) {
+            global.logger.info('"message" event! %j', JSON.parse(Buffer.from(data).toString()))
+        })
+        this.privateClient.on('ping', function (data, flags) {
+            global.logger.info('ping received')
+        })
+        this.privateClient.on('pong', function (data, flags) {
+            global.logger.info('pong received')
+        })
 
-privateClient.on('open', function () {
-    global.logger.info('"open" PRIVATE event!')
-    global.logger.info('WebSocket PRIVATE Client Connected')
-    const expires = new Date().getTime() + 10000
-    const signature = crypto
-        .createHmac('sha256', apiSecret)
-        .update('GET/realtime' + expires)
-        .digest('hex')
-    const payload = {
-        op: 'auth',
-        args: [apiKey, expires.toFixed(0), signature],
+        this.setupPingPongHandlers(this.privateClient, WEB_SOCKETS_URLS.PRIVATE);
     }
-    global.logger.info('🚀 ~ file: ByBitWebSocket.ts:34 ~ payload:', payload)
-    privateClient.send(JSON.stringify(payload))
-    privateClient.send(JSON.stringify({ op: 'wallet' }))
-    setupPingPongHandlers(privateClient, WEB_SOCKETS_URLS.PRIVATE)
-})
-privateClient.on('message', function (data) {
-    global.logger.info('"message" event! %j', JSON.parse(Buffer.from(data).toString()))
-})
-privateClient.on('ping', function (data, flags) {
-    global.logger.info('ping received')
-})
-privateClient.on('pong', function (data, flags) {
-    global.logger.info('pong received')
-})
 
-export const webSocketSetOHLCVsUpdateCallback = (callback) => {
-    callbacks.OHLCVsUpdateCallback = callback
-    publicClient.on('message', function (data) {
-        const message = JSON.parse(Buffer.from(data).toString())
-        // global.logger.info("🚀 ~ file: ByBitWebSocket.ts:73 ~ message:", message)
-        if (message.topic?.includes('kline')) {
-            callbacks.OHLCVsUpdateCallback(message)
-        }
-    })
-}
+    private setupPingPongHandlers(client: WebSocket, url: string): void {
+        client.on('ping', () => {
+            global.logger.info('ping sent')
+        })
 
-export const webSocketRegisterToOHLCVDataForPair = async (
-    symbolName,
-    timeframe,
-) => {
-    try {
-        publicClient.send(
-            JSON.stringify({
-                op: 'subscribe',
-                args: [
-                    `kline.${convertTimeFrameToByBitStandard(timeframe)}.${symbolName}`,
-                ],
-            }),
-        )
-    } catch (error) {
-        global.logger.error('🚀 ~ file: ByBitWebSocket.ts:129 ~ error:', { error, symbolName })
+        client.on('pong', () => {
+            global.logger.info('pong received')
+            clearTimeout(this.pongTimeout)
+        })
+
+        setInterval(() => {
+            client.ping()
+            this.pongTimeout = setTimeout(() => {
+                global.logger.info('Pong not received')
+                this.pongTimeoutCount++
+                if (this.pongTimeoutCount >= PONG_TIMEOUT_COUNT) {
+                    console.error('Pong not received, reconnecting')
+                    try {
+                        this.publicClient.terminate()
+                        this.initPublicClient()
+                        this.callbacks.restartCallback?.()
+                        this.pongTimeoutCount = 0
+                    } catch (error) {
+                        global.logger.info(
+                            '🚀 ~ file: ByBitWebSocket.ts:69 ~ pongTimeout=setTimeout ~ error:',
+                            error,
+                        )
+                    }
+                }
+                // client.terminate(); // This will trigger the close event and your reconnection logic
+            }, PONG_TIMEOUT)
+        }, 30000) // Send ping every 30 seconds
     }
-}
 
-export const webSocketRegisterToAllOHLCVDataUpdates = async (
-    symbolNames,
-    timeframes,
-    newOHLCVDataCallback,
-) => {
-    callbacks.OHLCVsUpdateCallback = newOHLCVDataCallback
-    publicClient.on('message', function (data) {
-        const message = JSON.parse(Buffer.from(data).toString())
-        // global.logger.info("🚀 ~ file: ByBitWebSocket.ts:73 ~ message:", message)
-        if (message.topic?.includes('kline')) {
-            callbacks.OHLCVsUpdateCallback?.(message)
-        }
-    })
+    public setReconnectCallback(restartCallback: () => void): void {
+        this.callbacks.restartCallback = restartCallback;
+    }
 
-    symbolNames.forEach((symbolName) => {
-        timeframes.forEach((timeframe) => {
-            publicClient.send(
+    public webSocketSetOHLCVsUpdateCallback(callback: (message: any) => void): void {
+        this.callbacks.OHLCVsUpdateCallback = callback
+        this.publicClient.on('message', (data) => {
+            const message = JSON.parse(Buffer.from(data).toString())
+            // global.logger.info("🚀 ~ file: ByBitWebSocket.ts:73 ~ message:", message)
+            if (message.topic?.includes('kline')) {
+                this.callbacks.OHLCVsUpdateCallback?.(message)
+            }
+        })
+    }
+
+    public async webSocketRegisterToOHLCVDataForPair(symbolName: string, timeframe: string): Promise<void> {
+        try {
+            this.publicClient.send(
                 JSON.stringify({
                     op: 'subscribe',
                     args: [
@@ -161,14 +148,33 @@ export const webSocketRegisterToAllOHLCVDataUpdates = async (
                     ],
                 }),
             )
-        })
-    })
-}
-initPublicClient()
+        } catch (error) {
+            global.logger.error('🚀 ~ file: ByBitWebSocket.ts:129 ~ error:', { error, symbolName })
+        }
+    }
 
-export default {
-    webSocketRegisterToAllOHLCVDataUpdates,
-    webSocketRegisterToOHLCVDataForPair,
-    webSocketSetOHLCVsUpdateCallback,
-    setReconnectCallback,
+    public async webSocketRegisterToAllOHLCVDataUpdates(symbolNames: string[], timeframes: string[], newOHLCVDataCallback: (message: any) => void): Promise<void> {
+        this.callbacks.OHLCVsUpdateCallback = newOHLCVDataCallback
+        this.publicClient.on('message', (data) => {
+            const message = JSON.parse(Buffer.from(data).toString())
+            // global.logger.info("🚀 ~ file: ByBitWebSocket.ts:73 ~ message:", message)
+            if (message.topic?.includes('kline')) {
+                this.callbacks.OHLCVsUpdateCallback?.(message)
+            }
+        })
+
+        symbolNames.forEach((symbolName) => {
+            timeframes.forEach((timeframe) => {
+                this.publicClient.send(
+                    JSON.stringify({
+                        op: 'subscribe',
+                        args: [
+                            `kline.${convertTimeFrameToByBitStandard(timeframe)}.${symbolName}`,
+                        ],
+                    }),
+                )
+            })
+        })
+    }
 }
+export default ByBitWebSocket

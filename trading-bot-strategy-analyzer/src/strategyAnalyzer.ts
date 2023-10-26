@@ -26,7 +26,7 @@ export const fetchRSI = async (timeframes = ["1d", "1h", "5m"]) => {
 
     });
     const symbolsObjects = await symbolsResponse.json()
-    // console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ symbolsObjects:", symbolsObjects)
+    // global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ symbolsObjects:", symbolsObjects)
     const symbols = symbolsObjects.map(pair => pair.name);
 
     const rsiResponse = await fetch(rsiBulkUrl, {
@@ -37,7 +37,7 @@ export const fetchRSI = async (timeframes = ["1d", "1h", "5m"]) => {
         body: JSON.stringify({ symbols, timeframes })
     });
     const rsiValues = await rsiResponse.json();
-    // console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ rsiResponse:", rsiValues)
+    // global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ rsiResponse:", rsiValues)
     return { rsiValues, symbols, timeframes }
 }
 
@@ -56,21 +56,21 @@ export const checkRSIThresholds = async (rsiValues, symbols, timeframes) => {
             // Check if the RSI is below the threshold and no notification has been sent yet
             if (rsiValue && rsiValue < RSI_THRESHOLD && !notificationsSent[symbol][timeframe]) {
                 signalTriggered = true;
-                console.log(`RSI value for ${symbol} at ${timeframe} is below the threshold! RSI: ${rsiValue}`);
+                global.logger.debug(`RSI value for ${symbol} at ${timeframe} is below the threshold! RSI: ${rsiValue}`);
 
                 // Send signal email
                 try {
 
                     await sendNotification(`RSI Alert: ${symbol} at ${timeframe} is below the threshold! RSI: ${rsiValue}`);
                 } catch (error) {
-                    console.log("🚀 ~ file: strategyAnalyzer.ts:66 ~ checkRSIThresholds ~ error:", error)
+                    global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:66 ~ checkRSIThresholds ~ error:", error)
 
                 }
                 try {
 
                     await sendSignalEmail("RSI Alert", symbol, timeframe, `RSI: ${rsiValue}`, true);
                 } catch (error) {
-                    console.log("🚀 ~ file: strategyAnalyzer.ts:73 ~ checkRSIThresholds ~ error:", error)
+                    global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:73 ~ checkRSIThresholds ~ error:", error)
 
                 }
                 // await sendNotification("RSI Alert : ", symbol, timeframe, `RSI: ${rsiValue}`, true);
@@ -87,7 +87,7 @@ export const checkRSIThresholds = async (rsiValues, symbols, timeframes) => {
     }
 
     if (!signalTriggered) {
-        console.log('No RSI values were below the threshold.');
+        global.logger.debug('No RSI values were below the threshold.');
     }
     return notificationsSent
 }
@@ -140,7 +140,7 @@ const generateSellSignal = (data) => {
     return isPriceTouchedUpperBand && isRSIOverBought && isMACDBearish;
 }
 function analyzeRSI(data) {
-    // // console.log("🚀 ~ file: strategyAnalyzer.ts:41 ~ analyzeRSI ~ data:", data)
+    // // global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:41 ~ analyzeRSI ~ data:", data)
     const { rsi } = data;
     const { ohlcvData } = data;
     const length = rsi.length;
@@ -221,7 +221,7 @@ async function openLongPosition(symbol, price) {
 
         const data = await res.json();
 
-        // console.log(`Opened new long position with ID ${data.id}`);
+        // global.logger.debug(`Opened new long position with ID ${data.id}`);
     } catch (err) {
         console.error(`Failed to open long position: ${position} ${err}`);
     }
@@ -244,9 +244,9 @@ async function openShortPosition(symbol, price) {
         });
 
         const data = await res.json();
-        // console.log("🚀 ~ file: strategyAnalyzer.ts:146 ~ openShortPosition ~ data:", data)
+        // global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:146 ~ openShortPosition ~ data:", data)
 
-        // console.log(`Opened new short position with ID ${data.id}`);
+        // global.logger.debug(`Opened new short position with ID ${data.id}`);
     } catch (err) {
         console.error(`Failed to open short position: ${position} ${err}`);
     }
@@ -307,7 +307,7 @@ export async function analyzeData(symbol, timeframe, analysisType, signalStatus,
             break;
 
         default:
-            // console.log(`Unknown analysis type: ${analysisType}`);
+            // global.logger.debug(`Unknown analysis type: ${analysisType}`);
             return;
     }
 

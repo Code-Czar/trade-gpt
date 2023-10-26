@@ -61,3 +61,4 @@ exports.BACKEND_URLS = {
     },
 };
 // export default { PROJECT_URLS }
+//# sourceMappingURL=projectURLs.js.map

@@ -1,3 +1,6 @@
+import { format } from 'winston';  // Add this at the top with your other imports
+const util = require('util');
+
 
 interface StackInfo {
     method: string;
@@ -7,6 +10,16 @@ interface StackInfo {
 }
 
 type LogLevel = 'info' | 'warn' | 'error' | 'debug'; // Add debug here
+
+const combineMessageAndSplat = () => {
+    return {
+        transform: (info, opts) => {
+            //combine message and args if any
+            info.message = util.format(info.message, ...info[Symbol.for('splat')] || [])
+            return info;
+        }
+    }
+}
 
 export class VersatileLogger {
     private componentName: string;
@@ -26,8 +39,12 @@ export class VersatileLogger {
             this.winston = require('winston');
 
             this.logger = this.winston.createLogger({
-                level: 'info',
-                format: this.winston.format.simple(),
+                levels: this.winston.config.syslog.levels,
+                level: 'debug',
+                format: format.combine(
+                    combineMessageAndSplat(),
+                    format.simple(),
+                ),
                 transports: [
                     new this.winston.transports.Console(),
                     new this.winston.transports.File({ filename: `${this.componentName}_${date}.log` })
@@ -56,27 +73,30 @@ export class VersatileLogger {
             }
         };
     }
-    public
 
     public async log(level: LogLevel, message: string, data: any, filename?: string, depth: number = 1): Promise<void> {
         const stackInfo: StackInfo | undefined = this.getStackInfo();
         if (stackInfo) {
-            const logMessage: string = `${this.componentName} | ${new Date().toISOString()} | ${level.toUpperCase()} 🚀 ~ ${stackInfo.file}:${stackInfo.method}|${stackInfo.line} ~ ${message}: ${data ? JSON.stringify(data) : ''}`;
+            const logMessage: string = `${this.componentName} | ${new Date().toISOString()} | ${level.toUpperCase()} | ${stackInfo.file}:${stackInfo.method}|${stackInfo.line} ~ ${message}: `;
 
             if (this.isBackend && this.logger) {
                 if (filename) {
                     this.logger.add(new this.winston.transports.File({ filename: filename }));
                 }
-                this.logger.log(level, logMessage);  // Ensure level is the first argument, and logMessage is the second
+                this.logger.log({
+                    level: level,
+                    message: logMessage,
+                    ...data
+                });
                 if (filename) {
                     this.logger.remove(new this.winston.transports.File({ filename: filename }));
                 }
             } else {
-                this.saveToIndexedDB(logMessage);
+                this.saveToIndexedDB(logMessage, data);
             }
 
             if (this.consoleLog) {
-                console.log(logMessage);
+                console.log(logMessage, data ? data : {});
             }
         }
     }
@@ -96,11 +116,11 @@ export class VersatileLogger {
     public debug(message: string, data: any, filename?: string): void {
         this.log('debug', message, data, filename, 2);
     }
-    private async saveToIndexedDB(logMessage: string): Promise<void> {
+    private async saveToIndexedDB(logMessage: string, data: any): Promise<void> {
         if (this.db) {
             const transaction = this.db.transaction(["logs"], "readwrite");
             const objectStore = transaction.objectStore("logs");
-            objectStore.add(logMessage);
+            objectStore.add({ logMessage, data });
         } else {
             console.error("IndexedDB not initialized. Log not saved!");
         }
