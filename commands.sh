@@ -50,4 +50,4 @@ function send_ssh_key() {
 alias startFront="cd trading-bot-frontend; yarn start"
 alias startBack="cd trading-bot-backend; yarn start"
 alias startTelegraf="telegraf --config /usr/local/etc/telegraf.conf"
-alias startInfluxMac="brew services influxdb restart"
+alias startInfluxMac="brew services  restart influxdb"

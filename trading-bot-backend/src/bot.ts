@@ -9,8 +9,8 @@ import ByBitDataFetcher from './dataFetchers/byBitDataFetcher';
 const fs = require('fs');
 const path = require('path');
 
-const dataStorePath = './dist/database/dataStore.json';
-const dbWrapper = new InfluxDBWrapper(dataStorePath);
+// const dataStorePath = './dist/database/dataStore.json';
+const dbWrapper = new InfluxDBWrapper();
 
 // dbWrapper.dropDatabase();
 // dbWrapper.initDB();
@@ -33,6 +33,7 @@ export class TradingBot {
     public refreshRate = 0;
     private webSocketStreamer: any;
     public isUpdating = false;
+    public initialized = false;
 
     public dataFetchers: DataFetchers = {
         bybitDataFetcher: null
@@ -87,14 +88,16 @@ export class TradingBot {
                 ohlcvs.push(newItem);
             }
         });
+        global.logger.debug("🚀 ~ file: bot.ts:90 ~ dataValues:", dataValues.length);
 
 
         await this.updateIndicators(symbolName, timeframe, ohlcvs.slice(-200));
 
         // Optionally: Only store the last 200 values
         storePair.ohlcvs.set(timeframe, ohlcvs.slice(-200));
+        dbWrapper.pushNewDataToDB(storePair, dataValues.length)
         this.webSocketStreamer.broadcast(`getRealTimeData`, { storePair: await convertPairToJSON(leveragePairs.get(symbolName)) })
-        this.writePairToDatabase(storePair);
+        // this.writePairToDatabase(storePair);
     };
 
     async updateIndicators(symbolName: string, timeframe: string, ohlcvs: any[]) {
@@ -124,6 +127,7 @@ export class TradingBot {
         // Calculate and update Bollinger Bands
         const { upperBand, lowerBand, middleBand } = await indicators.calculateBollingerBands(formattedData, 20);
         storePair.bollingerBands.set(timeframe, { upperBand, middleBand, lowerBand });
+        return storePair;
     }
 
 
@@ -164,7 +168,8 @@ export class TradingBot {
             storeSymbolPair.ohlcvs.set(timeframe, ohlcvs);
 
             // Update the indicators using the factored out method
-            await this.updateIndicators(symbolName, timeframe, ohlcvs);
+            storeSymbolPair = await this.updateIndicators(symbolName, timeframe, ohlcvs);
+            return storeSymbolPair;
             // global.logger.debug("", await convertPairToJSON(storeSymbolPair), `${symbolName}.json`);
 
         } catch (error) {
@@ -203,15 +208,16 @@ export class TradingBot {
                                 ohlcv: result.data
                             },
                         }
-                        this.populateDataStoreForPair(PAIR_TYPES.leveragePairs, inputData, timeframe);
-                        this.dataFetchers.bybitDataFetcher?.registerToOHLCVDataUpdates(symbol.name, timeframe);
+                        const storePair = this.populateDataStoreForPair(PAIR_TYPES.leveragePairs, inputData, timeframe);
+                        this.writePairToDatabase(storePair)
+                        // this.dataFetchers.bybitDataFetcher?.registerToOHLCVDataUpdates(symbol.name, timeframe);
                     }
                 });
             });
         });
 
         while (fetchPromises.length > 0) {
-            const batch = fetchPromises.splice(0, 100); // Get the next batch of 10 promises (and remove them from fetchPromises)
+            const batch = fetchPromises.splice(0, 2); // Get the next batch of 10 promises (and remove them from fetchPromises)
             await Promise.all(batch.map(fn => fn())); // Execute current batch of promises in parallel
 
             if (once) {
@@ -222,8 +228,9 @@ export class TradingBot {
         }
 
         global.logger.info("Data store populated and subscriptions set up for all leverage pairs.");
-        await this.writePairsToDatabase()
+        // await this.writePairsToDatabase()
         this.isUpdating = false;
+        this.initialized = true;
 
 
     }
@@ -233,52 +240,55 @@ export class TradingBot {
         // Get symbolDetails corresponding to pairSymbol
         const symbolDetails = this.dataStore.get(PAIR_TYPES.leveragePairs).get(pairSymbol).details;
 
-        const fetchedData = await byBitDataFetcher.getInitialOHLCV(symbolDetails, timeframe, limit, startTimestamp, endTimestamp);  // Assuming a default limit of 200
+        const fetchedData = await this.dataFetchers.bybitDataFetcher?.getInitialOHLCV(symbolDetails, timeframe, limit, startTimestamp, endTimestamp);  // Assuming a default limit of 200
+        // console.log("🚀 ~ file: bot.ts:241 ~ fetchedData:", fetchedData);
         const newData = fetchedData?.data;
 
         if (!newData || newData.length === 0) {
-            return; // Exit if no more data
+            return false; // Exit if no more data
         }
 
         // Update in-memory data store
         const storePair = this.dataStore.get(PAIR_TYPES.leveragePairs).get(pairSymbol);
-        storePair.ohlcvs[timeframe] = [...storePair.ohlcvs[timeframe], ...newData];
+        // console.log("🚀 ~ file: bot.ts:249 ~ storePair:", storePair);
+        storePair.ohlcvs.set(timeframe, [...storePair.ohlcvs.get(timeframe), ...newData]);
 
         // Update indicators and write to InfluxDB
-        await this.updateIndicators(pairSymbol, timeframe, storePair.ohlcvs[timeframe]);
-        global.logger.info("🚀 ~ file: bot.ts:237 ~ TradingBot ~ fetchBatchHistoricalDataForPair ~ writePairToDatabase:")
-        this.writePairToDatabase(pairSymbol, storePair);
+        await this.updateIndicators(pairSymbol, timeframe, storePair.ohlcvs.get(timeframe));
+        global.logger.info("🚀 ~ file: bot.ts:237 ~ TradingBot ~ fetchBatchHistoricalDataForPair ~ writePairToDatabase:", { name: pairSymbol })
+        await this.writePairToDatabase(storePair);
+        return true;
     }
 
     async fetchAllHistoricalData() {
-        while (this.isUpdating) {
+        while (this.isUpdating || !this.initialized || !this.dataStore.get(PAIR_TYPES.leveragePairs)) {
             global.logger.info("Waiting for current data update to finish...");
             await new Promise(resolve => setTimeout(resolve, 1000));;
         }
         this.isUpdating = true;
+        const fetchPromises: Array<Promise<any>> = [];
 
         const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs);
-
-        const fetchPromises = [];
-
-        leveragePairs.forEach((pairData, pairSymbol) => {
-            global.logger.info("🚀 ~ file: bot.ts:252 ~ TradingBot ~ leveragePairs.forEach ~ pairSymbol:", pairSymbol)
-            global.logger.info("🚀 ~ file: bot.ts:252 ~ TradingBot ~ leveragePairs.forEach ~ pairData:", pairData)
-            ACTIVE_TIMEFRAMES.forEach(timeframe => {
-                const earliestTimestamp = pairData.ohlcvs[timeframe][0][0];
+        for (const [pairName, pairData] of leveragePairs.entries()) {
+            for (const timeframe of ACTIVE_TIMEFRAMES) {
+                const earliestTimestamp = pairData.ohlcvs.get(timeframe)[0][0];
                 const timeframeMs = convertTimeframeToMs(timeframe);
                 let currentTimestamp = earliestTimestamp;
                 const limit = 1000;
 
                 while (true) { // continue until we've fetched all data
-                    fetchPromises.push(async () => {
-                        await this.fetchBatchHistoricalDataForPair(pairSymbol, timeframe, currentTimestamp - timeframeMs * limit, currentTimestamp, limit); // Fetching the next 1000 units of timeframe
-                    });
+                    console.log("🚀 ~ file: bot.ts:277 ~ pairName:", pairName);
+                    const hasData = await this.fetchBatchHistoricalDataForPair(pairName, timeframe, currentTimestamp - timeframeMs * limit, currentTimestamp, limit);
+
+                    // Assuming data.length < limit means there's no more data left.
+                    if (!hasData) {
+                        break; // exit the while loop
+                    }
+
                     currentTimestamp += timeframeMs * 1000;
                 }
-            });
-        });
-
+            }
+        }
         while (fetchPromises.length > 0) {
             const batch = fetchPromises.splice(0, 100); // Get the next batch of 10 promises (and remove them from fetchPromises)
             await Promise.all(batch.map(fn => fn())); // Execute current batch of promises in parallel
@@ -289,32 +299,15 @@ export class TradingBot {
         this.isUpdating = false;
     }
 
-
-    // async writeDataStore() {
-    //     const convertedDataStore = await stringifyMap(this.dataStore)
-    //     // fs.writeFile(dataStorePath, JSON.stringify(convertedDataStore, null, 4), 'utf8');
-    //     fs.writeFile(dataStorePath, JSON.stringify(convertedDataStore, null, 4), (err) => {
-    //         if (err) {
-    //             console.error('Error writing file:', err);
-    //         } else {
-    //             global.logger.info('File written successfully.');
-    //         }
-    //     });
-    // }
-
     async writePairToDatabase(pairData) {
-        global.logger.debug("🚀 ~ file: bot.ts:304 ~ writePairToDatabase:");
-
+        global.logger.debug("🚀 ~ file: bot.ts:304 ~ writePairToDatabase:", pairData);
         await dbWrapper.writePairToDatabase(pairData);
-
-        // Retrieve data
-        // const data = await dbWrapper.getPairData(await samplePairName);
     }
 
     async writePairsToDatabase() {
         const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs);
         leveragePairs.forEach(async (pairData, pairName) => {
-            console.log("🚀 ~ file: bot.ts:316 ~ leveragePairs:", pairData);
+            global.logger.debug("🚀 ~ file: bot.ts:316 ~ leveragePairs:", pairData);
             await dbWrapper.writePairToDatabase(pairData);
         })
 

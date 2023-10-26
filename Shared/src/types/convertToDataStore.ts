@@ -1,7 +1,6 @@
-import { VersatileLogger } from "../logger";
 import { Point } from '@influxdata/influxdb-client'
+import { sortDataAscending } from './convertData'
 
-// global.logger = new VersatileLogger('SharedLibrary', true, true);
 const findValue = (inputArray, timestamp, singleValue = true) => {
     if (singleValue) {
         return inputArray?.find((item) => item.time === timestamp)?.value
@@ -42,6 +41,7 @@ export const convertPairToDataArray = async (inputPair) => {
 
 
         ohlcvsData.forEach((data) => {
+            // console.log("🚀 ~ file: convertToDataStore.ts:44 ~ data:", data);
             const pointTimestamp = data[0]
             const currentPoint = {
                 timestamp: pointTimestamp,
@@ -64,8 +64,7 @@ export const convertPairToDataArray = async (inputPair) => {
             points[timeframe].push(currentPoint)
         })
     })
-    return Object.values(points).flat();
-
+    return sortDataAscending(Object.values(points).flat());
 };
 
 export const convertPointArrayToInfluxPoints = async (dataArray) => {
@@ -111,6 +110,7 @@ export const convertPointArrayToInfluxPoints = async (dataArray) => {
             point.floatField('rsi', data.rsi);
         }
 
+        console.log("🚀 ~ file: convertToDataStore.ts:115 ~ data:", data);
         points.push(point);
     });
 

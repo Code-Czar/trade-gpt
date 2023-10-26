@@ -1,15 +1,9 @@
-import { stringifyMap, BINANCE_TIMEFRAMES, convertPairToDataArray, convertPointArrayToInfluxPoints } from 'trading-shared'
+import { convertPairToDataArray, convertPointArrayToInfluxPoints } from 'trading-shared'
 import { InfluxDB, Point } from '@influxdata/influxdb-client'
 import {
-    extractOHLCV,
-    createOHLCVSDataPoints,
-    createRSIDataPoints,
-    createEMADataPoints,
+
     extractRSIData,
-    createMACDDataPoints,
-    createVolumesDataPoints,
-    createBoillingerBandsDataPoints,
-    flattenPairData
+
 } from './helpers'
 
 const lodash = require('lodash')
@@ -39,19 +33,10 @@ export class InfluxDBWrapper {
     private isProcessing: boolean = false;  // Lock flag
 
 
-    constructor(sampleFilePath: string = 'dataStore.json') {
-        // this.sampleData = JSON.parse(fs.readFileSync(sampleFilePath, 'utf-8'))
-
-        // this.client = new InfluxDB({
-        //     url: 'http://localhost:8086',
-        //     token: INFLUXDB_TOKEN,
-        //     timeout: 600000,
-        // })
-
-
-        // this.writeApi = this.client.getWriteApi(INFLUXDB_ORG, INFLUXDB_BUCKET)
+    constructor() {
         this.initTelegrafClient();
     }
+
     initTelegrafClient() {
         this.client = new net.Socket();
         this.client.connect(8094, '127.0.0.1')
@@ -98,120 +83,98 @@ export class InfluxDBWrapper {
     }
 
     sendDataToTelegraf(data) {
-        console.log("🚀 ~ file: InfluxDBWrapper.ts:101 ~ data:", data);
-        this.client.write(data + '\n');
+        // global.logger.debug("🚀 ~ file: InfluxDBWrapper.ts:101 ~ data:", data);
+        const batchedData = data.map(point => point.toLineProtocol()).join('\n');
+        this.client.write(batchedData + '\n');
     }
 
 
     async writePairToDatabase(inputPair) {
         const result = await convertPairToDataArray(await inputPair)
         const points = await convertPointArrayToInfluxPoints(await result)
-        console.log("🚀 ~ file: InfluxDBWrapper.ts:108 ~ points:", points.length);
-
-        this.isProcessing = true;
-        points.forEach((point) => this.sendDataToTelegraf(point))
-
-        // // Check if buffer size is over the threshold
-        // while (points.length >= this.BUFFER_THRESHOLD) {
-        //     let retryCount = 0;
-        //     while (retryCount < MAX_RETRIES) {
-        //         try {
-        //             // global.logger.info("🚀 ~ file: InfluxDBWrapper.ts:137 ~ InfluxDBWrapper ~ insertPairData ~ this.dataBuffer:", this.dataBuffer.length)
-        //             const dataToSend = points.splice(0, this.BUFFER_THRESHOLD);
-        //             for (const point of dataToSend) {
-        //                 const line = point.toLineProtocol();
-        //                 this.sendDataToTelegraf(line);
-        //             }
-        //             break; // Exit the loop if successful
-        //         } catch (error) {
-        //             retryCount++;
-        //             if (retryCount >= MAX_RETRIES) {
-        //                 console.error('Error while writing to InfluxDB:', error);
-        //                 fs.appendFileSync(
-        //                     'error.log',
-        //                     `${new Date().toISOString()} - ${error.message}\n`,
-        //                 );
-        //                 fs.appendFileSync('error.log', `${await stringifyMap(data)}`);
-        //                 this.isProcessing = false;
-        //                 throw error;
-        //             } else {
-        //                 await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
-        //             }
-        //         }
-        //     }
-        // }
-
-        this.isProcessing = false;
-
-
-
-    }
-
-    async insertPairData(pairName: string, data: any) {
-        if (!pairName) {
-            return;
-        }
-
-        // const dataPoints = [
-        //     ...createOHLCVSDataPoints(pairName, data.ohlcvs),
-        //     ...createRSIDataPoints(pairName, data.rsi),
-        //     ...createEMADataPoints(pairName, data.ema),
-        //     ...createMACDDataPoints(pairName, data.macd),
-        //     ...createVolumesDataPoints(pairName, data.volumes),
-        //     ...createBoillingerBandsDataPoints(pairName, data.bollingerBands)
-        // ];
-        const dataPoints = [
-            ...createOHLCVSDataPoints(pairName, data.ohlcvs),
-            ...createRSIDataPoints(pairName, data.rsi),
-            ...createEMADataPoints(pairName, data.ema),
-            ...createMACDDataPoints(pairName, data.macd),
-            ...createVolumesDataPoints(pairName, data.volumes),
-            ...createBoillingerBandsDataPoints(pairName, data.bollingerBands)
-        ];
-        // global.logger.info("🚀 ~ file: InfluxDBWrapper.ts:113 ~ InfluxDBWrapper ~ insertPairData ~ dataPoints:", dataPoints.length);
-
-        // Push data points to the buffer
-        this.dataBuffer.push(...dataPoints);
-
-        // If we're already processing, just exit and let the current process handle the buffer
-        if (this.isProcessing) {
-            return;
-        }
+        console.log("🚀 ~ file: InfluxDBWrapper.ts:95 ~ points:", points.length);
+        // global.logger.debug("🚀 ~ file: InfluxDBWrapper.ts:108 ~ points:", points.length);
 
         this.isProcessing = true;
 
-        // Check if buffer size is over the threshold
-        while (this.dataBuffer.length >= this.BUFFER_THRESHOLD) {
-            let retryCount = 0;
-            while (retryCount < MAX_RETRIES) {
-                try {
-                    // global.logger.info("🚀 ~ file: InfluxDBWrapper.ts:137 ~ InfluxDBWrapper ~ insertPairData ~ this.dataBuffer:", this.dataBuffer.length)
-                    const dataToSend = this.dataBuffer.splice(0, this.BUFFER_THRESHOLD);
-                    for (const point of dataToSend) {
-                        const line = point.toLineProtocol();
-                        this.sendDataToTelegraf(line);
-                    }
-                    break; // Exit the loop if successful
-                } catch (error) {
-                    retryCount++;
-                    if (retryCount >= MAX_RETRIES) {
-                        console.error('Error while writing to InfluxDB:', error);
-                        fs.appendFileSync(
-                            'error.log',
-                            `${new Date().toISOString()} - ${error.message}\n`,
-                        );
-                        fs.appendFileSync('error.log', `${await stringifyMap(data)}`);
-                        this.isProcessing = false;
-                        throw error;
-                    } else {
-                        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
-                    }
-                }
-            }
-        }
+        this.sendDataToTelegraf(points);
+
 
         this.isProcessing = false;
     }
+
+    async pushNewDataToDB(inputPair, lastDataNumber) {
+        const result = (await convertPairToDataArray(await inputPair)).slice(-lastDataNumber)
+        const points = await convertPointArrayToInfluxPoints(await result)
+        this.sendDataToTelegraf(points)
+        return points
+    }
+
+    // async insertPairData(pairName: string, data: any) {
+    //     if (!pairName) {
+    //         return;
+    //     }
+
+    //     // const dataPoints = [
+    //     //     ...createOHLCVSDataPoints(pairName, data.ohlcvs),
+    //     //     ...createRSIDataPoints(pairName, data.rsi),
+    //     //     ...createEMADataPoints(pairName, data.ema),
+    //     //     ...createMACDDataPoints(pairName, data.macd),
+    //     //     ...createVolumesDataPoints(pairName, data.volumes),
+    //     //     ...createBoillingerBandsDataPoints(pairName, data.bollingerBands)
+    //     // ];
+    //     const dataPoints = [
+    //         ...createOHLCVSDataPoints(pairName, data.ohlcvs),
+    //         ...createRSIDataPoints(pairName, data.rsi),
+    //         ...createEMADataPoints(pairName, data.ema),
+    //         ...createMACDDataPoints(pairName, data.macd),
+    //         ...createVolumesDataPoints(pairName, data.volumes),
+    //         ...createBoillingerBandsDataPoints(pairName, data.bollingerBands)
+    //     ];
+    //     // global.logger.info("🚀 ~ file: InfluxDBWrapper.ts:113 ~ InfluxDBWrapper ~ insertPairData ~ dataPoints:", dataPoints.length);
+
+    //     // Push data points to the buffer
+    //     this.dataBuffer.push(...dataPoints);
+
+    //     // If we're already processing, just exit and let the current process handle the buffer
+    //     if (this.isProcessing) {
+    //         return;
+    //     }
+
+    //     this.isProcessing = true;
+
+    //     // Check if buffer size is over the threshold
+    //     while (this.dataBuffer.length >= this.BUFFER_THRESHOLD) {
+    //         let retryCount = 0;
+    //         while (retryCount < MAX_RETRIES) {
+    //             try {
+    //                 // global.logger.info("🚀 ~ file: InfluxDBWrapper.ts:137 ~ InfluxDBWrapper ~ insertPairData ~ this.dataBuffer:", this.dataBuffer.length)
+    //                 const dataToSend = this.dataBuffer.splice(0, this.BUFFER_THRESHOLD);
+    //                 for (const point of dataToSend) {
+    //                     const line = point.toLineProtocol();
+    //                     this.sendDataToTelegraf(line);
+    //                 }
+    //                 break; // Exit the loop if successful
+    //             } catch (error) {
+    //                 retryCount++;
+    //                 if (retryCount >= MAX_RETRIES) {
+    //                     console.error('Error while writing to InfluxDB:', error);
+    //                     fs.appendFileSync(
+    //                         'error.log',
+    //                         `${new Date().toISOString()} - ${error.message}\n`,
+    //                     );
+    //                     fs.appendFileSync('error.log', `${await stringifyMap(data)}`);
+    //                     this.isProcessing = false;
+    //                     throw error;
+    //                 } else {
+    //                     await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     this.isProcessing = false;
+    // }
 
     async getPairData(pair: string) {
         // Reconstruct the JSON format

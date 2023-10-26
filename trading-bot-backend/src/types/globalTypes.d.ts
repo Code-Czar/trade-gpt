@@ -1,6 +1,6 @@
 // globalTypes.ts
 declare global {
-    type DataStore = {}
+    type DataStore = Map
 
     type Object = {
         [key: string]: any;

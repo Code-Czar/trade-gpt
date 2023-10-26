@@ -205,3 +205,4 @@ app.get('/health', (req, res) => {
 })
 
 bot.populateDataStoreParallel()
+bot.fetchAllHistoricalData()
