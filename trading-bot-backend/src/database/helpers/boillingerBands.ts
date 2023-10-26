@@ -1,6 +1,9 @@
 import { Point } from '@influxdata/influxdb-client'
 
-export function createBoillingerBandsDataPoints(pairName, allBoillingerBandData) {
+export function createBoillingerBandsDataPoints(
+    pairName,
+    allBoillingerBandData,
+) {
     const points: Point[] = []
 
     allBoillingerBandData.forEach((rsiData, timeframe) => {
@@ -9,8 +12,8 @@ export function createBoillingerBandsDataPoints(pairName, allBoillingerBandData)
 
             const point = new Point('pair_data')
                 .tag('pair', pairName)
-                .tag('timeframe', timeframe)
-                .tag('key', 'upperBand')
+                .stringField('timeframe', timeframe)
+                .stringField('key', 'upperBand')
 
                 .timestamp(new Date(time))
                 .floatField('value', value)
@@ -25,8 +28,8 @@ export function createBoillingerBandsDataPoints(pairName, allBoillingerBandData)
 
             const point = new Point('pair_data')
                 .tag('pair', pairName)
-                .tag('timeframe', timeframe)
-                .tag('key', 'middleBand')
+                .stringField('timeframe', timeframe)
+                .stringField('key', 'middleBand')
 
                 .timestamp(new Date(time))
                 .floatField('value', value)
@@ -41,8 +44,8 @@ export function createBoillingerBandsDataPoints(pairName, allBoillingerBandData)
 
             const point = new Point('pair_data')
                 .tag('pair', pairName)
-                .tag('timeframe', timeframe)
-                .tag('key', 'lowerBand')
+                .stringField('timeframe', timeframe)
+                .stringField('key', 'lowerBand')
 
                 .timestamp(new Date(time))
                 .floatField('value', value)
@@ -50,10 +53,6 @@ export function createBoillingerBandsDataPoints(pairName, allBoillingerBandData)
             points.push(point)
         })
     })
-    console.log(
-        '🚀 ~ file: rsiData.ts:27 ~ createRSIDataPoints ~ points:',
-        points,
-    )
     return points
 }
 

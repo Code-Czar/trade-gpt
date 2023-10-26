@@ -9,8 +9,8 @@ export function createRSIDataPoints(pairName, allRSIData) {
 
             const point = new Point('pair_data')
                 .tag('pair', pairName)
-                .tag('timeframe', timeframe)
-                .tag('key', 'rsiData')
+                .stringField('timeframe', timeframe)
+                .stringField('key', 'rsiData')
 
                 .timestamp(new Date(time))
                 .floatField('value', value)
@@ -18,10 +18,6 @@ export function createRSIDataPoints(pairName, allRSIData) {
             points.push(point)
         })
     })
-    console.log(
-        '🚀 ~ file: rsiData.ts:27 ~ createRSIDataPoints ~ points:',
-        points,
-    )
     return points
 }
 

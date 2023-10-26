@@ -6,16 +6,16 @@ export class WebsocketStreamer {
     private subscriptions: Map<string, Set<WebSocket>> = new Map();
 
     constructor(server: any) {
-        console.log("🚀 ~ file: websocketStreamer.ts:9 ~ WebsocketStreamer ~ constructor ~ server:", server)
+        global.logger.info("🚀 ~ file: websocketStreamer.ts:9 ~ WebsocketStreamer ~ constructor ~ server:", server)
         this.websocket = new WebSocketServer({ server, path: '/ws' });
 
         this.websocket.on('connection', (ws: WebSocket) => {
-            console.log('SA connected');
+            global.logger.info('SA connected');
             this.clients.add(ws);
 
             ws.on('message', (message: string) => {
                 const data = JSON.parse(message);
-                console.log('Received:', data);
+                global.logger.info('Received:', data);
                 if (data.subscribe) {
                     if (!this.subscriptions.has(data.subscribe)) {
                         this.subscriptions.set(data.subscribe, new Set());
@@ -27,7 +27,7 @@ export class WebsocketStreamer {
             });
 
             ws.on('close', () => {
-                console.log('SA disconnected');
+                global.logger.info('SA disconnected');
                 this.clients.delete(ws);
                 // Remove this client from all subscriptions
                 for (let [, clientSet] of this.subscriptions) {

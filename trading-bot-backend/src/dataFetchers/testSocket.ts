@@ -2,13 +2,13 @@ var url = require('url');
 var WebSocket = require('ws');
 var crypto = require('crypto');
 var endpoint = "wss://stream.bybit.com/v5/private"
-console.log('attempting to connect to WebSocket %j', endpoint);
+global.logger.info('attempting to connect to WebSocket %j', endpoint);
 var client = new WebSocket(endpoint);
 const apiKey = "UZNt3P7CRJZBKtMH4X";
 const apiSecret = "jBqfnoA4ggi0m2JsWpgDH8rwwHg9aFuoOO2h";
 client.on('open', function () {
-    console.log('"open" event!');
-    console.log('WebSocket Client Connected');
+    global.logger.info('"open" event!');
+    global.logger.info('WebSocket Client Connected');
     const expires = new Date().getTime() + 10000;
     const signature = crypto.createHmac("sha256", apiSecret).update("GET/realtime" + expires).digest("hex");
     const payload = {
@@ -22,11 +22,11 @@ client.on('open', function () {
 });
 
 client.on('message', function (data) {
-    console.log('"message" event! %j', JSON.parse(Buffer.from(data).toString()));
+    global.logger.info('"message" event! %j', JSON.parse(Buffer.from(data).toString()));
 });
 client.on('ping', function (data, flags) {
-    console.log("ping received");
+    global.logger.info("ping received");
 });
 client.on('pong', function (data, flags) {
-    console.log("pong received");
+    global.logger.info("pong received");
 });

@@ -24,10 +24,12 @@ export const getInitialOHLCV = async (symbolDetails, timeframe, limit = 200, fro
 
         // Logging the data
         response.data = response.data.result.list
-        console.log("🚀 ~ file: cryptoFetcher.ts:27 ~ fetchByBitOHLCV ~ symbol:",
-            symbolDetails.name,
-            timeframe,
-            response.data?.length
+        global.logger.info("🚀 ~ file: cryptoFetcher.ts:27 ~ fetchByBitOHLCV ~ symbol:",
+            {
+                name: symbolDetails.name,
+                timeframe,
+                length: response.data?.length
+            }
             //  response.data
         )
         if (response.data) {
@@ -43,9 +45,11 @@ export const getInitialOHLCV = async (symbolDetails, timeframe, limit = 200, fro
         }
         else {
             console.error("🚀 ~ file: cryptoFetcher.ts:27 ~ fetchByBitOHLCV ~ symbol:",
-                symbolDetails.name,
-                response,
-                requestParams, timeframe
+                {
+                    name: symbolDetails.name,
+                    timeframe,
+                    length: response.data?.length
+                }
                 //  response.data
             )
         }
@@ -64,11 +68,11 @@ export const getInitialOHLCV = async (symbolDetails, timeframe, limit = 200, fro
 
 
 export const getInitialOHLCVs = async (symbols, timeframes, limit = 200, from = null, to = null) => {
-    console.log("🚀 ~ file: ByBitDataFetcher.ts:5 ~ getInitialOHLCVs ~ timeframe:", timeframes)
+    global.logger.info("🚀 ~ file: ByBitDataFetcher.ts:5 ~ getInitialOHLCVs ~ timeframe:", timeframes)
     const fetchPromises = symbols.flatMap(symbol =>
         timeframes.map(timeframe => () => getInitialOHLCV(symbol, timeframe))
     );
-    console.log("🚀 ~ file: ByBitDataFetcher.ts:65 ~ getInitialOHLCVs ~ fetchPromises:", fetchPromises.length)
+    global.logger.info("🚀 ~ file: ByBitDataFetcher.ts:65 ~ getInitialOHLCVs ~ fetchPromises:", fetchPromises.length)
     const result = {}
 
     const shouldRetry = []
@@ -79,7 +83,7 @@ export const getInitialOHLCVs = async (symbols, timeframes, limit = 200, from = 
         batchResults.forEach((batchResult, index) => {
             const { symbolDetails, timeframe, data } = batchResult
             if (!data) {
-                console.log("🚀 ~ file: ByBitDataFetcher.ts:82 ~ batchResults.forEach ~ data:", symbolDetails.name, timeframe, data)
+                global.logger.info("🚀 ~ file: ByBitDataFetcher.ts:82 ~ batchResults.forEach ~ data:", { name: symbolDetails.name, timeframe, data })
 
             }
             if (data) {
@@ -98,7 +102,7 @@ export const getInitialOHLCVs = async (symbols, timeframes, limit = 200, from = 
         await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 10 seconds before next batch
     }
 
-    console.log("🚀 ~ file: ByBitDataFetcher.ts:61 ~ getInitialOHLCVs ~ allResults:", Object.keys(result).length)
+    global.logger.info("🚀 ~ file: ByBitDataFetcher.ts:61 ~ getInitialOHLCVs ~ allResults:", { keys: Object.keys(result).length })
     return result;
 };
 const setUpdateOHLCVCallback = (callback) => {

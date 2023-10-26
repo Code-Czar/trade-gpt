@@ -17,6 +17,7 @@
   "dependencies": {
     "@types/node": "^20.8.6",
     "dotenv": "^16.3.1",
-    "technicalindicators": "^3.1.0"
+    "technicalindicators": "^3.1.0",
+    "winston": "^3.11.0"
   }
 }

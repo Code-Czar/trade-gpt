@@ -9,8 +9,8 @@ export function createMACDDataPoints(pairName, allRSIData) {
 
             const point = new Point('pair_data')
                 .tag('pair', pairName)
-                .tag('timeframe', timeframe)
-                .tag('key', 'macdData')
+                .stringField('timeframe', timeframe)
+                .stringField('key', 'macdData')
 
                 .timestamp(new Date(time))
                 .floatField('value', value)
@@ -25,8 +25,8 @@ export function createMACDDataPoints(pairName, allRSIData) {
 
             const point = new Point('pair_data')
                 .tag('pair', pairName)
-                .tag('timeframe', timeframe)
-                .tag('key', 'histogramData')
+                .stringField('timeframe', timeframe)
+                .stringField('key', 'histogramData')
 
                 .timestamp(new Date(time))
                 .floatField('value', value)
@@ -41,8 +41,8 @@ export function createMACDDataPoints(pairName, allRSIData) {
 
             const point = new Point('pair_data')
                 .tag('pair', pairName)
-                .tag('timeframe', timeframe)
-                .tag('key', 'signalData')
+                .stringField('timeframe', timeframe)
+                .stringField('key', 'signalData')
 
                 .timestamp(new Date(time))
                 .floatField('value', value)
@@ -50,10 +50,6 @@ export function createMACDDataPoints(pairName, allRSIData) {
             points.push(point)
         })
     })
-    console.log(
-        '🚀 ~ file: rsiData.ts:27 ~ createRSIDataPoints ~ points:',
-        points,
-    )
     return points
 }
 

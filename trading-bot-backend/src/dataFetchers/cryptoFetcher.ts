@@ -64,7 +64,7 @@ export const fetchByBitOHLCV = async (symbol, interval, limit = 200, from = null
 
         // Logging the data
         response.data = response.data.result.list
-        // console.log("🚀 ~ file: cryptoFetcher.ts:27 ~ fetchByBitOHLCV ~ symbol:", symbol, interval, response.data)
+        // global.logger.info("🚀 ~ file: cryptoFetcher.ts:27 ~ fetchByBitOHLCV ~ symbol:", symbol, interval, response.data)
         // Returning the OHLCV data
         return response.data;
     } catch (error) {

@@ -9,8 +9,8 @@ export function createVolumesDataPoints(pairName, allVolumesData) {
 
             const point = new Point('pair_data')
                 .tag('pair', pairName)
-                .tag('timeframe', timeframe)
-                .tag('key', 'volumesData')
+                .stringField('timeframe', timeframe)
+                .stringField('key', 'volumesData')
 
                 .timestamp(new Date(time))
                 .floatField('value', value)
@@ -19,10 +19,6 @@ export function createVolumesDataPoints(pairName, allVolumesData) {
             points.push(point)
         })
     })
-    console.log(
-        '🚀 ~ file: rsiData.ts:27 ~ createRSIDataPoints ~ points:',
-        points,
-    )
     return points
 }
 

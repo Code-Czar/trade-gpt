@@ -54,7 +54,7 @@ export const fetchFOREXOHLC = async (symbol: string, timeframe: string) => {
     // const response = await fetch(BASE_URL);
     const data = await fetchWithRotatingApiKey(BASE_URL);
     // const data = await response.json();
-    console.log('🚀 ~ file: bot.ts:75 ~ TradingBot ~ fetchFOREXOHLC ~ data:', data);
+    global.logger.info('🚀 ~ file: bot.ts:75 ~ TradingBot ~ fetchFOREXOHLC ~ data:', data);
 
     let formattedOHLCData: OHLCV = [];
 

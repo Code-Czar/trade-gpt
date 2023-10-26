@@ -31,8 +31,8 @@ const callbacks = {
 function initPublicClient() {
     publicClient = new WebSocket(WEB_SOCKETS_URLS.FUTURES)
     publicClient.on('open', function () {
-        console.log('"open" event!')
-        console.log('WebSocket Client Connected')
+        global.logger.info('"open" event!')
+        global.logger.info('WebSocket Client Connected')
         const expires = new Date().getTime() + 10000
         const signature = crypto
             .createHmac('sha256', apiSecret)
@@ -45,18 +45,18 @@ function initPublicClient() {
 
 function setupPingPongHandlers(client, url) {
     client.on('ping', function () {
-        console.log('ping sent')
+        global.logger.info('ping sent')
     })
 
     client.on('pong', function () {
-        console.log('pong received')
+        global.logger.info('pong received')
         clearTimeout(pongTimeout)
     })
 
     setInterval(() => {
         client.ping()
         pongTimeout = setTimeout(() => {
-            console.log('Pong not received')
+            global.logger.info('Pong not received')
             pongTimeoutCount++
             if (pongTimeoutCount >= PONG_TIMEOUT_COUNT) {
                 console.error('Pong not received, reconnecting')
@@ -66,7 +66,7 @@ function setupPingPongHandlers(client, url) {
                     callbacks.restartCallback?.()
                     pongTimeoutCount = 0
                 } catch (error) {
-                    console.log(
+                    global.logger.info(
                         '🚀 ~ file: ByBitWebSocket.ts:69 ~ pongTimeout=setTimeout ~ error:',
                         error,
                     )
@@ -82,8 +82,8 @@ function setReconnectCallback(restartCallback) {
 }
 
 privateClient.on('open', function () {
-    console.log('"open" PRIVATE event!')
-    console.log('WebSocket PRIVATE Client Connected')
+    global.logger.info('"open" PRIVATE event!')
+    global.logger.info('WebSocket PRIVATE Client Connected')
     const expires = new Date().getTime() + 10000
     const signature = crypto
         .createHmac('sha256', apiSecret)
@@ -93,26 +93,26 @@ privateClient.on('open', function () {
         op: 'auth',
         args: [apiKey, expires.toFixed(0), signature],
     }
-    console.log('🚀 ~ file: ByBitWebSocket.ts:34 ~ payload:', payload)
+    global.logger.info('🚀 ~ file: ByBitWebSocket.ts:34 ~ payload:', payload)
     privateClient.send(JSON.stringify(payload))
     privateClient.send(JSON.stringify({ op: 'wallet' }))
     setupPingPongHandlers(privateClient, WEB_SOCKETS_URLS.PRIVATE)
 })
 privateClient.on('message', function (data) {
-    console.log('"message" event! %j', JSON.parse(Buffer.from(data).toString()))
+    global.logger.info('"message" event! %j', JSON.parse(Buffer.from(data).toString()))
 })
 privateClient.on('ping', function (data, flags) {
-    console.log('ping received')
+    global.logger.info('ping received')
 })
 privateClient.on('pong', function (data, flags) {
-    console.log('pong received')
+    global.logger.info('pong received')
 })
 
 export const webSocketSetOHLCVsUpdateCallback = (callback) => {
     callbacks.OHLCVsUpdateCallback = callback
     publicClient.on('message', function (data) {
         const message = JSON.parse(Buffer.from(data).toString())
-        // console.log("🚀 ~ file: ByBitWebSocket.ts:73 ~ message:", message)
+        // global.logger.info("🚀 ~ file: ByBitWebSocket.ts:73 ~ message:", message)
         if (message.topic?.includes('kline')) {
             callbacks.OHLCVsUpdateCallback(message)
         }
@@ -133,7 +133,7 @@ export const webSocketRegisterToOHLCVDataForPair = async (
             }),
         )
     } catch (error) {
-        console.log('🚀 ~ file: ByBitWebSocket.ts:129 ~ error:', error, symbolName)
+        global.logger.error('🚀 ~ file: ByBitWebSocket.ts:129 ~ error:', { error, symbolName })
     }
 }
 
@@ -145,7 +145,7 @@ export const webSocketRegisterToAllOHLCVDataUpdates = async (
     callbacks.OHLCVsUpdateCallback = newOHLCVDataCallback
     publicClient.on('message', function (data) {
         const message = JSON.parse(Buffer.from(data).toString())
-        // console.log("🚀 ~ file: ByBitWebSocket.ts:73 ~ message:", message)
+        // global.logger.info("🚀 ~ file: ByBitWebSocket.ts:73 ~ message:", message)
         if (message.topic?.includes('kline')) {
             callbacks.OHLCVsUpdateCallback?.(message)
         }

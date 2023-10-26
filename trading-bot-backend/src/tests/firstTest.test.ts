@@ -6,7 +6,7 @@ import app from '@/backend-server'; // Import your app
 // const app = require('../../backend-server'); // Import your app
 
 
-console.log("🚀 ~ file: app.test.ts:6 ~ app:", app)
+global.logger.info("🚀 ~ file: app.test.ts:6 ~ app:", app)
 
 // Destructure the expect function from Chai
 const { expect } = chai;
@@ -20,14 +20,14 @@ describe('POST /set-rsi', () => {
 
 
     before((done) => {
-        console.log('Starting server...');
+        global.logger.info('Starting server...');
         // server = app.listen(3000, done);
-        console.log("🚀 ~ file: app.test.ts:23 ~ before ~ server:", server)
+        global.logger.info("🚀 ~ file: app.test.ts:23 ~ before ~ server:", server)
         // setTimeout(done, 10000);
     });
 
     after((done) => {
-        console.log('Stopping server...');
+        global.logger.info('Stopping server...');
         // server.close(done);
     });
     it('should respond with json and 200 status code', async () => {

@@ -9,8 +9,8 @@ export function createEMADataPoints(pairName, allTimeFramesEMA) {
 
             const point = new Point('pair_data')
                 .tag('pair', pairName)
-                .tag('timeframe', timeframe)
-                .tag('key', 'ema7')
+                .stringField('timeframe', timeframe)
+                .stringField('key', 'ema7')
 
                 .timestamp(new Date(time))
                 .floatField('value', value)
@@ -22,8 +22,8 @@ export function createEMADataPoints(pairName, allTimeFramesEMA) {
 
             const point = new Point('pair_data')
                 .tag('pair', pairName)
-                .tag('timeframe', timeframe)
-                .tag('key', 'ema14')
+                .stringField('timeframe', timeframe)
+                .stringField('key', 'ema14')
 
                 .timestamp(new Date(time))
                 .floatField('value', value)
@@ -35,8 +35,8 @@ export function createEMADataPoints(pairName, allTimeFramesEMA) {
 
             const point = new Point('pair_data')
                 .tag('pair', pairName)
-                .tag('timeframe', timeframe)
-                .tag('key', 'ema28')
+                .stringField('timeframe', timeframe)
+                .stringField('key', 'ema28')
 
                 .timestamp(new Date(time))
                 .floatField('value', value)
@@ -44,7 +44,6 @@ export function createEMADataPoints(pairName, allTimeFramesEMA) {
             points.push(point)
         })
     })
-    console.log("🚀 ~ file: ema.ts:48 ~ createEMADataPoints ~ points:", points)
     return points
 }
 
