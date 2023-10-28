@@ -91,8 +91,9 @@ export class InfluxDBWrapper {
 
     async writePairToDatabase(inputPair) {
         const result = await convertPairToDataArray(await inputPair)
+        // console.log("🚀 ~ file: InfluxDBWrapper.ts:94 ~ result:", result);
         const points = await convertPointArrayToInfluxPoints(await result)
-        console.log("🚀 ~ file: InfluxDBWrapper.ts:95 ~ points:", points.length);
+        // console.log("🚀 ~ file: InfluxDBWrapper.ts:95 ~ points:", points.length);
         // global.logger.debug("🚀 ~ file: InfluxDBWrapper.ts:108 ~ points:", points.length);
 
         this.isProcessing = true;

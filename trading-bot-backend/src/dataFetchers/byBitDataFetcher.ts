@@ -32,8 +32,8 @@ export class ByBitDataFetcher {
             category: 'linear',
             symbol: symbolDetails.name,
             interval: convertTimeFrameToByBitStandard(timeframe),  // e.g., '1m', '5m', '1h', etc.
-            start: from,  // Timestamp in seconds for the start of the candlestick data
-            end: to,  // Timestamp in seconds for the end of the candlestick data
+            start: from,  // Timestamp in ms for the start of the candlestick data
+            end: to,  // Timestamp in ms for the end of the candlestick data
             limit: limit,  // Timestamp in seconds for the end of the candlestick data
         }
         try {
