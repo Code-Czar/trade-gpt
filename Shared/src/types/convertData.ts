@@ -1,7 +1,13 @@
 // Explicitly type the parameters and return types
+import moment from 'moment';
+
 export const sortDataAscending = (data) => {
     return data.sort((a, b) => a[0] - b[0]);
 }
+
+export const readableTimestamp = (timestamp) => {
+    return moment(timestamp).format('DD-MM-YYYY HH:mm')
+};
 
 export const convertTimeFrameToByBitStandard = (interval: string) => {
     if (interval.includes('m')) {
@@ -140,6 +146,7 @@ export const convertPairToJSON = async (pair: any) => {
 };
 
 export default {
+    readableTimestamp,
     mapToObject,
     stringifyMap,
     convertPairToJSON,
@@ -150,6 +157,7 @@ export default {
     getStartOfTimeframe
 }
 module.exports = {
+    readableTimestamp,
     mapToObject,
     stringifyMap,
     convertPairToJSON,

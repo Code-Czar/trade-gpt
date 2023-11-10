@@ -31,6 +31,7 @@ export class ByBitWebSocket {
     privateClient: WebSocket = new WebSocket(WEB_SOCKETS_URLS.PRIVATE);
     pongTimeoutCount: number = 0;
     pongTimeout = null;
+    pingPongInterval = null
     callbacks: Callbacks = {
         OHLCVsUpdateCallback: null,
         restartCallback: null,
@@ -99,7 +100,7 @@ export class ByBitWebSocket {
             clearTimeout(this.pongTimeout)
         })
 
-        setInterval(() => {
+        this.pingPongInterval = setInterval(() => {
             client.ping()
             this.pongTimeout = setTimeout(() => {
                 global.logger.info('Pong not received')
@@ -111,6 +112,7 @@ export class ByBitWebSocket {
                         this.initPublicClient()
                         this.callbacks.restartCallback?.()
                         this.pongTimeoutCount = 0
+                        clearInterval(this.pingPongInterval)
                     } catch (error) {
                         global.logger.info(
                             '🚀 ~ file: ByBitWebSocket.ts:69 ~ pongTimeout=setTimeout ~ error:',

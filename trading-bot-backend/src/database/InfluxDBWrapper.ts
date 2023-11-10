@@ -50,7 +50,7 @@ export class InfluxDBWrapper {
         const endpoint = `http://localhost:8086/api/v2/delete?org=${INFLUXDB_ORG}&bucket=${INFLUXDB_BUCKET}`
         const now = new Date()
         const oneYearAgo = new Date()
-        oneYearAgo.setFullYear(now.getFullYear() - 1)
+        oneYearAgo.setFullYear(now.getFullYear() - 10)
 
         const body = {
             start: oneYearAgo.toISOString(),
@@ -111,71 +111,7 @@ export class InfluxDBWrapper {
         return points
     }
 
-    // async insertPairData(pairName: string, data: any) {
-    //     if (!pairName) {
-    //         return;
-    //     }
 
-    //     // const dataPoints = [
-    //     //     ...createOHLCVSDataPoints(pairName, data.ohlcvs),
-    //     //     ...createRSIDataPoints(pairName, data.rsi),
-    //     //     ...createEMADataPoints(pairName, data.ema),
-    //     //     ...createMACDDataPoints(pairName, data.macd),
-    //     //     ...createVolumesDataPoints(pairName, data.volumes),
-    //     //     ...createBoillingerBandsDataPoints(pairName, data.bollingerBands)
-    //     // ];
-    //     const dataPoints = [
-    //         ...createOHLCVSDataPoints(pairName, data.ohlcvs),
-    //         ...createRSIDataPoints(pairName, data.rsi),
-    //         ...createEMADataPoints(pairName, data.ema),
-    //         ...createMACDDataPoints(pairName, data.macd),
-    //         ...createVolumesDataPoints(pairName, data.volumes),
-    //         ...createBoillingerBandsDataPoints(pairName, data.bollingerBands)
-    //     ];
-    //     // global.logger.info("🚀 ~ file: InfluxDBWrapper.ts:113 ~ InfluxDBWrapper ~ insertPairData ~ dataPoints:", dataPoints.length);
-
-    //     // Push data points to the buffer
-    //     this.dataBuffer.push(...dataPoints);
-
-    //     // If we're already processing, just exit and let the current process handle the buffer
-    //     if (this.isProcessing) {
-    //         return;
-    //     }
-
-    //     this.isProcessing = true;
-
-    //     // Check if buffer size is over the threshold
-    //     while (this.dataBuffer.length >= this.BUFFER_THRESHOLD) {
-    //         let retryCount = 0;
-    //         while (retryCount < MAX_RETRIES) {
-    //             try {
-    //                 // global.logger.info("🚀 ~ file: InfluxDBWrapper.ts:137 ~ InfluxDBWrapper ~ insertPairData ~ this.dataBuffer:", this.dataBuffer.length)
-    //                 const dataToSend = this.dataBuffer.splice(0, this.BUFFER_THRESHOLD);
-    //                 for (const point of dataToSend) {
-    //                     const line = point.toLineProtocol();
-    //                     this.sendDataToTelegraf(line);
-    //                 }
-    //                 break; // Exit the loop if successful
-    //             } catch (error) {
-    //                 retryCount++;
-    //                 if (retryCount >= MAX_RETRIES) {
-    //                     console.error('Error while writing to InfluxDB:', error);
-    //                     fs.appendFileSync(
-    //                         'error.log',
-    //                         `${new Date().toISOString()} - ${error.message}\n`,
-    //                     );
-    //                     fs.appendFileSync('error.log', `${await stringifyMap(data)}`);
-    //                     this.isProcessing = false;
-    //                     throw error;
-    //                 } else {
-    //                     await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     this.isProcessing = false;
-    // }
 
     async getPairData(pair: string) {
         // Reconstruct the JSON format

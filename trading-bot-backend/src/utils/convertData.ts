@@ -30,6 +30,8 @@ export const convertTimeframeToMs = (timeframe: string): number => {
         case 'm': return value * 60 * 1000;
         case 'h': return value * 60 * 60 * 1000;
         case 'd': return value * 24 * 60 * 60 * 1000;
+        case 'W': return value * 7 * 24 * 60 * 60 * 1000;
+        case 'M': return value * 30 * 24 * 60 * 60 * 1000;
         // Add more units as needed
         default: throw new Error(`Unknown timeframe unit: ${unit}`);
     }

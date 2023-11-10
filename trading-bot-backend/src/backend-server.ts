@@ -28,12 +28,12 @@ app.get('/', (req, res) => {
     res.send('Hello from Express!')
 })
 
-const websocketStreamer = new WebsocketStreamer(server)
-const bot = new TradingBot(websocketStreamer)
 const PORT = 3000
-server.listen(PORT, () => {
-    global.logger.info(`Server is running on http:`)
-})
+const CLEAR_DATABASE = false;
+
+const websocketStreamer = new WebsocketStreamer(server)
+const bot = new TradingBot(websocketStreamer, CLEAR_DATABASE)
+
 
 app.get('/api/symbols/leverage', async (req: Request, res: Response) => {
     try {
@@ -204,5 +204,14 @@ app.get('/health', (req, res) => {
     }
 })
 
+server.listen(PORT, () => {
+    global.logger.info(`Server is running on http:`)
+
+})
+
+
+
 bot.populateDataStoreParallel()
 bot.fetchAllHistoricalData()
+
+

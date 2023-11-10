@@ -12,7 +12,8 @@ import {
     stringifyMap,
     generateIndicatorsFromOHLCVs,
     mergeIndicatorsWithOHLCVs,
-    convertPointArrayToInfluxPoints
+    convertPointArrayToInfluxPoints,
+    readableTimestamp
 } from 'trading-shared'
 import { convertPairToJSON } from './utils/convertData'
 import { InfluxDBWrapper } from './database'
@@ -22,16 +23,12 @@ import moment from 'moment';
 const fs = require('fs')
 const path = require('path')
 
-// const dataStorePath = './dist/database/dataStore.json';
-const dbWrapper = new InfluxDBWrapper()
-
-// dbWrapper.dropDatabase();
-// dbWrapper.initDB();
 
 const binanceDataFile = 'binanceData.json'
 const bybitDataFile = 'bybitData.json'
 
-const ACTIVE_TIMEFRAMES = ['1d', '1h', '5m', '1m']
+const ACTIVE_TIMEFRAMES = ['5m', '1m']
+// const ACTIVE_TIMEFRAMES = ['5m']
 
 let once = true
 
@@ -46,12 +43,13 @@ export class TradingBot {
     private webSocketStreamer: any
     public isUpdating = false
     public initialized = false
+    public dbWrapper: InfluxDBWrapper | null = null;
 
     public dataFetchers: DataFetchers = {
         bybitDataFetcher: null,
     }
 
-    constructor(webSocketStreamer) {
+    constructor(webSocketStreamer, CLEAR_DATABASE = false) {
         this.dataStore.set(PAIR_TYPES.leveragePairs, new Map())
         this.dataStore.set(PAIR_TYPES.forexPairs, new Map())
         this.dataStore.set(PAIR_TYPES.cryptoPairs, new Map())
@@ -64,6 +62,11 @@ export class TradingBot {
         this.dataFetchers.bybitDataFetcher.setUpdateOHLCVCallback(
             this.newOHLCVDataAvailable.bind(this),
         )
+
+        this.dbWrapper = new InfluxDBWrapper()
+        if (CLEAR_DATABASE) {
+            this.dbWrapper.clearBucketData()
+        }
     }
 
     async newOHLCVDataAvailable(eventData) {
@@ -110,7 +113,7 @@ export class TradingBot {
 
         // Optionally: Only store the last 200 values
         storePair.ohlcvs.set(timeframe, ohlcvs.slice(-200))
-        dbWrapper.pushNewDataToDB(storePair, dataValues.length)
+        this.dbWrapper?.pushNewDataToDB(storePair, dataValues.length)
         this.webSocketStreamer.broadcast(`getRealTimeData`, {
             storePair: await convertPairToJSON(leveragePairs.get(symbolName)),
         })
@@ -232,11 +235,8 @@ export class TradingBot {
 
     async populateDataStoreParallel(
         timeframes = ACTIVE_TIMEFRAMES,
-        clearDataBase = true,
+
     ) {
-        if (clearDataBase) {
-            await dbWrapper.clearBucketData()
-        }
 
         if (this.isUpdating) {
             return
@@ -253,7 +253,7 @@ export class TradingBot {
 
         const fetchPromises = []
 
-        leveragePairs.slice(0, 2).forEach((symbol) => {
+        leveragePairs.forEach((symbol) => {
             timeframes.forEach((timeframe) => {
                 fetchPromises.push(async () => {
                     const result = await dataFetcher.getInitialOHLCV(symbol, timeframe)
@@ -281,7 +281,7 @@ export class TradingBot {
         })
 
         while (fetchPromises.length > 0) {
-            const batch = fetchPromises.splice(0, 120) // Get the next batch of 10 promises (and remove them from fetchPromises)
+            const batch = fetchPromises.splice(0, 100) // Get the next batch of 10 promises (and remove them from fetchPromises)
             await Promise.all(batch.map((fn) => fn())) // Execute current batch of promises in parallel
 
             if (once) {
@@ -342,8 +342,11 @@ export class TradingBot {
         // console.log("🚀 ~ file: bot.ts:343 ~ mergedIndicators:", mergedIndicators);
 
         const pointsArray = await mergeIndicatorsWithOHLCVs(mergedIndicators.formattedData, mergedIndicators, timeframe, pairSymbol)
-        // console.log("🚀 ~ file: bot.ts:349 ~ pointsArray:", pointsArray);
+        console.log("🚀 ~ file: bot.ts:349 ~ pointsArray:", pointsArray.length, readableTimestamp);
 
+        const fromTimeStamp = readableTimestamp(pointsArray[0].timestamp);
+        const toTimeStamp = readableTimestamp(pointsArray[pointsArray.length - 1].timestamp);
+        console.log("🚀 ~ file: bot.ts:349 ~ pointsArray:", fromTimeStamp, toTimeStamp);
         await this.writePointsArrayToDatabase(pointsArray)
         storePair.lastFetchedOHLCV = mergedOHLCVs.slice(0, limit)
         this.dataStore.get(PAIR_TYPES.leveragePairs).set(pairSymbol, storePair)
@@ -360,40 +363,44 @@ export class TradingBot {
             global.logger.info('Waiting for current data update to finish...')
             await new Promise((resolve) => setTimeout(resolve, 1000))
         }
+        const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs)
         global.logger.info('Start historical data fetch.')
+        global.logger.info('Entries : ', { length: leveragePairs.size })
         this.isUpdating = true
         const fetchPromises: Array<Promise<any>> = []
 
-        const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs)
         for (const timeframe of ACTIVE_TIMEFRAMES) {
-            for (const [pairName, pairData] of leveragePairs.entries()) {
-                const earliestTimestamp = pairData.ohlcvs.get(timeframe)[0][0]
-                const timeframeMs = convertTimeframeToMs(timeframe)
-                let currentTimestamp = earliestTimestamp
-                const limit = 1000
+            const pairsPromises = Array.from(leveragePairs.entries()).map(([pairName, pairData]) => {
+                return async () => { // Return a function that returns a promise
+                    const earliestTimestamp = pairData.ohlcvs.get(timeframe)[0][0];
+                    const timeframeMs = convertTimeframeToMs(timeframe);
+                    let currentTimestamp = earliestTimestamp;
+                    const limit = 1000;
 
-                while (true) {
-                    // continue until we've fetched all data
-                    const previousShiftTimestamp = currentTimestamp - timeframeMs * limit
-                    console.log('🚀 ~ file: bot.ts:277 ~ pairName:', pairName, timeframe)
-                    console.log(`🚀 ~ file: bot.ts:277 ~ timestamp from :${moment(currentTimestamp).format('DD-MM-YYYY HH:mm')} to:${moment(previousShiftTimestamp).format('DD-MM-YYYY HH:mm')}`)
-                    global.logger.debug(`🚀 ~ file: bot.ts:277 ~ timestamp from :${moment(currentTimestamp).format('DD-MM-YYYY HH:mm')} to:${moment(previousShiftTimestamp).format('DD-MM-YYYY HH:mm')}`)
-                    const hasData = await this.fetchBatchHistoricalDataForPair(
-                        pairName,
-                        timeframe,
-                        previousShiftTimestamp,
-                        currentTimestamp,
-                        limit,
-                    )
+                    while (true) {
+                        // continue until we've fetched all data
+                        const previousShiftTimestamp = currentTimestamp - timeframeMs * limit;
+                        console.log('🚀 ~ file: bot.ts:277 ~ pairName:', pairName, timeframe);
+                        console.log(`🚀 ~ file: bot.ts:277 ~ timestamp from :${moment(currentTimestamp).format('DD-MM-YYYY HH:mm')} to:${moment(previousShiftTimestamp).format('DD-MM-YYYY HH:mm')}`);
 
-                    // Assuming data.length < limit means there's no more data left.
-                    if (!hasData) {
-                        break // exit the while loop
+                        const hasData = await this.fetchBatchHistoricalDataForPair(
+                            pairName,
+                            timeframe,
+                            previousShiftTimestamp,
+                            currentTimestamp,
+                            limit,
+                        );
+
+                        if (!hasData) {
+                            break; // exit the while loop
+                        }
+
+                        currentTimestamp = currentTimestamp - timeframeMs * limit;
                     }
+                };
+            });
 
-                    currentTimestamp = currentTimestamp - timeframeMs * limit
-                }
-            }
+            fetchPromises.push(...pairsPromises);
         }
         while (fetchPromises.length > 0) {
             const batch = fetchPromises.splice(0, 120) // Get the next batch of 10 promises (and remove them from fetchPromises)
@@ -407,7 +414,7 @@ export class TradingBot {
 
     async writePointsArrayToDatabase(pointsArray) {
         const points = await convertPointArrayToInfluxPoints(await pointsArray)
-        await dbWrapper.sendDataToTelegraf(points);
+        await this.dbWrapper?.sendDataToTelegraf(points);
     };
 
     async writePairToDatabase(pairData) {
@@ -415,7 +422,7 @@ export class TradingBot {
             '🚀 ~ file: bot.ts:304 ~ writePairToDatabase:',
             pairData,
         )
-        await dbWrapper.writePairToDatabase(pairData)
+        await this.dbWrapper?.writePairToDatabase(pairData)
     }
 
 
@@ -424,7 +431,7 @@ export class TradingBot {
         const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs)
         leveragePairs.forEach(async (pairData, pairName) => {
             global.logger.debug('🚀 ~ file: bot.ts:316 ~ leveragePairs:', pairData)
-            await dbWrapper.writePairToDatabase(pairData)
+            await this.dbWrapper?.writePairToDatabase(pairData)
         })
     }
 
