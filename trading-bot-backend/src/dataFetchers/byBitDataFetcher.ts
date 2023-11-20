@@ -44,14 +44,14 @@ export class ByBitDataFetcher {
 
             // Logging the data
             response.data = response.data.result.list
-            global.logger.info("🚀 ~ file: cryptoFetcher.ts:27 ~ fetchByBitOHLCV ~ symbol:",
+            /*global.logger.info("🚀 ~ file: cryptoFetcher.ts:27 ~ fetchByBitOHLCV ~ symbol:",
                 {
                     name: symbolDetails.name,
                     timeframe,
                     length: response.data?.length
                 }
                 //  response.data
-            )
+            )*/
             if (response.data) {
                 response.data = response.data.map((item) => {
                     return [parseFloat(item[0]),
