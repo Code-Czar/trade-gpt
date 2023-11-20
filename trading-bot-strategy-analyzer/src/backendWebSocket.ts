@@ -1,5 +1,4 @@
-import { BACKEND_URLS, REMOTE_URL, REMOTE_WSS_URL } from 'shared';
-global.logger.debug("🚀 ~ file: backendWebSocket.ts:2 ~ BACKEND_URLS:", BACKEND_URLS, REMOTE_URL, REMOTE_WSS_URL)
+import { BACKEND_URLS } from 'trading-shared';
 
 // const WebSocket = require('ws')
 import * as WebSocket from 'ws';
