@@ -47,6 +47,10 @@ export const BACKEND_ENDPOINTS = {
     }
 };
 
+export const CENTRALIZATION_ENDPOINTS = {
+    USERS: '/users'
+};
+
 export const STRATEGY_ANALYZER_URLS = {
     SIGNALS: {
         getEMA28Signals: PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals',

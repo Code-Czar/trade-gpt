@@ -38,6 +38,9 @@
 import { ref, defineProps, defineEmits } from 'vue';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'vue-router';
+import { userStore } from '../stores/userStore';
+console.log("🚀 ~ file: LoginPage.vue:42 ~ userStore:", userStore);
+
 
 const SUPABASE_URL = "https://yhotbknfiebbflhovpws.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlob3Ria25maWViYmZsaG92cHdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTQ4NzE5MTEsImV4cCI6MjAxMDQ0NzkxMX0.LmJKiQhg09gO0YHKcHeRLU-T3mcbIaNbebYSrmsCXmM";
@@ -53,7 +56,10 @@ const login = async (provider: 'google' | 'github') => {
 
     if (user) {
         // Redirect to index page after successful login
-        router.push("/index");
+        console.log("🚀 ~ file: LoginPage.vue:51 ~ session:", session);
+        console.log("🚀 ~ file: LoginPage.vue:53 ~ user:", user);
+        await userStore.setUserCredentials(user, session);
+        // router.push("/index");
     } else {
         console.error("Login error:", error?.message);
     }

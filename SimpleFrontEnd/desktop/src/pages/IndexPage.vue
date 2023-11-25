@@ -5,10 +5,14 @@
       <q-toolbar>
         <q-btn flat round dense icon="menu" @click="toggleDrawer" />
         <q-toolbar-title>
-          My App
+          Opportunities
         </q-toolbar-title>
+
+        <!-- New Login Button -->
+        <q-btn flat round dense icon="login" @click="goToLogin" />
       </q-toolbar>
     </q-header>
+
 
     <!-- Video Section -->
     <section class="video-section">
@@ -55,6 +59,9 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { STRATEGY_ANALYZER_URL } from '@/models/consts'
+// import { userStore } from '../stores/userStore';
+// console.log("🚀 ~ file: IndexPage.vue:63 ~ userStore:", userStore);
+
 
 
 

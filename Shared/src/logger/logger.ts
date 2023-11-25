@@ -1,6 +1,12 @@
-import { format } from 'winston';  // Add this at the top with your other imports
-const util = require('util');
+const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
+console.log("🚀 ~ file: logger.ts:2 ~ isNode:", isNode);
+let util;
+let winston;
 
+if (isNode) {
+    util = require('util');
+    winston = require('winston');
+}
 
 interface StackInfo {
     method: string;
@@ -14,8 +20,10 @@ type LogLevel = 'info' | 'warn' | 'error' | 'debug'; // Add debug here
 const combineMessageAndSplat = () => {
     return {
         transform: (info, opts) => {
-            //combine message and args if any
-            info.message = util.format(info.message, ...info[Symbol.for('splat')] || [])
+            if (util) {
+                // Utilize 'util.format' only in a Node.js environment
+                info.message = util.format(info.message, ...info[Symbol.for('splat')] || []);
+            }
             return info;
         }
     }
@@ -34,7 +42,7 @@ export class VersatileLogger {
         this.isBackend = isBackend;
         this.consoleLog = consoleLog;
 
-        if (this.isBackend) {
+        if (this.isBackend && winston) {
             const date = new Date().toISOString().split('T')[0];  // Format: YYYY-MM-DD
             this.winston = require('winston');
 

@@ -1,11 +1,26 @@
 from rest_framework import viewsets
 from .models import Position
 from .serializers import PositionSerializer
+from rest_framework import views, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 
 import requests
+
+from .models import User
+from .serializers import UserSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        id = self.kwargs.get('id')
+        return User.objects.get(id=id)
+
+
 
 
 class PositionViewSet(viewsets.ModelViewSet):

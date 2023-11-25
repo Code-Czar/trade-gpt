@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BACKEND_URLS = exports.STRATEGY_ANALYZER_URLS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = void 0;
+exports.BACKEND_URLS = exports.STRATEGY_ANALYZER_URLS = exports.CENTRALIZATION_ENDPOINTS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = void 0;
 const config_json_1 = __importDefault(require("./config.json"));
 let REMOTE_URL;
 let REMOTE_WSS_URL;
@@ -43,6 +43,9 @@ exports.BACKEND_ENDPOINTS = {
     RSI_ENDPOINTS: {
         getAllRSIValues: '/api/rsi/getValues',
     }
+};
+exports.CENTRALIZATION_ENDPOINTS = {
+    USERS: '/users'
 };
 exports.STRATEGY_ANALYZER_URLS = {
     SIGNALS: {
