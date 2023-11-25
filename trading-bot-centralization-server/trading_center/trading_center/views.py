@@ -17,10 +17,8 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def get_object(self):
-        id = self.kwargs.get('id')
+        id = self.kwargs.get("id")
         return User.objects.get(id=id)
-
-
 
 
 class PositionViewSet(viewsets.ModelViewSet):

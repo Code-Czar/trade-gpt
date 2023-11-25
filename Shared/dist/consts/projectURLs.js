@@ -14,20 +14,21 @@ if (typeof process !== 'undefined' && process.versions && process.versions.node)
     const configPath = path.resolve(__dirname, 'config.json');
     const jsonData = fs.readFileSync(configPath, 'utf-8');
     const loadedConfig = JSON.parse(jsonData);
-    REMOTE_URL = 'https://' + loadedConfig.REMOTE_URL;
-    REMOTE_WSS_URL = 'wss://' + loadedConfig.REMOTE_URL;
+    REMOTE_URL = loadedConfig.REMOTE_URL;
+    REMOTE_WSS_URL = loadedConfig.REMOTE_WSS;
 }
 else {
     // In a browser environment, use the imported config
-    REMOTE_URL = 'https://' + config_json_1.default.REMOTE_URL;
-    REMOTE_WSS_URL = 'wss://' + config_json_1.default.REMOTE_URL;
+    REMOTE_URL = config_json_1.default.REMOTE_URL;
+    REMOTE_WSS_URL = config_json_1.default.REMOTE_WSS;
 }
 // ... rest of the code remains unchanged
+console.log("🚀 ~ file: projectURLs.ts:19 ~ config:", config_json_1.default, REMOTE_URL);
 exports.SERVER_PORTS = {
     BACKEND_PORT: 3000,
     STRATEGY_ANALYZER_PORT: 3002,
     POSITION_MANAGER_PORT: 3003,
-    CENTRALIZATION_PORT: 8100,
+    CENTRALIZATION_PORT: 8000,
 };
 exports.PROJECT_URLS = {
     BACKEND_URL: REMOTE_URL + ':' + exports.SERVER_PORTS.BACKEND_PORT,

@@ -37,13 +37,14 @@ export const userStore = defineStore('user', {
         }
 
         // POST or PATCH request based on user existence
-        const response = await fetch(`${PROJECT_URLS.CENTRALIZATION_URL}${CENTRALIZATION_ENDPOINTS.USERS}${method === 'PATCH' ? '/' + user.id : ''}`, {
+        const response = await fetch(`${PROJECT_URLS.CENTRALIZATION_URL}${CENTRALIZATION_ENDPOINTS.USERS}${method === 'PATCH' ? '/' + user.id : '/'}`, {
           method: method,
           headers: {
             'Content-Type': 'application/json',
             // Include authorization headers if needed
           },
-          body: JSON.stringify(user)
+
+          body: JSON.stringify({ id: user.id, details: user })
         });
 
         if (!response.ok) {

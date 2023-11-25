@@ -1,11 +1,11 @@
 const isNode = typeof process !== 'undefined' && process.versions != null && process.versions.node != null;
-console.log("🚀 ~ file: logger.ts:2 ~ isNode:", isNode);
 let util;
 let winston;
-
+let format;
 if (isNode) {
     util = require('util');
     winston = require('winston');
+    format = winston.format;
 }
 
 interface StackInfo {
