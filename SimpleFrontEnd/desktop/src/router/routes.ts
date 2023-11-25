@@ -32,8 +32,10 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('pages/RSIPage.vue') }
+
       // other app routes go here
-    ]
+    ],
+    meta: { requiresAuth: true, roles: ['Admin', 'VIP', 'Dev'] }
   }
 ]
 

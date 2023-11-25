@@ -19,7 +19,7 @@ class User(models.Model):
         ("VIP", "VIP"),
     ]
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, editable=False)
     details = models.JSONField()  # Updated to use the standard JSONField
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="User")
     permission_level = models.CharField(

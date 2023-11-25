@@ -36,13 +36,13 @@ onMounted(() => {
         console.log("🚀 ~ file: CallbackComponent.vue:32 ~ accessToken:", accessToken);
         console.log("🚀 ~ file: CallbackComponent.vue:34 ~ tokenType:", tokenType);
 
-        supabase.auth.getUser(accessToken).then(({ data: { user } }) => {
+        supabase.auth.getUser(accessToken).then(async ({ data: { user } }) => {
             if (user) {
                 console.log("User details:", user);
 
                 // Store user details in your user store
                 store.setUserCredentials(user, accessToken);
-                store.pushUserToBackend(user);
+                await store.pushUserToBackend(user);
 
                 // You can access specific details like this:
                 console.log("User name:", user.user_metadata.name); // Example for name

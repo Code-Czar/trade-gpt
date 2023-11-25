@@ -37,7 +37,7 @@ export const userStore = defineStore('user', {
         }
 
         // POST or PATCH request based on user existence
-        const response = await fetch(`${PROJECT_URLS.CENTRALIZATION_URL}${CENTRALIZATION_ENDPOINTS.USERS}${method === 'PATCH' ? '/' + user.id : '/'}`, {
+        const response = await fetch(`${PROJECT_URLS.CENTRALIZATION_URL}${CENTRALIZATION_ENDPOINTS.USERS}${method === 'PATCH' ? '/' + user.id + '/' : '/'}`, {
           method: method,
           headers: {
             'Content-Type': 'application/json',
@@ -53,6 +53,8 @@ export const userStore = defineStore('user', {
 
         const data = await response.json();
         console.log("User data pushed to backend:", data);
+        this.user = data;
+        console.log("🚀 ~ file: userStore.ts:57 ~ this.user:", this.user);
       } catch (error) {
         console.error("Error pushing user data to backend:", error);
       }
