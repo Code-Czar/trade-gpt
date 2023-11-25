@@ -16,6 +16,16 @@
         </q-item-label>
 
         <!-- Link to Monitoring Page -->
+        <q-item v-if="isDev" clickable>
+          <q-item-section avatar>
+            <q-icon name="Admin" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>
+              <span @click="goToAdminPage">Dev Panel</span>
+            </q-item-label>
+          </q-item-section>
+        </q-item>
         <q-item clickable>
           <q-item-section avatar>
             <q-icon name="monitor" />
@@ -38,6 +48,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserRole } from '@/composables/useUserRoles';
+
+const { isAdmin, isUser, isDev } = useUserRole();
+
 
 const router = useRouter();
 const leftDrawerOpen = ref(false);
@@ -46,7 +60,9 @@ function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 }
 const gotToMonitoringPage = () => {
-
   router.push('/monitoring');
+}
+const goToAdminPage = () => {
+  router.push('/devOnly');
 }
 </script>

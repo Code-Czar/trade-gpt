@@ -23,6 +23,14 @@ const routes = [
     ]
   },
   {
+    path: '/devOnly',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/DevOnly.vue') }
+    ],
+    meta: { requiresAuth: true, roles: ['Dev'] }
+  },
+  {
     path: '/:access_token',
     component: () => import('components/CallbackComponent.vue')
 
