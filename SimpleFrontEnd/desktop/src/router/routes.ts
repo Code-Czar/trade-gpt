@@ -31,6 +31,14 @@ const routes = [
     meta: { requiresAuth: true, roles: ['Dev'] }
   },
   {
+    path: '/checkout',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/CheckoutPage.vue') }
+    ],
+    meta: { requiresAuth: true, roles: ['Admin', 'VIP', 'Dev'] }
+  },
+  {
     path: '/:access_token',
     component: () => import('components/CallbackComponent.vue')
 

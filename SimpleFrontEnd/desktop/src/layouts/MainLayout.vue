@@ -26,6 +26,16 @@
             </q-item-label>
           </q-item-section>
         </q-item>
+        <q-item v-if="isDev" clickable>
+          <q-item-section avatar>
+            <q-icon name="Admin" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>
+              <span @click="goToCheckout">Checkout</span>
+            </q-item-label>
+          </q-item-section>
+        </q-item>
         <q-item clickable>
           <q-item-section avatar>
             <q-icon name="monitor" />
@@ -61,6 +71,9 @@ function toggleLeftDrawer() {
 }
 const gotToMonitoringPage = () => {
   router.push('/monitoring');
+}
+const goToCheckout = () => {
+  router.push('/checkout');
 }
 const goToAdminPage = () => {
   router.push('/devOnly');

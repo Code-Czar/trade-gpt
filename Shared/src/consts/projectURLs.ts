@@ -49,7 +49,10 @@ export const BACKEND_ENDPOINTS = {
 };
 
 export const CENTRALIZATION_ENDPOINTS = {
-    USERS: '/users'
+    USERS: '/users',
+    STRIPE_CONFIG: '/config',
+    STRIPE_PAYMENT_ATTEMPT: '/create-payment-intent',
+    STRIPE_CREATE_CUSTOMER: '/create-customer'
 };
 
 export const STRATEGY_ANALYZER_URLS = {

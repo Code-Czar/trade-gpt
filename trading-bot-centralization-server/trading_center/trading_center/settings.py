@@ -28,6 +28,9 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_ALL_ORIGINS = True
 
+STRIPE_SECRET_KEY = 'pk_test_51OGQQoJ5PV7GuigYwTYVEmyl3e1kT9jh6Oh859hcIQo6xDFh21HMWfUJexNE4oZ9bwtlfctUSbWXw0wdmX4srovX00jEAc9PgN'
+
+
 
 # Application definition
 
