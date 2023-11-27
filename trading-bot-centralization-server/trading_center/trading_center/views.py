@@ -1,11 +1,41 @@
+from django.http import Http404
 from rest_framework import viewsets
-from .models import Position
-from .serializers import PositionSerializer
+
+from rest_framework import views, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 
 import requests
+
+from .models import User
+from .models import Position
+from .serializers import PositionSerializer
+from .serializers import UserSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    # def get_object(self):
+    #     uuid = self.kwargs.get("id")
+    #     try:
+    #         return User.objects.get(id=uuid)
+    #     except User.DoesNotExist:
+    #         raise Http404("User not found")
+
+    def perform_create(self, serializer):
+        uuid = self.request.data.get('id')
+        if uuid:
+            serializer.save(id=uuid)
+        else:
+            serializer.save()
+    
+    # def retrieve(self, request, *args, **kwargs):
+    #     instance = get_object_or_404(self.get_queryset(), id=kwargs.get('id'))
+    #     serializer = self.get_serializer(instance)
+    #     return Response(serializer.data)
 
 
 class PositionViewSet(viewsets.ModelViewSet):

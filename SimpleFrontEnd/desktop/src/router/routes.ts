@@ -23,6 +23,22 @@ const routes = [
     ]
   },
   {
+    path: '/devOnly',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/DevOnly.vue') }
+    ],
+    meta: { requiresAuth: true, roles: ['Dev'] }
+  },
+  {
+    path: '/checkout',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/CheckoutPage.vue') }
+    ],
+    meta: { requiresAuth: true, roles: ['Admin', 'VIP', 'Dev'] }
+  },
+  {
     path: '/:access_token',
     component: () => import('components/CallbackComponent.vue')
 
@@ -32,8 +48,10 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [
       { path: '', component: () => import('pages/RSIPage.vue') }
+
       // other app routes go here
-    ]
+    ],
+    meta: { requiresAuth: true, roles: ['Admin', 'VIP', 'Dev'] }
   }
 ]
 
