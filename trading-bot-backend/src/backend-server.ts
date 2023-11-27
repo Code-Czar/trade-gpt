@@ -193,6 +193,33 @@ app.post('/set-rsi', async (req: Request, res: Response) => {
     res.status(200).json({ message: 'RSI values updated successfully' })
 })
 
+app.get('/getLeveragePairs', async (req, res) => {
+    try {
+        res.status(200).json({
+            leveragePairs: await cryptoFetcher.getBybitPairsWithLeverage(),
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ error: 'Error fetching health data' })
+    }
+});
+
+
+app.post('/api/fetchHistoricalDataForPair', async (req: Request, res: Response) => {
+    const { pairSymbol, timeframe } = req.body
+    const result = (await bot.fetchAllHistoricalDataForPair(pairSymbol, timeframe))()
+
+    console.log("🚀 ~ file: backend-server.ts:211 ~ result:", await result);
+
+    res.status(200).json({ message: 'Started to populate database with historical data' })
+})
+app.post('/getAllHistoricalData', async (req: Request, res: Response) => {
+    bot.fetchAllHistoricalData()
+    res.status(200).json({ message: 'Started to populate database with historical data' })
+})
+
+
+
 app.get('/health', (req, res) => {
     try {
         res.status(200).json({
@@ -212,6 +239,6 @@ server.listen(PORT, () => {
 
 
 bot.populateDataStoreParallel()
-bot.fetchAllHistoricalData()
+// bot.fetchAllHistoricalData()
 
 

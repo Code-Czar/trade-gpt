@@ -353,6 +353,38 @@ export class TradingBot {
 
         return true
     }
+    fetchAllHistoricalDataForPair(pairName, timeframe) {
+        const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs)
+        const pairData = leveragePairs.get(pairName)
+        return async () => { // Return a function that returns a promise
+            const earliestTimestamp = pairData.ohlcvs.get(timeframe)[0][0];
+            const timeframeMs = convertTimeframeToMs(timeframe);
+            let currentTimestamp = earliestTimestamp;
+            const limit = 1000;
+
+            while (true) {
+                // continue until we've fetched all data
+                const previousShiftTimestamp = currentTimestamp - timeframeMs * limit;
+                console.log('🚀 ~ file: bot.ts:277 ~ pairName:', pairName, timeframe);
+                console.log(`🚀 ~ file: bot.ts:277 ~ timestamp from :${moment(currentTimestamp).format('DD-MM-YYYY HH:mm')} to:${moment(previousShiftTimestamp).format('DD-MM-YYYY HH:mm')}`);
+
+                const hasData = await this.fetchBatchHistoricalDataForPair(
+                    pairName,
+                    timeframe,
+                    previousShiftTimestamp,
+                    currentTimestamp,
+                    limit,
+                );
+
+                if (!hasData) {
+                    break; // exit the while loop
+                }
+
+                currentTimestamp = currentTimestamp - timeframeMs * limit;
+            }
+        };
+
+    }
 
     async fetchAllHistoricalData() {
         while (
@@ -371,33 +403,7 @@ export class TradingBot {
 
         for (const timeframe of ACTIVE_TIMEFRAMES) {
             const pairsPromises = Array.from(leveragePairs.entries()).map(([pairName, pairData]) => {
-                return async () => { // Return a function that returns a promise
-                    const earliestTimestamp = pairData.ohlcvs.get(timeframe)[0][0];
-                    const timeframeMs = convertTimeframeToMs(timeframe);
-                    let currentTimestamp = earliestTimestamp;
-                    const limit = 1000;
-
-                    while (true) {
-                        // continue until we've fetched all data
-                        const previousShiftTimestamp = currentTimestamp - timeframeMs * limit;
-                        console.log('🚀 ~ file: bot.ts:277 ~ pairName:', pairName, timeframe);
-                        console.log(`🚀 ~ file: bot.ts:277 ~ timestamp from :${moment(currentTimestamp).format('DD-MM-YYYY HH:mm')} to:${moment(previousShiftTimestamp).format('DD-MM-YYYY HH:mm')}`);
-
-                        const hasData = await this.fetchBatchHistoricalDataForPair(
-                            pairName,
-                            timeframe,
-                            previousShiftTimestamp,
-                            currentTimestamp,
-                            limit,
-                        );
-
-                        if (!hasData) {
-                            break; // exit the while loop
-                        }
-
-                        currentTimestamp = currentTimestamp - timeframeMs * limit;
-                    }
-                };
+                this.fetchAllHistoricalDataForPair(pairName, pairData, timeframe)
             });
 
             fetchPromises.push(...pairsPromises);

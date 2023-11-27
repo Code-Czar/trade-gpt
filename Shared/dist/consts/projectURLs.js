@@ -39,7 +39,8 @@ exports.PROJECT_URLS = {
 };
 exports.BACKEND_ENDPOINTS = {
     LEVERAGE_ENDPOINTS: {
-        getLeverageSymbols: '/api/symbols/leverage'
+        getLeverageSymbols: '/api/symbols/leverage',
+        getHistoricalDataForPair: '/api/fetchHistoricalDataForPair'
     },
     RSI_ENDPOINTS: {
         getAllRSIValues: '/api/rsi/getValues',

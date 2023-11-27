@@ -41,7 +41,8 @@ export const PROJECT_URLS = {
 
 export const BACKEND_ENDPOINTS = {
     LEVERAGE_ENDPOINTS: {
-        getLeverageSymbols: '/api/symbols/leverage'
+        getLeverageSymbols: '/api/symbols/leverage',
+        getHistoricalDataForPair: '/api/fetchHistoricalDataForPair'
     },
     RSI_ENDPOINTS: {
         getAllRSIValues: '/api/rsi/getValues',

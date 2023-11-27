@@ -18,10 +18,7 @@
                 <!-- Tab Panels -->
                 <q-tab-panels v-model="tab">
                     <q-tab-panel name="backend">
-                        <!-- Buttons for Node Backend actions -->
-                        <q-btn label="Action 1" @click="performBackendAction1" />
-                        <q-btn label="Action 2" @click="performBackendAction2" />
-                        <!-- Add more buttons as needed -->
+                        <NodeBackendPanel />
                     </q-tab-panel>
 
                     <q-tab-panel name="strategy-analyzer">
@@ -49,6 +46,7 @@
   
 <script setup lang="ts">
 import { ref } from 'vue';
+import { NodeBackendPanel } from '@/components';
 
 // State for the selected tab
 const tab = ref('backend');
