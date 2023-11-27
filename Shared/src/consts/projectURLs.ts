@@ -52,7 +52,8 @@ export const CENTRALIZATION_ENDPOINTS = {
     USERS: '/users',
     STRIPE_CONFIG: '/config',
     STRIPE_PAYMENT_ATTEMPT: '/create-payment-intent',
-    STRIPE_CREATE_CUSTOMER: '/create-customer'
+    STRIPE_CREATE_CUSTOMER: '/create-customer',
+    STRIPE_CHECKOUT_SESSION: '/create_checkout_session'
 };
 
 export const STRATEGY_ANALYZER_URLS = {

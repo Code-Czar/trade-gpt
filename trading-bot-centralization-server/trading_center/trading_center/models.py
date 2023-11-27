@@ -26,6 +26,9 @@ class User(models.Model):
         max_length=10, choices=PERMISSION_CHOICES, default="Basic"
     )
 
+    stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
+    stripe_customer_details = models.JSONField(default=dict)
+
     def __str__(self):
         return str(self.id)
 

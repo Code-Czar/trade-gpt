@@ -1,0 +1,7 @@
+{
+  "key": "ctrl+alt+l",
+  "command": "editor.action.insertSnippet",
+  "args": {
+      "name": "loggerInfo"
+  }
+}

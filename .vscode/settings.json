@@ -3,5 +3,11 @@
         "activityBar.background": "#2F2B3C",
         "titleBar.activeBackground": "#423C54",
         "titleBar.activeForeground": "#FAFAFB"
-    }
+    },
+    
+    
+    
+    "turboConsoleLog.addSemicolonInTheEnd": true,
+    "turboConsoleLog.insertEnclosingFunction": false,
+    "turboConsoleLog.insertEnclosingClass": false
 }

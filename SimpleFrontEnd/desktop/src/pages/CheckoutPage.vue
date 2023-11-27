@@ -1,8 +1,8 @@
 <template>
-    <div>
+    <q-page>
         checkout
         <SrCheckout />
-    </div>
+    </q-page>
 </template>
 <script lang="ts" setup>
 import SrCheckout from "@/components/stripe/SrCheckout.vue"

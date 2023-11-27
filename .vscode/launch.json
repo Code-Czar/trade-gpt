@@ -1,16 +1,27 @@
-// .vscode/launch.json
 {
     "version": "0.2.0",
     "configurations": [
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "Launch Program",
-        "preLaunchTask": "build", // The task to run before launching the debugger
-        "program": "${workspaceFolder}/trading-bot-backend/backend-server.ts",
-        "outFiles": ["${workspaceFolder}/out/**/*.js"], // Path to the compiled JavaScript files
-        "sourceMaps": true // Enable source maps for debugging
-      }
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Backend-Server with ts-node",
+            // "runtimeArgs": [
+            //     "-r",
+            //     "${workspaceFolder}/trading-bot-backend/node_modules/ts-node/register"
+            // ],
+            "program": "${workspaceFolder}/trading-bot-backend/src/backend-server.ts",
+            "restart": true,
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Backend 2",
+            "program": "${workspaceFolder}/backend2/app.js"
+        }
     ]
-  }
-  
+}

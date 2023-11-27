@@ -1,0 +1,10 @@
+{
+    "loggerInfo": {
+        "prefix": "loggerInfo",
+        "body": [
+            "",
+            "logger.info($1);"
+        ],
+        "description": "Log selected text with logger.info"
+    }
+}
