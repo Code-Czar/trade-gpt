@@ -27,7 +27,7 @@ const path = require('path')
 const binanceDataFile = 'binanceData.json'
 const bybitDataFile = 'bybitData.json'
 
-const ACTIVE_TIMEFRAMES = ['5m', '1m']
+const ACTIVE_TIMEFRAMES = ['1d', '1h', '5m', '1m']
 // const ACTIVE_TIMEFRAMES = ['5m']
 
 let once = true
