@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 
 import { sendSignalEmail } from './notifiers/email';
 import { sendNotification } from './notifiers/notificationsSender';
-import { BACKEND_URLS } from 'shared';
+import { BACKEND_URLS } from 'trading-shared';
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 
 

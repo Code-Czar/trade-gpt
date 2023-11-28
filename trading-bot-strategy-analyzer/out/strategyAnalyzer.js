@@ -40,7 +40,7 @@ exports.analyzeData = exports.fetchRSIAndCheckThreshold = exports.checkRSIThresh
 var fetch = require('node-fetch');
 var email_1 = require("./notifiers/email");
 var notificationsSender_1 = require("./notifiers/notificationsSender");
-var shared_1 = require("shared");
+var trading_shared_1 = require("trading-shared");
 var positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 var RSIUpperThreshold = 51;
 var RSILowerThreshold = 50;
@@ -54,8 +54,8 @@ var fetchRSI = function (timeframes) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    symbolsUrl = shared_1.BACKEND_URLS.LEVERAGE_URLS.getLeverageSymbols;
-                    rsiBulkUrl = shared_1.BACKEND_URLS.RSI_URLS.getAllRSIValues;
+                    symbolsUrl = trading_shared_1.BACKEND_URLS.LEVERAGE_URLS.getLeverageSymbols;
+                    rsiBulkUrl = trading_shared_1.BACKEND_URLS.RSI_URLS.getAllRSIValues;
                     return [4 /*yield*/, fetch(symbolsUrl, {
                             method: 'GET',
                             headers: {
@@ -65,7 +65,7 @@ var fetchRSI = function (timeframes) {
                 case 1:
                     symbolsResponse = _a.sent();
                     return [4 /*yield*/, symbolsResponse.json()
-                        // console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ symbolsObjects:", symbolsObjects)
+                        // global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ symbolsObjects:", symbolsObjects)
                     ];
                 case 2:
                     symbolsObjects = _a.sent();
@@ -82,7 +82,7 @@ var fetchRSI = function (timeframes) {
                     return [4 /*yield*/, rsiResponse.json()];
                 case 4:
                     rsiValues = _a.sent();
-                    // console.log("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ rsiResponse:", rsiValues)
+                    // global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ rsiResponse:", rsiValues)
                     return [2 /*return*/, { rsiValues: rsiValues, symbols: symbols, timeframes: timeframes }];
             }
         });
@@ -112,7 +112,7 @@ var checkRSIThresholds = function (rsiValues, symbols, timeframes) { return __aw
                 }
                 if (!(rsiValue && rsiValue < RSI_THRESHOLD && !notificationsSent[symbol][timeframe])) return [3 /*break*/, 10];
                 signalTriggered = true;
-                console.log("RSI value for ".concat(symbol, " at ").concat(timeframe, " is below the threshold! RSI: ").concat(rsiValue));
+                global.logger.debug("RSI value for ".concat(symbol, " at ").concat(timeframe, " is below the threshold! RSI: ").concat(rsiValue));
                 _b.label = 3;
             case 3:
                 _b.trys.push([3, 5, , 6]);
@@ -122,7 +122,7 @@ var checkRSIThresholds = function (rsiValues, symbols, timeframes) { return __aw
                 return [3 /*break*/, 6];
             case 5:
                 error_1 = _b.sent();
-                console.log("🚀 ~ file: strategyAnalyzer.ts:66 ~ checkRSIThresholds ~ error:", error_1);
+                global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:66 ~ checkRSIThresholds ~ error:", error_1);
                 return [3 /*break*/, 6];
             case 6:
                 _b.trys.push([6, 8, , 9]);
@@ -132,7 +132,7 @@ var checkRSIThresholds = function (rsiValues, symbols, timeframes) { return __aw
                 return [3 /*break*/, 9];
             case 8:
                 error_2 = _b.sent();
-                console.log("🚀 ~ file: strategyAnalyzer.ts:73 ~ checkRSIThresholds ~ error:", error_2);
+                global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:73 ~ checkRSIThresholds ~ error:", error_2);
                 return [3 /*break*/, 9];
             case 9:
                 // await sendNotification("RSI Alert : ", symbol, timeframe, `RSI: ${rsiValue}`, true);
@@ -153,7 +153,7 @@ var checkRSIThresholds = function (rsiValues, symbols, timeframes) { return __aw
                 return [3 /*break*/, 1];
             case 13:
                 if (!signalTriggered) {
-                    console.log('No RSI values were below the threshold.');
+                    global.logger.debug('No RSI values were below the threshold.');
                 }
                 return [2 /*return*/, notificationsSent];
         }
@@ -213,7 +213,7 @@ var generateSellSignal = function (data) {
     return isPriceTouchedUpperBand && isRSIOverBought && isMACDBearish;
 };
 function analyzeRSI(data) {
-    // // console.log("🚀 ~ file: strategyAnalyzer.ts:41 ~ analyzeRSI ~ data:", data)
+    // // global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:41 ~ analyzeRSI ~ data:", data)
     var rsi = data.rsi;
     var ohlcvData = data.ohlcvData;
     var length = rsi.length;
@@ -444,7 +444,7 @@ function analyzeData(symbol, timeframe, analysisType, signalStatus, autoOpenPosi
                     _f.label = 14;
                 case 14: return [3 /*break*/, 16];
                 case 15: 
-                // console.log(`Unknown analysis type: ${analysisType}`);
+                // global.logger.debug(`Unknown analysis type: ${analysisType}`);
                 return [2 /*return*/];
                 case 16: return [2 /*return*/, [data, analysisResult]];
             }

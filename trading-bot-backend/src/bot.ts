@@ -418,10 +418,10 @@ export class TradingBot {
     };
 
     async writePairToDatabase(pairData) {
-        global.logger.debug(
+        /*global.logger.debug(
             '🚀 ~ file: bot.ts:304 ~ writePairToDatabase:',
             pairData,
-        )
+        )*/
         await this.dbWrapper?.writePairToDatabase(pairData)
     }
 
