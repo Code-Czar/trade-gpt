@@ -15,7 +15,7 @@
 //     makeDecision(symbol: string, buySignal: boolean, sellSignal: boolean) {
 //         const currentRiskedCapital = this.getCurrentRiskedCapital();
 //         if (currentRiskedCapital >= this.totalRiskedCapital) {
-//             // console.log('Total risked capital has been invested, no new trades will be initiated.');
+//             // global.logger.debug('Total risked capital has been invested, no new trades will be initiated.');
 //             return;
 //         }
 //         if (buySignal && this.positionManager.hasShortPosition(symbol)) {
@@ -32,7 +32,7 @@
 //     }
 //     handleShortDCA(symbol: string) {
 //         if (this.dcaCounter[symbol] > 2) {
-//             // console.log('DCA limit reached, not buying more');
+//             // global.logger.debug('DCA limit reached, not buying more');
 //             return;
 //         }
 //         let riskPerTrade = this.initialRiskPerTrade * (this.dcaCounter[symbol] + 1) * this.dcaFactor;
@@ -41,7 +41,7 @@
 //     }
 //     handleLongDCA(symbol: string) {
 //         if (this.dcaCounter[symbol] > 2) {
-//             // console.log('DCA limit reached, not selling more');
+//             // global.logger.debug('DCA limit reached, not selling more');
 //             return;
 //         }
 //         let riskPerTrade = this.initialRiskPerTrade * (this.dcaCounter[symbol] + 1) * this.dcaFactor;

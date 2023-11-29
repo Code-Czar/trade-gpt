@@ -23,6 +23,14 @@ const routes = [
     ]
   },
   {
+    path: '/premiumAlerts',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/VIP_Pages/AlertsPage.vue') }
+    ],
+    meta: { requiresAuth: true, roles: ['Dev', 'VIP', 'Advanced'] }
+  },
+  {
     path: '/devOnly',
     component: () => import('layouts/MainLayout.vue'),
     children: [

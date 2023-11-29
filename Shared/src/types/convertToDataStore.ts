@@ -85,7 +85,7 @@ export const convertPairToDataArray = async (inputPair) => {
 
 
 export const convertPointArrayToInfluxPoints = async (dataArray) => {
-    const points = [];
+    const points: Array<any> = [];
 
     dataArray.forEach((data) => {
         const point = new Point('pair_data')

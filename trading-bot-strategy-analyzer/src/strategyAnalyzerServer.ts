@@ -55,8 +55,6 @@ app.get('/health', (req, res) => {
     res.status(200).send('Hello from SA!');
 });
 
-
-
 app.get('/api/getRSISignals/:symbolName', (req, res) => {
     const { symbolName } = req.params;
     if (strategyAnalyzer.pastRSISignals[symbolName]) {
@@ -66,6 +64,7 @@ app.get('/api/getRSISignals/:symbolName', (req, res) => {
     }
     res.status(404).send('No RSI signals found for this symbol');
 });
+
 app.get('/api/getEMA28Signals/:symbolName', (req, res) => {
     const { symbolName } = req.params;
     if (strategyAnalyzer.pastEMA28Signals[symbolName]) {

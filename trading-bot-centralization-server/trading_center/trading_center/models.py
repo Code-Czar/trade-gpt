@@ -1,8 +1,7 @@
 from django.db import models
-import uuid
 from django.utils import timezone
-
 from django.contrib.postgres.fields import JSONField
+
 import uuid
 
 
@@ -28,6 +27,7 @@ class User(models.Model):
 
     stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
     stripe_customer_details = models.JSONField(default=dict)
+    notifications = models.JSONField(default=list)
 
     def __str__(self):
         return str(self.id)

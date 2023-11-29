@@ -1,0 +1,207 @@
+<template>
+    <div>
+        <q-page padding>
+            <div class="accordion-grid">
+                <!-- RSI Below Threshold -->
+                <div class="accordion-card">
+                    <q-expansion-item label="RSI Below Threshold" icon="trending_down" class="q-flex q-flex-column"
+                        :expanded="true">
+                        <q-toggle v-model="rsiAlertEnabled" label="Enable Alert" />
+                        <q-select v-model="selectedPairsRsi" :options="pairOptions" use-input input-debounce="300" multiple
+                            label="Select Pairs" placeholder="Type to search pairs" @filter="filterPairs">
+                            <template v-slot:append>
+                                <q-btn flat label="Select All" @click.stop="selectAllPairs" />
+                            </template>
+                        </q-select>
+                        <div class="q-mb-md sliders-container">
+                            <div class="slider-container">
+                                Lower threshold :
+                                <q-slider v-model="rsiThresholdLower" :min="0" :max="100" label-always />
+                                <q-btn flat icon="add"
+                                    @click="addNotification('RSI_Low_Alert', rsiThresholdLower, selectedPairsRsi)" />
+                            </div>
+                            <div class="slider-container">
+                                Higher threshold :
+                                <q-slider v-model="rsiThresholdHigher" :min="0" :max="100" label-always />
+                                <q-btn flat icon="add"
+                                    @click="addNotification('RSI_High_Alert', rsiThresholdHigher, selectedPairsRsi)" />
+                            </div>
+                        </div>
+
+                        <!-- Notifications List -->
+                        <div class="notifications-list">
+                            <div v-for="(notif, index) in notifications" :key="index" class="notification-item">
+                                {{ notif.type }} - Threshold: {{ notif.parameters.threshold }} - Pairs: {{
+
+                                    notif.parameters.pairs
+                                }}
+                                <q-btn flat icon="remove" @click="removeNotification(index)" />
+                            </div>
+                        </div>
+                        <q-btn class="q-flex" style="display:flex; margin-left:auto" flat @click="saveNotifications"> Save
+                        </q-btn>
+
+                    </q-expansion-item>
+                </div>
+
+                <!-- Mark Price Alert -->
+                <div class="accordion-card">
+                    <q-expansion-item label="Mark Price Alert" icon="attach_money" :expanded="true">
+                        <q-input v-model="markPrice" label="Mark Price" type="number" />
+                        <q-toggle v-model="markPriceAlertEnabled" label="Enable Alert" />
+                    </q-expansion-item>
+                </div>
+
+                <!-- Price on/under EMA -->
+                <div class="accordion-card">
+                    <q-expansion-item label="Price on/under EMA" icon="show_chart" :expanded="true">
+                        <!-- Additional UI elements for EMA settings go here -->
+                    </q-expansion-item>
+                </div>
+
+                <!-- Price Breaking EMA -->
+                <div class="accordion-card">
+                    <q-expansion-item label="Price Breaking EMA" icon="multiline_chart" :expanded="true">
+                        <!-- Additional UI elements for EMA settings go here -->
+                    </q-expansion-item>
+                </div>
+
+                <!-- EMA Crossing Another EMA -->
+                <div class="accordion-card">
+                    <q-expansion-item label="EMA Crossing Another EMA" icon="swap_calls" :expanded="true">
+                        <!-- Additional UI elements for EMA crossing settings go here -->
+                    </q-expansion-item>
+                </div>
+
+                <!-- Trend Reversal -->
+                <div class="accordion-card">
+                    <q-expansion-item label="Trend Reversal" icon="trending_up" :expanded="true">
+                        <q-toggle v-model="trendReversalEnabled" label="Enable Alert" />
+                    </q-expansion-item>
+                </div>
+            </div>
+        </q-page>
+    </div>
+</template>
+
+  
+<script setup>
+import { ref } from 'vue';
+import { RSINotifDescription } from 'trading-shared';
+
+const accordion = ref([1, 2, 3, 4, 5, 6]); // Keeping all accordions open
+const rsiThresholdLower = ref(30);
+const rsiThresholdHigher = ref(70);
+const rsiAlertEnabled = ref(false);
+const markPrice = ref(null);
+const markPriceAlertEnabled = ref(false);
+const trendReversalEnabled = ref(false);
+const selectedPairsRsi = ref([]);
+const pairOptions = ref(['BTC/USD', 'ETH/USD', 'XRP/USD']); // Example pair options
+const notifications = ref([]);
+
+// Function to filter pairs in q-select
+const filterPairs = (val, update) => {
+    update(() => {
+        if (val === '') {
+            pairOptions.value = ['BTC/USD', 'ETH/USD', 'XRP/USD']; // Replace with actual fetching logic
+        } else {
+            const needle = val.toLowerCase();
+            pairOptions.value = pairOptions.value.filter(v => v.toLowerCase().indexOf(needle) > -1);
+        }
+    });
+};
+const selectAllPairs = () => {
+    selectedPairsRsi.value = [...pairOptions.value];
+};
+
+
+
+function addNotification(type, threshold, pairs) {
+    const pairsText = Array.isArray(pairs) ? pairs.join(', ') : '';
+    console.log("🚀 ~ file: alertsPanel.vue:119 ~ pairsText:", pairsText, typeof pairsText, selectedPairsRsi);
+
+    notifications.value.push({
+        ...RSINotifDescription,
+        type,
+        parameters: {
+            threshold,
+            pairs: pairsText
+        },
+        // preferences: { ... } // Set preferences as needed
+    });
+}
+
+function removeNotification(index) {
+    notifications.value.splice(index, 1);
+}
+
+function saveNotifications() {
+    console.log("🚀 ~ file: alertsPanel.vue:133 ~ notifications.value:", notifications.value);
+    return
+}
+
+</script>
+  
+<style lang="scss" scoped>
+.q-expansion-item__content {
+    display: flex;
+    flex-direction: column;
+}
+
+.accordion-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Adjust grid layout to fit maximum 3 cards per row */
+@media (min-width: 900px) {
+    .accordion-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Style each accordion item as a card */
+.accordion-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+}
+
+
+/* Adding styles for the slider container */
+.sliders-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 2rem;
+
+}
+
+.slider-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.q-slider {
+    display: flex;
+    justify-content: center;
+}
+
+.notifications-list {
+    margin-top: 1rem;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    background: #f5f5f5;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+</style>

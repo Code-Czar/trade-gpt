@@ -31,9 +31,9 @@
     "onesignal-node": "^3.4.0",
     "prettier": "^2.8.8",
     "supertest": "^6.3.3",
+    "trading-shared": "../Shared",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.2", 
-    "trading-shared" : "../Shared"
+    "typescript": "^5.0.2"
   },
   "scripts": {
     "linkShared": "yarn add --force ../Shared",

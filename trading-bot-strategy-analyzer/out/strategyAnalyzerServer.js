@@ -1,5 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var trading_shared_1 = require("trading-shared");
+global.logger = new trading_shared_1.VersatileLogger('StrategyAnalyzerServer', true, true);
 var express = require('express');
 var cors = require('cors');
 var fs = require('fs');
@@ -9,8 +11,8 @@ var fetch = require('node-fetch');
 var dotenv = require('dotenv');
 var path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env') });
-console.log('Current directory:', process.cwd());
-var trading_shared_1 = require("trading-shared");
+global.logger.debug('Current directory:', process.cwd());
+var trading_shared_2 = require("trading-shared");
 var backendWebSocket_1 = require("./backendWebSocket");
 var strategyAnalyzerClass_1 = require("./strategyAnalyzerClass");
 var mode = process.env.MODE;
@@ -21,7 +23,7 @@ if (mode === 'PRODUCTION') {
     var certificatePath = '/etc/letsencrypt/live/beniben.hopto.org/';
     var key = fs.readFileSync("".concat(certificatePath, "/privkey.pem"));
     var cert = fs.readFileSync("".concat(certificatePath, "/fullchain.pem"));
-    console.log('🚀 ~ file: strategyAnalyzerServer.ts:13 ~ key:', key, cert);
+    global.logger.debug('🚀 ~ file: strategyAnalyzerServer.ts:13 ~ key:', key, cert);
     httpsOptions = {
         key: key,
         cert: cert,
@@ -32,8 +34,8 @@ else {
     // Use HTTP for DEV mode
     server = http.createServer(app);
 }
-server.listen(trading_shared_1.SERVER_PORTS.STRATEGY_ANALYZER_PORT, function () {
-    console.log("SA Server running on port ".concat(trading_shared_1.SERVER_PORTS.STRATEGY_ANALYZER_PORT));
+server.listen(trading_shared_2.SERVER_PORTS.STRATEGY_ANALYZER_PORT, function () {
+    global.logger.debug("SA Server running on port ".concat(trading_shared_2.SERVER_PORTS.STRATEGY_ANALYZER_PORT));
 });
 app.use(cors());
 // Start the loop
