@@ -11,6 +11,7 @@
                             label="Select Pairs" placeholder="Type to search pairs" @filter="filterPairs">
                             <template v-slot:append>
                                 <q-btn flat label="Select All" @click.stop="selectAllPairs" />
+                                <q-btn flat label="Clear" @click.stop="clearSelection" />
                             </template>
                         </q-select>
                         <div class="q-mb-md sliders-container">
@@ -30,12 +31,15 @@
 
                         <!-- Notifications List -->
                         <div class="notifications-list">
-                            <div v-for="(notif, index) in notifications" :key="index" class="notification-item">
-                                {{ notif.type }} - Threshold: {{ notif.parameters.threshold }} - Pairs: {{
-
-                                    notif.parameters.pairs
-                                }}
-                                <q-btn flat icon="remove" @click="removeNotification(index)" />
+                            <q-btn v-if="notifications.length > 0" class="q-flex" style="display:flex; margin-left:auto"
+                                flat @click="clearAllNotifications"> Clear </q-btn>
+                            <div class="notifications-container">
+                                <div v-for="(notif, index) in notifications" :key="index" class="notification-item">
+                                    {{ notif.type }} - Threshold: {{ notif.parameters?.threshold }} - Pairs: {{
+                                        notif.pairName
+                                    }}
+                                    <q-btn flat icon="remove" @click="removeNotification(index)" />
+                                </div>
                             </div>
                         </div>
                         <q-btn class="q-flex" style="display:flex; margin-left:auto" flat @click="saveNotifications"> Save
@@ -85,9 +89,11 @@
 </template>
 
   
-<script setup>
-import { ref } from 'vue';
-import { RSINotifDescription } from 'trading-shared';
+<script lang="ts" setup>
+import { ref, onMounted } from 'vue';
+import { RSINotifDescription, PROJECT_URLS, CENTRALIZATION_ENDPOINTS } from 'trading-shared';
+import { getLeveragePairNames } from "@/models"
+import { userStore } from '@/stores/userStore'
 
 const accordion = ref([1, 2, 3, 4, 5, 6]); // Keeping all accordions open
 const rsiThresholdLower = ref(30);
@@ -99,12 +105,13 @@ const trendReversalEnabled = ref(false);
 const selectedPairsRsi = ref([]);
 const pairOptions = ref(['BTC/USD', 'ETH/USD', 'XRP/USD']); // Example pair options
 const notifications = ref([]);
+let fetchedPairs = null
 
 // Function to filter pairs in q-select
 const filterPairs = (val, update) => {
     update(() => {
         if (val === '') {
-            pairOptions.value = ['BTC/USD', 'ETH/USD', 'XRP/USD']; // Replace with actual fetching logic
+            pairOptions.value = fetchedPairs; // Replace with actual fetching logic
         } else {
             const needle = val.toLowerCase();
             pairOptions.value = pairOptions.value.filter(v => v.toLowerCase().indexOf(needle) > -1);
@@ -114,6 +121,9 @@ const filterPairs = (val, update) => {
 const selectAllPairs = () => {
     selectedPairsRsi.value = [...pairOptions.value];
 };
+const clearSelection = () => {
+    selectedPairsRsi.value = [];
+};
 
 
 
@@ -121,25 +131,94 @@ function addNotification(type, threshold, pairs) {
     const pairsText = Array.isArray(pairs) ? pairs.join(', ') : '';
     console.log("🚀 ~ file: alertsPanel.vue:119 ~ pairsText:", pairsText, typeof pairsText, selectedPairsRsi);
 
-    notifications.value.push({
-        ...RSINotifDescription,
-        type,
-        parameters: {
-            threshold,
-            pairs: pairsText
-        },
-        // preferences: { ... } // Set preferences as needed
-    });
+    pairs.forEach((pair) => {
+
+        console.log("🚀 ~ file: alertsPanel.vue:143 ~ pair:", pair);
+        notifications.value.push({
+            ...RSINotifDescription,
+            pairName: pair,
+            type,
+            parameters: {
+                threshold,
+            },
+            // preferences: { ... } // Set preferences as needed
+        });
+    })
+
 }
 
 function removeNotification(index) {
     notifications.value.splice(index, 1);
 }
 
-function saveNotifications() {
-    console.log("🚀 ~ file: alertsPanel.vue:133 ~ notifications.value:", notifications.value);
-    return
+async function fetchUserNotifications() {
+    const user = userStore().user;
+    const userUrl = `${PROJECT_URLS.CENTRALIZATION_URL}/${CENTRALIZATION_ENDPOINTS.USERS}/${user.id}`;
+
+    try {
+        const response = await fetch(userUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const userData = await response.json();
+        notifications.value = userData.notifications['RSI'] || [];
+        console.log("🚀 ~ file: alertsPanel.vue:165 ~ notifications.value:", notifications.value);
+    } catch (error) {
+        console.error("Error fetching user notifications:", error);
+    }
 }
+
+async function saveNotifications() {
+    const user = userStore().user;
+    const userFetchUrl = `${PROJECT_URLS.CENTRALIZATION_URL}/${CENTRALIZATION_ENDPOINTS.USERS}/${user.id}/`;
+
+    try {
+        // Fetch current user data
+        const userResponse = await fetch(userFetchUrl);
+        if (!userResponse.ok) {
+            throw new Error(`HTTP error! status: ${userResponse.status}`);
+        }
+        const userData = await userResponse.json();
+
+        // Merge existing notifications with new RSI notifications
+        const updatedNotifications = { ...userData.notifications };
+        updatedNotifications['RSI'] = JSON.stringify(notifications.value);
+        console.log("🚀 ~ file: alertsPanel.vue:185 ~ updatedNotifications:", updatedNotifications);
+
+        // Update user with merged notifications
+        const userUpdateUrl = userFetchUrl;
+        const updateResponse = await fetch(userUpdateUrl, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ notifications: updatedNotifications }),
+        });
+
+        if (!updateResponse.ok) {
+            throw new Error(`HTTP error! status: ${updateResponse.status}`);
+        }
+
+        const updatedUser = await updateResponse.json();
+        console.log("Updated user:", updatedUser);
+    } catch (error) {
+        console.error("Error updating user:", error);
+    }
+}
+
+const clearAllNotifications = async () => {
+    console.log("🚀 ~ file: alertsPanel.vue:199 ~ clearAllNotifications:", clearAllNotifications);
+    notifications.value = []
+}
+
+onMounted(async () => {
+    fetchedPairs = await getLeveragePairNames()
+    pairOptions.value = fetchedPairs
+    console.log("🚀 ~ file: alertsPanel.vue:184 ~ pairOptions.value:", pairOptions.value);
+    fetchUserNotifications()
+}
+);
+
 
 </script>
   
@@ -189,6 +268,13 @@ function saveNotifications() {
 .q-slider {
     display: flex;
     justify-content: center;
+}
+
+.notifications-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 20vh;
+    overflow-y: auto;
 }
 
 .notifications-list {

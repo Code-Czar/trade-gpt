@@ -3813,17 +3813,6 @@ tr46@~0.0.3:
   resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
   integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
 
-trading-shared@../Shared:
-  version "1.0.0"
-  dependencies:
-    "@influxdata/influxdb-client" "^1.33.2"
-    "@types/node" "^20.8.6"
-    dotenv "^16.3.1"
-    moment "^2.29.4"
-    technicalindicators "^3.1.0"
-    trading-shared "../Shared"
-    winston "^3.11.0"
-
 trading-shared@../Shared/:
   version "1.0.0"
   dependencies:
@@ -3832,7 +3821,6 @@ trading-shared@../Shared/:
     dotenv "^16.3.1"
     moment "^2.29.4"
     technicalindicators "^3.1.0"
-    trading-shared "../Shared"
     winston "^3.11.0"
 
 triple-beam@^1.3.0:

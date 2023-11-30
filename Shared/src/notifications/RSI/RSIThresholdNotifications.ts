@@ -21,11 +21,11 @@ interface NotificationDescription {
 
 export const RSINotifDescription: NotificationDescription = {
     type: "RSI_Low_Alert", // Can only be "RSI_Low_Alert" or "RSI_High_Alert"
+    preferences,
     parameters: {
         threshold: 30,
         pairs: ["BTC/USD", "ETH/USD"]
     },
-    preferences,
 };
 
 

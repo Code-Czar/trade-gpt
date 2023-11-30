@@ -32,6 +32,7 @@ interface SharedPreferences {
 }
 
 interface Preferences {
+    pairName: string;
     status: string;
     preferences: SharedPreferences;
 }
@@ -61,5 +62,6 @@ export const sharedPreferences: SharedPreferences = {
 // User preferences object
 export const preferences: Preferences = {
     status: "active",
+    pairName: '',
     preferences: { ...sharedPreferences }
 };

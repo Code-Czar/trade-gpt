@@ -44,6 +44,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { PROJECT_URLS, BACKEND_ENDPOINTS } from 'trading-shared';
+import { getLeveragePairsFromBackend } from '@/models';
 
 const leveragePairs = ref([]);
 const selected = ref([]);
@@ -83,12 +84,7 @@ const columns = [
 const timeframes = ['1d', '1h', '5m', '1m'];
 
 const getLeveragePairs = async () => {
-    const pairsResult = await fetch(PROJECT_URLS.BACKEND_URL + BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getLeverageSymbols);
-    const pairs = await pairsResult.json();
-    leveragePairs.value = pairs.map(pair => ({
-        ...pair,
-        timeframeSelection: timeframes.reduce((acc, tf) => ({ ...acc, [tf]: false }), {})
-    }));
+    leveragePairs.value = await getLeveragePairsFromBackend()
 };
 
 const getAllHistoricalData = async () => {
