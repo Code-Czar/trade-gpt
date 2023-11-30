@@ -1,6 +1,8 @@
 SHELL := /bin/bash
 NVM_DIR := $(HOME)/.nvm
 REQUIRED_NODE_VERSION := v18.0
+SHARED_LIB_NAME := trading-shared
+
 
 install_screen:
 	if ! command -v screen &>/dev/null; then \
@@ -40,6 +42,17 @@ install_apache_config:
 	sudo a2enmod rewrite
 
 	sudo systemctl reload apache2
+
+deploy_android:
+	cd SimpleFrontend && ./deployCordova.sh
+
+link_shared_lib:
+	# Link the shared library globally
+	cd Shared && yarn link
+	# Link the shared library in each project
+	cd trading-bot-backend && yarn link "$(SHARED_LIB_NAME)"
+	cd SimpleFrontend/desktop && yarn add --force ../../Shared
+	cd trading-bot-strategy-analyzer && yarn link "$(SHARED_LIB_NAME)"
 
 install_backend: install_node
 	cd trading-bot-backend && yarn install

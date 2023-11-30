@@ -14,6 +14,15 @@
                                 <q-btn flat label="Clear" @click.stop="clearSelection" />
                             </template>
                         </q-select>
+                        <div class="timeframe-selector">
+                            <q-select v-model="selectedTimeframes" :options="timeframeOptions" use-input
+                                input-debounce="300" multiple label="Select Timeframes" placeholder="Choose timeframes">
+                                <template v-slot:append>
+                                    <q-btn flat label="Select All" @click.stop="selectAllTimeframes" />
+                                    <q-btn flat label="Clear" @click.stop="clearTimeframeSelection" />
+                                </template>
+                            </q-select>
+                        </div>
                         <div class="q-mb-md sliders-container">
                             <div class="slider-container">
                                 Lower threshold :
@@ -35,9 +44,10 @@
                                 flat @click="clearAllNotifications"> Clear </q-btn>
                             <div class="notifications-container">
                                 <div v-for="(notif, index) in notifications" :key="index" class="notification-item">
-                                    {{ notif.type }} - Threshold: {{ notif.parameters?.threshold }} - Pairs: {{
+                                    <!-- {{ notif.type }} - Threshold: {{ notif.parameters.threshold }} - Pairs: {{
                                         notif.pairName
-                                    }}
+                                    }} -->
+                                    {{ notif.pairName }}
                                     <q-btn flat icon="remove" @click="removeNotification(index)" />
                                 </div>
                             </div>
@@ -105,6 +115,9 @@ const trendReversalEnabled = ref(false);
 const selectedPairsRsi = ref([]);
 const pairOptions = ref(['BTC/USD', 'ETH/USD', 'XRP/USD']); // Example pair options
 const notifications = ref([]);
+const selectedTimeframes = ref([]);
+const timeframeOptions = ref(['1d', '1h', '5m']);
+
 let fetchedPairs = null
 
 // Function to filter pairs in q-select
@@ -181,8 +194,17 @@ async function saveNotifications() {
         const userData = await userResponse.json();
 
         // Merge existing notifications with new RSI notifications
-        const updatedNotifications = { ...userData.notifications };
-        updatedNotifications['RSI'] = JSON.stringify(notifications.value);
+        const updatedNotifications = {
+            ...userData.notifications
+        };
+        updatedNotifications['RSI'] = notifications.value.map((notification) => {
+            return {
+                [notification.pairName]: {
+                    notification,
+                    userID: userStore().user.id
+                }
+            }
+        });
         console.log("🚀 ~ file: alertsPanel.vue:185 ~ updatedNotifications:", updatedNotifications);
 
         // Update user with merged notifications
@@ -205,6 +227,13 @@ async function saveNotifications() {
         console.error("Error updating user:", error);
     }
 }
+const selectAllTimeframes = () => {
+    selectedTimeframes.value = [...timeframeOptions.value];
+};
+
+const clearTimeframeSelection = () => {
+    selectedTimeframes.value = [];
+};
 
 const clearAllNotifications = async () => {
     console.log("🚀 ~ file: alertsPanel.vue:199 ~ clearAllNotifications:", clearAllNotifications);
@@ -215,7 +244,7 @@ onMounted(async () => {
     fetchedPairs = await getLeveragePairNames()
     pairOptions.value = fetchedPairs
     console.log("🚀 ~ file: alertsPanel.vue:184 ~ pairOptions.value:", pairOptions.value);
-    fetchUserNotifications()
+    // await fetchUserNotifications()
 }
 );
 
@@ -289,5 +318,9 @@ onMounted(async () => {
     background: #f5f5f5;
     padding: 0.5rem;
     border-radius: 4px;
+}
+
+.timeframe-selector {
+    margin-top: 1rem;
 }
 </style>

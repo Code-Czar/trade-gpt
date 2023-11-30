@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "yarn build; pm2 start ./dist/backend-server.js --no-daemon",
+    "start": "yarn prebuild; pm2 start ./dist/backend-server.js --no-daemon",
     "dev": "nodemon",
-    "prebuild": "rm -rf ./dist/*; yarn install; copyfiles -u 1 src/**/*.json dist/",
-    "build": " tsc src/*.ts --outDir ./dist",
+    "prebuild": "cd ../Shared && yarn build && cd -; rm -rf ./dist/*; yarn install; copyfiles -u 1 src/**/*.json dist/",
+    "build": "tsc src/*.ts --outDir ./dist",
     "test": "mocha -r ts-node/register -r tsconfig-paths/register 'src/**/*.test.ts'"
   },
   "keywords": [],
@@ -53,7 +53,6 @@
     "onesignal-node": "^3.4.0",
     "p-limit": "^4.0.0",
     "technicalindicators": "^3.1.0",
-    "trading-shared": "../Shared/",
     "util": "^0.12.5",
     "websocket": "^1.0.34",
     "ws": "^8.14.2"

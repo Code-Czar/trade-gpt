@@ -19,8 +19,8 @@
     "@influxdata/influxdb-client": "^1.33.2",
     "@types/node": "^20.8.6",
     "dotenv": "^16.3.1",
+    "loglevel": "^1.8.1",
     "moment": "^2.29.4",
-    "technicalindicators": "^3.1.0",
-    "winston": "^3.11.0"
+    "technicalindicators": "^3.1.0"
   }
 }

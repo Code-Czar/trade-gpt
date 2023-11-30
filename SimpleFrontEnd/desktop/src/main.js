@@ -4,6 +4,10 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import OneSignalVue from 'onesignal-vue'
 
+if (typeof process === 'undefined') {
+    global.process = { env: {} };
+}
+
 const app = createApp(App)
 console.log("🚀 ~ file: main.ts:8 ~ app:", app)
 // const app = new Vue({
@@ -16,7 +20,8 @@ console.log("🚀 ~ file: main.ts:8 ~ app:", app)
 // Install the Vue plugin
 const ONE_SIGNAL_APP_ID = '96d52203-d7fa-4174-a9c9-85a0fb84afc7';
 
-app.$oneSignal.setup(process.env.ONESIGNAL_APP_ID)
+// app.$oneSignal.setup(process.env.ONESIGNAL_APP_ID)
+app.$oneSignal.setup(ONE_SIGNAL_APP_ID)
 app.use(OneSignalVue, { appId: ONE_SIGNAL_APP_ID })
 
 

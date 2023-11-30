@@ -1,6 +1,13 @@
-// vite.config.js
 export default {
-    define: {
-        __dirname: JSON.stringify('/')
+    build: {
+
+        define: {
+            // Mock the entire 'process' object
+            'process': JSON.stringify({
+                env: {},
+                versions: { node: false },
+                platform: ''
+            }),
+        }
     }
-}
+};

@@ -89,6 +89,18 @@ module.exports = configure(function (/* ctx */) {
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
+      vite: {
+        optimizeDeps: {
+          exclude: ['winston'] // Add Node.js-specific modules here
+        },
+        build: {
+          sourcemap: true,
+
+          // other build options...
+        },
+
+        // other Vite options...
+      },
 
       vitePlugins: [
         ['@intlify/vite-plugin-vue-i18n', {
