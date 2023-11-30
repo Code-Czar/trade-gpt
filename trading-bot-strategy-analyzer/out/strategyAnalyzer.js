@@ -298,7 +298,7 @@ function openLongPosition(symbol, price) {
                     position = JSON.stringify({
                         symbol: symbol,
                         buyPrice: price,
-                        quantity: positionUSDTAmount,
+                        quantity: positionUSDTAmount, // TODO: adjust the quantity based on your strategy
                         type: 'long' // this is a long position
                     });
                     _a.label = 1;
@@ -335,7 +335,7 @@ function openShortPosition(symbol, price) {
                     position = JSON.stringify({
                         symbol: symbol,
                         sellPrice: price,
-                        quantity: positionUSDTAmount,
+                        quantity: positionUSDTAmount, // TODO: adjust the quantity based on your strategy
                         type: 'short' // this is a short position
                     });
                     _a.label = 1;
