@@ -47,6 +47,7 @@ onMounted(() => {
                 // You can access specific details like this:
                 console.log("User name:", user.user_metadata.name); // Example for name
                 console.log("User avatar UUID:", user.user_metadata.avatar_url); // Example for avatar URL
+                console.log("🚀 ~ file: CallbackComponent.vue:55 ~ user:", user);
 
                 // Redirect to the desired page
                 router.push('/app');

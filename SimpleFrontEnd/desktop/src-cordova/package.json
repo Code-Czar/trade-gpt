@@ -1,5 +1,5 @@
 {
-  "name": "org.cordova.quasar.app",
+  "name": "opportunitie.app",
   "displayName": "Opportunities",
   "version": "1.0.0",
   "description": "Opportunities mobile App",
@@ -13,7 +13,9 @@
   "author": "Benjamin Tourrette",
   "license": "Apache-2.0",
   "devDependencies": {
-    "cordova-android": "^12.0.1"
+    "cordova-android": "^12.0.1",
+    "cordova-find-config": "^0.1.2",
+    "cordova-plugin-customurlscheme": "^5.0.2"
   },
   "cordova": {
     "platforms": [
@@ -21,7 +23,13 @@
     ],
     "plugins": {
       "onesignal-cordova-plugin": {},
-      "cordova-plugin-exclude-files": {}
+      "cordova-plugin-exclude-files": {},
+      "cordova-plugin-customurlscheme": {
+        "URL_SCHEME": "opportunities",
+        "ANDROID_SCHEME": " ",
+        "ANDROID_HOST": " ",
+        "ANDROID_PATHPREFIX": "/"
+      }
     }
   },
   "dependencies": {

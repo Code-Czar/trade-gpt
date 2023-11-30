@@ -35,7 +35,8 @@
 
 
 <script lang="ts" setup>
-import { ref, defineProps, defineEmits } from 'vue';
+import { Platform } from 'quasar';
+
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'vue-router';
 import { userStore } from '../stores/userStore';
@@ -49,16 +50,25 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 console.log("🚀 ~ file: LoginPage.vue:28 ~ supabase:", supabase)
 const router = useRouter();
 
+const mobileURLScheme = 'opportunities://app'
+
 const login = async (provider: 'google' | 'github') => {
+    // Determine the redirect URI based on the platform
+    let redirectUri = Platform.is.android ? mobileURLScheme : window.location.origin;
+
     const { user, session, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
+        options: {
+            redirectTo: redirectUri,
+        },
     });
 
     if (user) {
         // Redirect to index page after successful login
-        console.log("🚀 ~ file: LoginPage.vue:51 ~ session:", session);
-        console.log("🚀 ~ file: LoginPage.vue:53 ~ user:", user);
+        console.log("🚀 ~ session:", session);
+        console.log("🚀 ~ user:", user);
         await userStore.setUserCredentials(user, session);
+        // Optionally, navigate to a different route
         // router.push("/index");
     } else {
         console.error("Login error:", error?.message);
