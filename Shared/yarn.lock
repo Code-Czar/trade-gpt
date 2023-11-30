@@ -203,17 +203,6 @@ text-hex@1.0.x:
   resolved "https://registry.yarnpkg.com/text-hex/-/text-hex-1.0.0.tgz#69dc9c1b17446ee79a92bf5b884bb4b9127506f5"
   integrity sha512-uuVGNWzgJ4yhRaNSiubPY7OjISw4sw4E5Uv0wbjp+OzcbmVU/rsT8ujgcXJhn9ypzsgr5vlzpPqP+MBBKcGvbg==
 
-trading-shared@../Shared:
-  version "1.0.0"
-  dependencies:
-    "@influxdata/influxdb-client" "^1.33.2"
-    "@types/node" "^20.8.6"
-    dotenv "^16.3.1"
-    moment "^2.29.4"
-    technicalindicators "^3.1.0"
-    trading-shared "../Shared"
-    winston "^3.11.0"
-
 triple-beam@^1.3.0:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/triple-beam/-/triple-beam-1.4.1.tgz#6fde70271dc6e5d73ca0c3b24e2d92afb7441984"
