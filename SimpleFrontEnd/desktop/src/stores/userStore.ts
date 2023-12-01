@@ -11,6 +11,12 @@ export const userStore = defineStore('user', {
 
   },
   actions: {
+    initializeAuthListener() {
+      document.addEventListener('deviceready', this.onDeviceReady, false);
+    },
+    handleIncomingUrl(url) {
+      console.log("🚀 ~ file: userStore.ts:18 ~ url:", url);
+    },
     async setUserCredentials(user, session) {  // From backend structure
       console.log("🚀 ~ file: userStore.ts:14 ~ session:", session);
       console.log("🚀 ~ file: userStore.ts:14 ~ user:", user);

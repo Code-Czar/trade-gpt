@@ -50,7 +50,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 console.log("🚀 ~ file: LoginPage.vue:28 ~ supabase:", supabase)
 const router = useRouter();
 
-const mobileURLScheme = 'opportunities://app'
+const mobileURLScheme = 'opportunities://auth'
 
 const login = async (provider: 'google' | 'github') => {
     // Determine the redirect URI based on the platform
