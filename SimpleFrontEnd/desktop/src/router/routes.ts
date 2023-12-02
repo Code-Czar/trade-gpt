@@ -6,7 +6,8 @@ const routes = [
     component: () => import('layouts/PublicLayout.vue'),
     children: [
       { path: '', component: () => import('pages/IndexPage.vue') }
-    ]
+    ],
+    meta: { requiresAuth: false, roles: [] }
   },
   {
     path: '/login',
@@ -47,8 +48,9 @@ const routes = [
     meta: { requiresAuth: true, roles: ['Admin', 'VIP', 'Dev'] }
   },
   {
-    path: '/:access_token',
-    component: () => import('components/CallbackComponent.vue')
+    path: '/auth',
+    component: () => import('components/CallbackComponent.vue'),
+    meta: { requiresAuth: false, roles: [] }
 
   },
   {

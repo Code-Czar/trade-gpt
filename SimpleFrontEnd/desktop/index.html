@@ -38,13 +38,30 @@
     />
     <link rel="icon" type="image/ico" href="favicon.ico" />
     <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
+    
     <script>
-      function handleOpenURL(url) {
-        console.log("🚀 ~ file: index.html:43 ~ url:", url);
-       
-      }
-    </script>
-    <script src="cordova.js"></script>
+       function handleOpenURL(url) {
+         const replaced = url.replace('#', '?')
+         console.log("🚀 ~ file: index.html:44 ~ url:", url);
+         console.log("🚀 ~ file: index.html:45 ~ replaced:", replaced);
+
+        // Check if URL contains 'access_token'
+        // if (url.includes('access_token')) {
+        //     // Assuming the URL format is something like 'app#access_token=...&...'
+        //     // Extract the part after 'app#'
+        //     let strippedURL = url.split('app#')[1];
+        //     if (strippedURL) {
+        //         console.log("Stripped URL:", strippedURL);
+
+        //         // Navigate to the route that handles the access token
+        //         // Change '/callback' to the correct path in your app that handles the token
+                // window.location.replace('/#/?' + strippedURL);
+                window.location.replace(replaced);
+        //     }
+        // }
+    }
+    </script> 
+
     <!-- <script>
       // Add to index.js or the first page that loads with your app.
       document.addEventListener('deviceready', OneSignalInit, false);

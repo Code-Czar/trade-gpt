@@ -1,0 +1,57 @@
+# utils.exp
+
+proc execute_remote {root_user remote_ip remote_port root_password command_to_execute log_file_path} {
+    # Enable detailed debugging
+    exp_internal 1
+
+   spawn ssh -p $remote_port $root_user@$remote_ip
+    expect {
+        -re "assword:" {
+            send "$root_password\r"
+            exp_continue
+        }
+        -re "yes/no" {
+            send "yes\r"
+            exp_continue
+        }
+        -re {root@opportunities:~#} {  # Adjusted to match the server's prompt
+            send "$command_to_execute; echo '===COMMAND_END===' \r"
+        }
+    }
+
+    expect {
+        "===COMMAND_END===" {
+            set output $expect_out(buffer)
+            send_user "Executed command: $command_to_execute\n"
+            send_user "Command output:\n$output\n"
+        }
+        timeout {
+            send_user "Command timed out\n"
+        }
+    }
+
+    send "exit\r"
+    expect eof
+}
+
+
+
+
+
+
+
+
+# Function to execute rsync command
+proc rsync_folder {local_folder remote_user remote_ip remote_port remote_folder} {
+    global root_password  # Declare root_password as global
+    spawn rsync -arvz -e "ssh -p $remote_port" $local_folder/ $remote_user@$remote_ip:$remote_folder
+    expect {
+        "assword:" {
+            send "$root_password\r"
+            exp_continue
+        }
+        eof {
+            # Finished rsync
+        }
+    }
+}

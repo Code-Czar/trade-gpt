@@ -19,7 +19,7 @@ const store = userStore();
 
 onMounted(() => {
     console.log("🚀 ~ file: CallbackComponent.vue:19 ~ onMounted ~ window.location:", window.location)
-    const hashParams = new URLSearchParams(window.location.hash.split('/')[1]);
+    const hashParams = new URLSearchParams(window.location.hash.split('auth?')[1]);
     const accessToken = hashParams.get("access_token");
     const tokenType = hashParams.get("token_type");
     const expiresAt = hashParams.get("expires_at");

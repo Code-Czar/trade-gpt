@@ -2,6 +2,8 @@
 TESTNET_BYBIT="https://testnet.bybit.com"
 PROJECT_PATH="/Users/beniben/Domaines_De_Vie/Business/GPT_Trading"
 
+STAGING_IP="195.35.29.209"
+
 # Init
 # alias nvm="~/.nvm/nvm.sh"
 # nvm use 18.0
@@ -54,3 +56,7 @@ alias startFront="cd trading-bot-frontend; yarn start"
 alias startBack="cd trading-bot-backend; yarn start"
 alias startTelegraf="telegraf --config /usr/local/etc/telegraf.conf"
 alias startInfluxMac="brew services  restart influxdb"
+
+
+# Go to servers 
+alias gotoStaging="ssh -p2233 opDevUser@$STAGING_IP"
