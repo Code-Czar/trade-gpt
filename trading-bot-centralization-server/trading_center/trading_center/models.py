@@ -26,8 +26,8 @@ class User(models.Model):
     )
 
     stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
-    stripe_customer_details = models.JSONField(default=dict)
-    notifications = models.JSONField(default=list)
+    stripe_customer_details = models.JSONField(default=dict, blank=True, null=True)
+    notifications = models.JSONField(default=list, blank=True, null=True)
 
     def __str__(self):
         return str(self.id)
