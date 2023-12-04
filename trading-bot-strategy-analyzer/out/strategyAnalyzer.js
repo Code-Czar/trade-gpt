@@ -40,7 +40,7 @@ exports.analyzeData = exports.fetchRSIAndCheckThreshold = exports.checkRSIThresh
 var fetch = require('node-fetch');
 var email_1 = require("./notifiers/email");
 var notificationsSender_1 = require("./notifiers/notificationsSender");
-var shared_1 = require("shared");
+var trading_shared_1 = require("trading-shared");
 var positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 var RSIUpperThreshold = 51;
 var RSILowerThreshold = 50;
@@ -54,8 +54,8 @@ var fetchRSI = function (timeframes) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    symbolsUrl = shared_1.BACKEND_URLS.LEVERAGE_URLS.getLeverageSymbols;
-                    rsiBulkUrl = shared_1.BACKEND_URLS.RSI_URLS.getAllRSIValues;
+                    symbolsUrl = trading_shared_1.BACKEND_URLS.LEVERAGE_URLS.getLeverageSymbols;
+                    rsiBulkUrl = trading_shared_1.BACKEND_URLS.RSI_URLS.getAllRSIValues;
                     return [4 /*yield*/, fetch(symbolsUrl, {
                             method: 'GET',
                             headers: {

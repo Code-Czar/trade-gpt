@@ -51,7 +51,7 @@ link_shared_lib:
 	cd Shared && yarn link
 	# Link the shared library in each project
 	cd trading-bot-backend && yarn link "$(SHARED_LIB_NAME)"
-	cd SimpleFrontend/desktop && yarn add --force ../../Shared
+	cd SimpleFrontEnd/desktop && yarn add --force ../../Shared
 	cd trading-bot-strategy-analyzer && yarn link "$(SHARED_LIB_NAME)"
 
 install_backend: install_node
