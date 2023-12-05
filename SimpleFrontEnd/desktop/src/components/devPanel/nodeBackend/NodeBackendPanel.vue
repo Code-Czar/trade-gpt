@@ -43,7 +43,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { PROJECT_URLS, BACKEND_ENDPOINTS } from 'trading-shared';
+import { BACKEND_URLS } from 'trading-shared';
 import { getLeveragePairsFromBackend } from '@/models';
 
 const leveragePairs = ref([]);
@@ -103,7 +103,7 @@ const getHistoricalDataForPair = async (pairName) => {
 
                 // Fetch the data for this timeframe
                 try {
-                    const response = await fetch(PROJECT_URLS.BACKEND_URL + BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getHistoricalDataForPair, {
+                    const response = await fetch(BACKEND_URLS.LEVERAGE_URLS.getHistoricalDataForPair, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

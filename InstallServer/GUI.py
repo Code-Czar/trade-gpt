@@ -23,7 +23,8 @@ def worker():
     while True:
         script_name, args, interpreter = task_queue.get()
         try:
-            subprocess.run([interpreter, script_name] + args, check=True)
+            process = subprocess.Popen([interpreter, script_name] + args)
+
             tk.messagebox.showinfo(
                 "Success", f"Script {script_name} executed successfully!"
             )
@@ -48,15 +49,35 @@ def submit():
     remote_ip = ip_var.get()
     remote_port = entry_remote_port.get()
     root_password = entry_root_password.get()
-    normal_user = entry_normal_user.get()  # Get the normal user name
+    normal_user = entry_normal_user.get()
     op_dev_user_password = entry_op_dev_user_password.get()
+    domain_name = entry_domain_name.get()
     key_files = public_key_files.get()
     current_folder = entry_current_folder.get()
 
-    # execute_bash_script('initial_setup.sh', [
-    #     'root', remote_ip, remote_port, root_password,
-    #     op_dev_user_password, key_files, current_folder
-    # ], 'expect')
+    # Debugging: Print the arguments to be passed
+    print("Running 'copy_project.sh' with arguments:")
+    print(
+        f"root_user: root, normal_user: {normal_user}, remote_ip: {remote_ip}, remote_port: {remote_port}, "
+    )
+    print(
+        f"root_password: {root_password}, domain_name: {domain_name}, key_files: {key_files}, current_folder: {current_folder}"
+    )
+
+    # Execute scripts with domain name as an additional argument
+    execute_bash_script(
+        "initial_setup.sh",
+        [
+            "root",
+            remote_ip,
+            remote_port,
+            root_password,
+            op_dev_user_password,
+            key_files,
+            current_folder,
+        ],
+        "expect",
+    )
     execute_bash_script(
         "install_dependencies.sh",
         [
@@ -66,6 +87,34 @@ def submit():
             remote_port,
             root_password,
             op_dev_user_password,
+            key_files,
+            current_folder,
+        ],
+        "expect",
+    )
+    execute_bash_script(
+        "copy_project.sh",
+        [
+            "root",
+            normal_user,
+            remote_ip,
+            remote_port,
+            root_password,
+            domain_name,
+            key_files,
+            current_folder,
+        ],
+        "bash",
+    )
+    execute_bash_script(
+        "install_project.sh",
+        [
+            "root",
+            normal_user,
+            remote_ip,
+            remote_port,
+            root_password,
+            domain_name,
             key_files,
             current_folder,
         ],
@@ -86,6 +135,7 @@ ip_var = tk.StringVar(value=list(config.values())[0])  # Set the first value as 
 ip_dropdown = tk.OptionMenu(frame, ip_var, *config.values())
 tk.Label(frame, text="Select IP:").grid(row=0, column=0, sticky="w")
 ip_dropdown.grid(row=0, column=1)
+
 
 # Fields for remote port
 entry_remote_port = tk.Entry(frame)
@@ -114,16 +164,23 @@ entry_current_folder = tk.Entry(frame)
 entry_current_folder.grid(row=5, column=1)
 tk.Label(frame, text="Current Folder:").grid(row=5, column=0, sticky="w")
 
+# Field for domain name
+entry_domain_name = tk.Entry(frame)
+entry_domain_name.insert(0, "infinite-opportunities.pro")
+entry_domain_name.grid(row=6, column=1)
+tk.Label(frame, text="Domain Name:").grid(row=6, column=0, sticky="w")
+
 # Button for selecting public key files
 public_key_files = tk.StringVar()
 btn_select_keys = tk.Button(
     frame, text="Select Public Key Files", command=select_public_key_files
 )
-btn_select_keys.grid(row=6, column=0, columnspan=2)
+btn_select_keys.grid(row=7, column=0, columnspan=2)
+
 
 # Submit button
 submit_button = tk.Button(frame, text="Submit", command=submit)
-submit_button.grid(row=7, column=0, columnspan=2)
+submit_button.grid(row=8, column=0, columnspan=2)
 
 # Start the worker thread
 threading.Thread(target=worker, daemon=True).start()

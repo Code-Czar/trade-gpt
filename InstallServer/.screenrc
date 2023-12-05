@@ -1,0 +1,8 @@
+# Set the tab titles format
+hardstatus on
+hardstatus alwayslastline
+hardstatus string "%{= KW}%-Lw%{= KW}%50>%n%f* %t%{= KW}%+Lw%< %{= kG}%-= %{-}"
+
+# Enable tabbed windows
+caption always
+caption string "%{= kG}[ %H ]"

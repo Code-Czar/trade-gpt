@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { PROJECT_URLS, CENTRALIZATION_ENDPOINTS } from 'trading-shared';
+import { CENTRALIZATION_API_URLS } from 'trading-shared';
 
 export const userStore = defineStore('user', {
   state: () => ({
@@ -23,8 +23,7 @@ export const userStore = defineStore('user', {
     async pushUserToBackend(user) {
       try {
         // Check if user exists
-        console.log("🚀 ~ file: userStore.ts:26 ~ CENTRALIZATION_ENDPOINTS:", CENTRALIZATION_ENDPOINTS, PROJECT_URLS);
-        const checkResponse = await fetch(`${PROJECT_URLS.CENTRALIZATION_URL}${CENTRALIZATION_ENDPOINTS.USERS}/${user.id}`, {
+        const checkResponse = await fetch(`${CENTRALIZATION_API_URLS.USERS}/${user.id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -39,7 +38,7 @@ export const userStore = defineStore('user', {
         }
 
         // POST or PATCH request based on user existence
-        const response = await fetch(`${PROJECT_URLS.CENTRALIZATION_URL}${CENTRALIZATION_ENDPOINTS.USERS}${method === 'PATCH' ? '/' + user.id + '/' : '/'}`, {
+        const response = await fetch(`${CENTRALIZATION_API_URLS.USERS}${method === 'PATCH' ? '/' + user.id + '/' : '/'}`, {
           method: method,
           headers: {
             'Content-Type': 'application/json',

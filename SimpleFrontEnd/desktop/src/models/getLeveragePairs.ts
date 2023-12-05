@@ -1,11 +1,11 @@
-import { PROJECT_URLS, BACKEND_ENDPOINTS } from 'trading-shared';
+import { BACKEND_URLS } from 'trading-shared';
 
 const timeframes = ['1d', '1h', '5m', '1m'];
 
 
 export const getLeveragePairsFromBackend = async () => {
     let leveragePairs = []
-    const pairsResult = await fetch(PROJECT_URLS.BACKEND_URL + BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getLeverageSymbols);
+    const pairsResult = await fetch(BACKEND_URLS.LEVERAGE_URLS.getLeverageSymbols);
     const pairs = await pairsResult.json();
     leveragePairs = pairs.map(pair => ({
         ...pair,

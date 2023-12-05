@@ -101,7 +101,7 @@
   
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
-import { RSINotifDescription, PROJECT_URLS, CENTRALIZATION_ENDPOINTS } from 'trading-shared';
+import { RSINotifDescription, CENTRALIZATION_API_URLS } from 'trading-shared';
 import { getLeveragePairNames } from "@/models"
 import { userStore } from '@/stores/userStore'
 
@@ -166,7 +166,7 @@ function removeNotification(index) {
 
 async function fetchUserNotifications() {
     const user = userStore().user;
-    const userUrl = `${PROJECT_URLS.CENTRALIZATION_URL}/${CENTRALIZATION_ENDPOINTS.USERS}/${user.id}`;
+    const userUrl = `${CENTRALIZATION_API_URLS.USERS}/${user.id}`;
 
     try {
         const response = await fetch(userUrl);
@@ -183,7 +183,7 @@ async function fetchUserNotifications() {
 
 async function saveNotifications() {
     const user = userStore().user;
-    const userFetchUrl = `${PROJECT_URLS.CENTRALIZATION_URL}/${CENTRALIZATION_ENDPOINTS.USERS}/${user.id}/`;
+    const userFetchUrl = `${CENTRALIZATION_API_URLS.USERS}/${user.id}/`;
 
     try {
         // Fetch current user data

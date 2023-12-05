@@ -54,7 +54,7 @@ link_shared_lib:
 	cd SimpleFrontEnd/desktop && yarn add --force ../../Shared
 	cd trading-bot-strategy-analyzer && yarn link "$(SHARED_LIB_NAME)"
 
-install_backend: install_node
+install_backend: install_node link_shared_lib
 	cd trading-bot-backend && yarn install
 
 install_frontend: install_backend
@@ -73,3 +73,9 @@ install_centralization_server: install_strategy_analyzer
 	pip install -r requirements.txt
 
 install: install_centralization_server install_ssl install_apache_config
+
+deploy_staging:
+	./deployToServer.sh staging
+
+deploy_production:
+	./deployToServer.sh production

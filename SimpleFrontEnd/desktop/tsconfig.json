@@ -4,10 +4,12 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "src/*"
+        "src/*",
+        "dist/*",
       ],
       "trading-shared": [
-        "../../Shared/src/index"
+        "../../Shared/src/index",
+        "../../Shared/dist/index",
       ]
     },
   }

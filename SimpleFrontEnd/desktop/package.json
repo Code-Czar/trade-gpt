@@ -12,7 +12,7 @@
     "test": "echo \"No test specified\" && exit 0",
     "clearViteCache": "rm -rf node_modules/vite/node_modules",
     "dev": "yarn clearViteCache && quasar dev",
-    "prebuild": "cd ../../Shared && yarn build && cd - && yarn install; yarn linkShared",
+    "prebuild": "yarn install",
     "build": "quasar build"
   },
   "dependencies": {

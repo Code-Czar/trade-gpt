@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BACKEND_URLS = exports.STRATEGY_ANALYZER_URLS = exports.CENTRALIZATION_ENDPOINTS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = void 0;
+exports.STRATEGY_ANALYZER_URLS = exports.CENTRALIZATION_API_URLS = exports.CENTRALIZATION_ENDPOINTS = exports.BACKEND_URLS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = void 0;
 const config_json_1 = __importDefault(require("./config.json"));
 let REMOTE_URL;
 let REMOTE_WSS_URL;
@@ -22,7 +22,6 @@ else {
     REMOTE_URL = config_json_1.default.REMOTE_URL;
     REMOTE_WSS_URL = config_json_1.default.REMOTE_WSS;
 }
-// ... rest of the code remains unchanged
 console.log("🚀 ~ file: projectURLs.ts:19 ~ config:", config_json_1.default, REMOTE_URL);
 exports.SERVER_PORTS = {
     BACKEND_PORT: 3000,
@@ -46,6 +45,17 @@ exports.BACKEND_ENDPOINTS = {
         getAllRSIValues: '/api/rsi/getValues',
     }
 };
+exports.BACKEND_URLS = {
+    ROOT: exports.PROJECT_URLS.BACKEND_URL,
+    WEBSOCKET: exports.PROJECT_URLS.BACKEND_WEBSOCKET,
+    LEVERAGE_URLS: {
+        getLeverageSymbols: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getLeverageSymbols,
+        getHistoricalDataForPair: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getHistoricalDataForPair,
+    },
+    RSI_URLS: {
+        getAllRSIValues: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.RSI_ENDPOINTS.getAllRSIValues,
+    },
+};
 exports.CENTRALIZATION_ENDPOINTS = {
     USERS: '/users',
     STRIPE_CONFIG: '/config',
@@ -53,21 +63,17 @@ exports.CENTRALIZATION_ENDPOINTS = {
     STRIPE_CREATE_CUSTOMER: '/create-customer',
     STRIPE_CHECKOUT_SESSION: '/create_checkout_session'
 };
+exports.CENTRALIZATION_API_URLS = {
+    USERS: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.USERS,
+    STRIPE_CONFIG: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.STRIPE_CONFIG,
+    STRIPE_PAYMENT_ATTEMPT: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.STRIPE_PAYMENT_ATTEMPT,
+    STRIPE_CREATE_CUSTOMER: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.STRIPE_CREATE_CUSTOMER,
+    STRIPE_CHECKOUT_SESSION: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.STRIPE_CHECKOUT_SESSION
+};
 exports.STRATEGY_ANALYZER_URLS = {
     SIGNALS: {
         getEMA28Signals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals',
         getRSISignals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getRSISignals',
     }
 };
-exports.BACKEND_URLS = {
-    ROOT: exports.PROJECT_URLS.BACKEND_URL,
-    WEBSOCKET: exports.PROJECT_URLS.BACKEND_WEBSOCKET,
-    LEVERAGE_URLS: {
-        getLeverageSymbols: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getLeverageSymbols,
-    },
-    RSI_URLS: {
-        getAllRSIValues: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.RSI_ENDPOINTS.getAllRSIValues,
-    },
-};
-// export default { PROJECT_URLS }
 //# sourceMappingURL=projectURLs.js.map

@@ -60,8 +60,7 @@ import {
     indicators,
     formatOHLCVForChartData,
     STRATEGY_ANALYZER_URLS,
-    PROJECT_URLS,
-    BACKEND_URLS,
+
 } from 'trading-shared';
 import { createChart, CrosshairMode } from 'lightweight-charts';
 import { dataStore } from '@/stores/example-store';
@@ -227,12 +226,7 @@ const drawTrendLines = (peaks, troughs) => {
 };
 
 const addEMASignals = async (formattedData, ema28Data, period = 28) => {
-    console.log(
-        '🚀 ~ file: TradingChart.vue:187 ~ addEMASignals ~ STRATEGY_ANALYZER_URLS:',
-        PROJECT_URLS,
-        BACKEND_URLS,
-        STRATEGY_ANALYZER_URLS
-    );
+
     const result = await fetch(
         `${STRATEGY_ANALYZER_URLS.SIGNALS.getEMA28Signals}/${currentSymbolPair.details.name}`
     ); // computeEMASignals(formattedData, ema28Data, period);
