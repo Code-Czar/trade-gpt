@@ -19,7 +19,7 @@ const store = userStore();
 
 onMounted(() => {
     console.log("🚀 ~ file: CallbackComponent.vue:19 ~ onMounted ~ window.location:", window.location)
-    const hashParams = new URLSearchParams(window.location.hash.split('auth?')[1]);
+    const hashParams = new URLSearchParams(window.location.hash.split('auth#')[1]);
     const accessToken = hashParams.get("access_token");
     const tokenType = hashParams.get("token_type");
     const expiresAt = hashParams.get("expires_at");
@@ -60,7 +60,7 @@ onMounted(() => {
 
         // router.push('/app');  // Redirect to the desired page
     } else {
-        console.error("No access token found in the callback URL.");
+        console.error("No access token found in the callback URL.", hashParams);
         // Handle this case as needed, possibly redirecting to an error page
     }
 });

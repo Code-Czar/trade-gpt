@@ -58,4 +58,13 @@ execute_remote $normal_user $remote_ip $remote_port $root_password "nvm alias de
 # Assuming a Makefile exists in the project root with an install target
 execute_remote $normal_user $remote_ip $remote_port $root_password "cd $project_folder && make install" $log_file
 
+execute_remote $root_user $remote_ip $remote_port $root_password "cp $project_folder/trading-bot-centralization-server/apache/centralization-server.conf /etc/apache2/sites-available/" $log_file
+execute_remote $root_user $remote_ip $remote_port $root_password "cp $project_folder/trading-bot-centralization-server/apache/apache_ports.conf /etc/apache2/ports.conf" $log_file
+# execute_remote $root_user $remote_ip $remote_port $root_password "cp $project_folder/trading-bot-backend/apache/backend-server-apache.conf /etc/apache2/sites-available" $log_file
+execute_remote $root_user $remote_ip $remote_port $root_password "cp $project_folder/SimpleFrontEnd/desktop/apache/infinite-opportunities.pro.conf /etc/apache2/sites-available" $log_file
+execute_remote $root_user $remote_ip $remote_port $root_password "sudo a2ensite centralization-server.conf" $log_file
+execute_remote $root_user $remote_ip $remote_port $root_password "systemctl restart apache2" $log_file
+execute_remote $normal_user $remote_ip $remote_port $root_password "cd $project_folder/trading-bot-centralization-server/trading-center && python manage.py collectstatic" $log_file
+
+
 puts "Project setup completed."

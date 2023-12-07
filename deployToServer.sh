@@ -21,5 +21,8 @@ normal_user='opDevUser'
 local_folder='.' # Adjust this to the correct local folder path
 project_folder='/var/www/trading-gpt'
 
+# Build
+cd Shared; yarn build;  cd - ; make  link_shared_lib;  cd SimpleFrontEnd/desktop; yarn build; cd -
+
 # Rsync command
-rsync -arvvvti -e "ssh -p $remote_port" "$local_folder" "${normal_user}@${IP}:${project_folder}"
+rsync -arvvvti --exclude 'env/' -e "ssh -p $remote_port" "$local_folder" "${normal_user}@${IP}:${project_folder}"

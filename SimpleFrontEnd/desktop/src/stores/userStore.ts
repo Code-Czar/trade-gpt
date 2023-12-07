@@ -23,7 +23,7 @@ export const userStore = defineStore('user', {
     async pushUserToBackend(user) {
       try {
         // Check if user exists
-        const checkResponse = await fetch(`${CENTRALIZATION_API_URLS.USERS}/${user.id}`, {
+        const checkResponse = await fetch(`http://${CENTRALIZATION_API_URLS.USERS}/${user.id}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

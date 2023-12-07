@@ -8,10 +8,12 @@ session="trading_bot"
 # Start new tmux session
 tmux new-session -d -s $session
 
-# Create a 2x2 grid layout
+# Create a 2x2 grid layout of panes
 tmux split-window -t $session -h
 tmux split-window -t $session -v
-tmux select-pane -t $session.1
+tmux select-pane -t $session.0
+tmux split-window -t $session -v
+tmux select-pane -t $session.2
 tmux split-window -t $session -v
 
 # List of trading bot components with commands to run and their corresponding names
@@ -25,10 +27,19 @@ do
     # Define the component name
     component_name="${component_names[$pane_index]}"
     
-    # Send the component name and command to start to each pane
-    tmux send-keys -t $session.$((pane_index * 2 + 1)) "cd $component && clear" C-m
-    tmux send-keys -t $session.$((pane_index * 2 + 1)) "echo '$component_name'" C-m
-    tmux send-keys -t $session.$((pane_index * 2 + 1)) "yarn start" C-m
+    # Set the pane title
+    tmux select-pane -t $session.$pane_index
+    tmux rename-window "$component_name"
+    
+    # Check if the component is the centralization server
+    if [ "$component" == "trading-bot-centralization-server" ]; then
+        # Start the centralization server with its specific commands
+        tmux send-keys -t $session.$pane_index "cd $component/trading_center && source env/bin/activate && python manage.py runserver" C-m
+    else
+        # Start other components with 'yarn start'
+        tmux send-keys -t $session.$pane_index "cd $component && clear" C-m
+        tmux send-keys -t $session.$pane_index "yarn start" C-m
+    fi
     ((pane_index++))
 done
 

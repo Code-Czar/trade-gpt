@@ -57,10 +57,7 @@ link_shared_lib:
 install_backend: install_node link_shared_lib
 	cd trading-bot-backend && yarn install
 
-install_frontend: install_backend
-	cd trading-bot-frontend && yarn install
-
-install_position_manager: install_frontend
+install_position_manager:
 	cd trading-bot-position-manager && yarn install
 
 install_strategy_analyzer: install_position_manager

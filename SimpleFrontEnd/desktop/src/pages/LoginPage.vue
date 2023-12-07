@@ -54,7 +54,9 @@ const mobileURLScheme = 'opportunities://auth'
 
 const login = async (provider: 'google' | 'github') => {
     // Determine the redirect URI based on the platform
-    let redirectUri = Platform.is.android ? mobileURLScheme : window.location.origin + '/auth';
+    let redirectUri = Platform.is.android ? mobileURLScheme : window.location.origin + '#/auth';
+    // let redirectUri = window.location.origin + '/auth';
+
 
     const { user, session, error } = await supabase.auth.signInWithOAuth({
         provider: provider,
