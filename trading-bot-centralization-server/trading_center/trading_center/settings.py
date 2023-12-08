@@ -29,7 +29,7 @@ ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_ALL_ORIGINS = True
 
 # SSL
-# SECURE_SSL_REDIRECT = True  # Redirect all HTTP traffic to HTTPS
+SECURE_SSL_REDIRECT = True  # Redirect all HTTP traffic to HTTPS
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # If behind a proxy
 SESSION_COOKIE_SECURE = True  # Send the session cookie only over HTTPS
 CSRF_COOKIE_SECURE = True  # Send the CSRF cookie only over HTTPS

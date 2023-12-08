@@ -1,9 +1,7 @@
-import { convertPairToDataArray, convertPointArrayToInfluxPoints } from 'trading-shared'
+import { apiConnector, convertPairToDataArray, convertPointArrayToInfluxPoints } from 'trading-shared'
 import { InfluxDB, Point } from '@influxdata/influxdb-client'
 import {
-
     extractRSIData,
-
 } from './helpers'
 
 const lodash = require('lodash')
@@ -57,14 +55,13 @@ export class InfluxDBWrapper {
             stop: now.toISOString(),
         }
         try {
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
+            const response = await apiConnector.post(endpoint,
+                JSON.stringify(body),
+                {
                     Authorization: `Token ${INFLUXDB_TOKEN}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(body),
-            })
+            )
 
             if (!response.ok) {
                 const errorData = await response.text()

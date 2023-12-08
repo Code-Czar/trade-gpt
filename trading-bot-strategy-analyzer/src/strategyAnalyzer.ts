@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 
 import { sendSignalEmail } from './notifiers/email';
 import { sendNotification } from './notifiers/notificationsSender';
-import { BACKEND_URLS } from 'trading-shared';
+import { apiConnector, BACKEND_URLS } from 'trading-shared';
 const positionManagerAPI = 'http://localhost:3003'; // adjust to your setup
 
 
@@ -18,25 +18,18 @@ export const fetchRSI = async (timeframes = ["1d", "1h", "5m"]) => {
     const symbolsUrl = BACKEND_URLS.LEVERAGE_URLS.getLeverageSymbols;
     const rsiBulkUrl = BACKEND_URLS.RSI_URLS.getAllRSIValues;
 
-    const symbolsResponse = await fetch(symbolsUrl, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-
-    });
-    const symbolsObjects = await symbolsResponse.json()
+    const symbolsResponse = await apiConnector.get(symbolsUrl);
+    const symbolsObjects = await symbolsResponse.data;
     // global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ symbolsObjects:", symbolsObjects)
     const symbols = symbolsObjects.map(pair => pair.name);
 
-    const rsiResponse = await fetch(rsiBulkUrl, {
-        method: 'POST',
-        headers: {
+    const rsiResponse = await apiConnector.post(rsiBulkUrl,
+        JSON.stringify({ symbols, timeframes }),
+        {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ symbols, timeframes })
-    });
-    const rsiValues = await rsiResponse.json();
+    );
+    const rsiValues = await rsiResponse.data;
     // global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ rsiResponse:", rsiValues)
     return { rsiValues, symbols, timeframes }
 }

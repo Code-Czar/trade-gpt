@@ -31,6 +31,7 @@
 import { ref, onMounted } from 'vue';
 // import fetch from 'node-fetch';
 import { BACKEND_URL } from '@/models';
+import { apiConnector } from 'trading-shared';
 
 const tab = ref('table');
 const healthData = ref(null);
@@ -38,11 +39,11 @@ const healthData = ref(null);
 const fetchHealthData = async () => {
     while (true) {
         try {
-            const response = await fetch(BACKEND_URL + `/health`);
+            const response = await apiConnector.get(BACKEND_URL + `/health`);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            healthData.value = await response.json();
+            healthData.value = await response.data;
         } catch (error) {
             console.error('Fetch error: ', error);
         }

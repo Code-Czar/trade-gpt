@@ -1,17 +1,17 @@
-import axios from 'axios';
+import { apiConnector } from 'trading-shared';
 import { BACKEND_URL } from './consts'
 
 
 export async function get_bybit_pairs_with_leverage(): Promise<BasicObject[]> {
     const url = `${BACKEND_URL}/api/symbols/leverage`;
-    const response = await fetch(url);
-    return response.json();
+    const response = await apiConnector.get(url);
+    return response.data;
 }
 
 export async function getBinanceHistoricalData(pair: string, interval: string, limit = 200): Promise<number[]> {
     const url = `${BACKEND_URL}/api/historical/${pair}/${interval}/${limit}`;
-    const response = await fetch(url);
-    return response.json();
+    const response = await apiConnector.get(url);
+    return response.data;
 }
 
 export async function calculate_rsi(pair: string, interval: string, period = 14): Promise<number> {
@@ -19,11 +19,11 @@ export async function calculate_rsi(pair: string, interval: string, period = 14)
     return calculate_rsi_from_prices(prices, period);
 }
 
-export async function calculate_rsi_bulk(symbols: string[], timeframes: string[]): Promise<any> {
-    const url = `${BACKEND_URL}/api/rsi/bulk`;
-    const response = await axios.post(url, { symbols, timeframes });
-    return response.data;
-}
+// export async function calculate_rsi_bulk(symbols: string[], timeframes: string[]): Promise<any> {
+//     const url = `${BACKEND_URL}/api/rsi/bulk`;
+//     const response = await axios.post(url, { symbols, timeframes });
+//     return response.data;
+// }
 
 export function calculate_rsi_from_prices(prices: number[], period = 14): number {
     if (prices.length < period + 1) {
@@ -62,5 +62,5 @@ export default {
     getBinanceHistoricalData,
     calculate_rsi,
     calculate_rsi_series,
-    calculate_rsi_bulk
+    // calculate_rsi_bulk
 }

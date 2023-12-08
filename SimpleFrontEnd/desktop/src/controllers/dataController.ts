@@ -1,7 +1,4 @@
-import axios from 'axios';
-// import fetch from 'node-fetch';
-
-
+import { apiConnector } from "trading-shared";
 import { RSIFetcher, BACKEND_URL } from "@/models"
 import { dataStore } from "@/stores/example-store";
 
@@ -92,8 +89,8 @@ export const fetchRSIAndOHLCV = async () => {
     fetching = true;
     getPairsDetails()
 
-    const result = await fetch(`${BACKEND_URL}/api/rsi/getValues`)
-    let data = (await result.json())
+    const result = await apiConnector.get(`${BACKEND_URL}/api/rsi/getValues`)
+    let data = (await result.data)
     console.log("🚀 ~ file: dataController.ts:91 ~ fetchRSIAndOHLCV ~ data:", data)
     dataStore().setAllPairs(data)
     data = null;
@@ -107,8 +104,8 @@ export const fetchLastRSI = async () => {
     fetching = true;
 
 
-    const result = await fetch(`${BACKEND_URL}/api/lastRsi/bulk`)
-    const data = (await result.json())
+    const result = await apiConnector.get(`${BACKEND_URL}/api/lastRsi/bulk`)
+    const data = (await result.data)
     console.log("🚀 ~ file: dataController.ts:91 ~ fetchRSIAndOHLCV ~ data:", data);
 
     fetching = false;
@@ -118,8 +115,8 @@ export const fetchLastRSI = async () => {
 
 export const fetchSymbolData = async (symbolName: string) => {
 
-    const result = await fetch(`${BACKEND_URL}/api/getSymbolValues/${symbolName}`)
-    const data = (await result.json())
+    const result = await apiConnector.get(`${BACKEND_URL}/api/getSymbolValues/${symbolName}`)
+    const data = (await result.data)
     return data
 };
 

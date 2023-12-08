@@ -60,6 +60,7 @@ import {
     indicators,
     formatOHLCVForChartData,
     STRATEGY_ANALYZER_URLS,
+    apiConnector
 
 } from 'trading-shared';
 import { createChart, CrosshairMode } from 'lightweight-charts';
@@ -227,10 +228,10 @@ const drawTrendLines = (peaks, troughs) => {
 
 const addEMASignals = async (formattedData, ema28Data, period = 28) => {
 
-    const result = await fetch(
+    const result = await apiConnector.get(
         `${STRATEGY_ANALYZER_URLS.SIGNALS.getEMA28Signals}/${currentSymbolPair.details.name}`
     ); // computeEMASignals(formattedData, ema28Data, period);
-    const emaSignals = (await result.json())[selectedTimeFrame.value]
+    const emaSignals = (await result.data)[selectedTimeFrame.value]
         .ema28signals;
     console.log(
         '🚀 ~ file: TradingChart.vue:187 ~ addEMASignals ~ emaSignals:',
@@ -1066,10 +1067,10 @@ const toggleMACD = () => {
 const toggleRSISignals = async () => {
     showRSISignals.value = !showRSISignals.value;
     if (showRSISignals.value) {
-        const response = await fetch(
+        const response = await apiConnector.get(
             `${STRATEGY_ANALYZER_URLS.SIGNALS.getRSISignals}/${currentSymbolPair.details.name}`
         );
-        const RSISignals = await response.json();
+        const RSISignals = await response.data;
         const RSISignalsTimeframe = RSISignals[selectedTimeFrame.value];
         console.log(
             '🚀 ~ file: TradingChart.vue:818 ~ toggleRSISignals ~ RSISignals:',

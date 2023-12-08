@@ -43,7 +43,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { BACKEND_URLS } from 'trading-shared';
+import { apiConnector, BACKEND_URLS } from 'trading-shared';
 import { getLeveragePairsFromBackend } from '@/models';
 
 const leveragePairs = ref([]);
@@ -103,21 +103,21 @@ const getHistoricalDataForPair = async (pairName) => {
 
                 // Fetch the data for this timeframe
                 try {
-                    const response = await fetch(BACKEND_URLS.LEVERAGE_URLS.getHistoricalDataForPair, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
+                    const response = await apiConnector.post(BACKEND_URLS.LEVERAGE_URLS.getHistoricalDataForPair,
+
+                        JSON.stringify({
                             pairSymbol: pairName,
                             timeframe: timeframe
-                        })
-                    });
+                        }),
+                        {
+                            'Content-Type': 'application/json',
+                        }
+                    );
 
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
                     }
-                    const data = await response.json();
+                    const data = await response.data;
                     console.log(`Data for ${pairName} at ${timeframe}:`, data);
                 } catch (error) {
                     console.error("Error fetching historical data:", error);

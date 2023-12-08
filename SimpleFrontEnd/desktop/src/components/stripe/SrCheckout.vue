@@ -10,7 +10,7 @@
 
 
 <script lang="ts" setup>
-import { CENTRALIZATION_API_URLS } from 'trading-shared'
+import { apiConnector, CENTRALIZATION_API_URLS } from 'trading-shared'
 import { userStore } from '@/stores/userStore'
 
 
@@ -21,10 +21,10 @@ const subscriptionProductID = "price_1OGcM6J5PV7GuigY8TduVpNv"
 
 
 async function getStripeConfig() {
-    const config = await fetch(`${CENTRALIZATION_API_URLS.STRIPE_CONFIG}`)
+    const config = await apiConnector.get(`${CENTRALIZATION_API_URLS.STRIPE_CONFIG}`)
 
 
-    return config.json()
+    return config.data
 }
 
 async function loadStripe() {
@@ -43,24 +43,24 @@ async function loadStripe() {
 
 async function redirectToCheckout(priceId = subscriptionProductID) {
     try {
-        const response = await fetch(`${CENTRALIZATION_API_URLS.STRIPE_CHECKOUT_SESSION}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
+        const response = await apiConnector.post(`${CENTRALIZATION_API_URLS.STRIPE_CHECKOUT_SESSION}/`,
+            JSON.stringify({
                 priceId,
+                // TODO: change URL
                 successURL: 'http://localhost:9000',
                 cancelURL: 'http://google.com',
                 email: userEmail
             }),
-        });
+            {
+                'Content-Type': 'application/json',
+            },
+        );
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const responseData = await response.json();  // Parse the JSON from the response
+        const responseData = await response.data;  // Parse the JSON from the response
         const sessionId = responseData.sessionId;    // Get the session ID
         console.log("🚀 ~ file: SrCheckout.vue:82 ~ sessionId:", sessionId);
 
@@ -73,29 +73,27 @@ async function redirectToCheckout(priceId = subscriptionProductID) {
 
 
 const handleSubscribe = async () => {
-    const customerResult = await fetch(`${CENTRALIZATION_API_URLS.STRIPE_CREATE_CUSTOMER}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+    const customerResult = await apiConnector.post(`${CENTRALIZATION_API_URLS.STRIPE_CREATE_CUSTOMER}/`,
+        JSON.stringify({
             email: userEmail,
         }),
-    })
-    const customerDetails = (await customerResult.json()).customer
+        {
+            'Content-Type': 'application/json',
+        },
+    )
+    const customerDetails = (await customerResult.data).customer
     const customerID = customerDetails.id
     console.log("🚀 ~ file: SrCheckout.vue:45 ~ customerResult:", customerDetails, customerID);
 
 
-    const subscriptionResult = await fetch(`${CENTRALIZATION_API_URLS.STRIPE_CREATE_CUSTOMER}/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+    const subscriptionResult = await apiConnector.post(`${CENTRALIZATION_API_URLS.STRIPE_CREATE_CUSTOMER}/`,
+        JSON.stringify({
             email: userEmail,
         }),
-    })
+        {
+            'Content-Type': 'application/json',
+        },
+    )
     await redirectToCheckout(subscriptionProductID)
 
 };

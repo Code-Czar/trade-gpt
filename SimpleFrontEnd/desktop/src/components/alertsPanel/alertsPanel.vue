@@ -101,7 +101,7 @@
   
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
-import { RSINotifDescription, CENTRALIZATION_API_URLS } from 'trading-shared';
+import { apiConnector, RSINotifDescription, CENTRALIZATION_API_URLS } from 'trading-shared';
 import { getLeveragePairNames } from "@/models"
 import { userStore } from '@/stores/userStore'
 
@@ -169,11 +169,11 @@ async function fetchUserNotifications() {
     const userUrl = `${CENTRALIZATION_API_URLS.USERS}/${user.id}`;
 
     try {
-        const response = await fetch(userUrl);
+        const response = await apiConnector.get(userUrl);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const userData = await response.json();
+        const userData = await response.data;
         notifications.value = userData.notifications['RSI'] || [];
         console.log("🚀 ~ file: alertsPanel.vue:165 ~ notifications.value:", notifications.value);
     } catch (error) {
@@ -187,11 +187,11 @@ async function saveNotifications() {
 
     try {
         // Fetch current user data
-        const userResponse = await fetch(userFetchUrl);
+        const userResponse = await apiConnector.get(userFetchUrl);
         if (!userResponse.ok) {
             throw new Error(`HTTP error! status: ${userResponse.status}`);
         }
-        const userData = await userResponse.json();
+        const userData = await userResponse.data;
 
         // Merge existing notifications with new RSI notifications
         const updatedNotifications = {
@@ -209,7 +209,7 @@ async function saveNotifications() {
 
         // Update user with merged notifications
         const userUpdateUrl = userFetchUrl;
-        const updateResponse = await fetch(userUpdateUrl, {
+        const updateResponse = await apiConnector.get(userUpdateUrl, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -221,7 +221,7 @@ async function saveNotifications() {
             throw new Error(`HTTP error! status: ${updateResponse.status}`);
         }
 
-        const updatedUser = await updateResponse.json();
+        const updatedUser = await updateResponse.data;
         console.log("Updated user:", updatedUser);
     } catch (error) {
         console.error("Error updating user:", error);

@@ -3,10 +3,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.STRATEGY_ANALYZER_URLS = exports.CENTRALIZATION_API_URLS = exports.CENTRALIZATION_ENDPOINTS = exports.BACKEND_URLS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = void 0;
+exports.STRATEGY_ANALYZER_URLS = exports.CENTRALIZATION_API_URLS = exports.CENTRALIZATION_ENDPOINTS = exports.BACKEND_URLS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = exports.REMOTE_WSS_URL = exports.REMOTE_URL = void 0;
 const config_json_1 = __importDefault(require("./config.json"));
-let REMOTE_URL;
-let REMOTE_WSS_URL;
 // Check if we are in a Node.js environment
 if (typeof process !== 'undefined' && process.versions && process.versions.node) {
     const fs = require('fs');
@@ -14,15 +12,15 @@ if (typeof process !== 'undefined' && process.versions && process.versions.node)
     const configPath = path.resolve(__dirname, 'config.json');
     const jsonData = fs.readFileSync(configPath, 'utf-8');
     const loadedConfig = JSON.parse(jsonData);
-    REMOTE_URL = loadedConfig.REMOTE_URL;
-    REMOTE_WSS_URL = loadedConfig.REMOTE_WSS;
+    exports.REMOTE_URL = loadedConfig.REMOTE_URL;
+    exports.REMOTE_WSS_URL = loadedConfig.REMOTE_WSS;
 }
 else {
     // In a browser environment, use the imported config
-    REMOTE_URL = config_json_1.default.REMOTE_URL;
-    REMOTE_WSS_URL = config_json_1.default.REMOTE_WSS;
+    exports.REMOTE_URL = config_json_1.default.REMOTE_URL;
+    exports.REMOTE_WSS_URL = config_json_1.default.REMOTE_WSS;
 }
-console.log("🚀 ~ file: projectURLs.ts:19 ~ config:", config_json_1.default, REMOTE_URL);
+console.log("🚀 ~ file: projectURLs.ts:19 ~ config:", config_json_1.default, exports.REMOTE_URL);
 exports.SERVER_PORTS = {
     BACKEND_PORT: 3000,
     STRATEGY_ANALYZER_PORT: 3002,
@@ -30,12 +28,15 @@ exports.SERVER_PORTS = {
     CENTRALIZATION_PORT: 8000,
 };
 exports.PROJECT_URLS = {
-    BACKEND_URL: REMOTE_URL + ':' + exports.SERVER_PORTS.BACKEND_PORT,
-    BACKEND_WEBSOCKET: REMOTE_WSS_URL + ':' + exports.SERVER_PORTS.BACKEND_PORT + '/ws',
-    STRATEGY_ANALYZER_URL: REMOTE_URL + ':' + exports.SERVER_PORTS.STRATEGY_ANALYZER_PORT,
-    POSITION_MANAGER_URL: REMOTE_URL + ':' + exports.SERVER_PORTS.POSITION_MANAGER_PORT,
-    CENTRALIZATION_URL: REMOTE_URL + ':' + exports.SERVER_PORTS.CENTRALIZATION_PORT,
+    BACKEND_URL: exports.REMOTE_URL + ':' + exports.SERVER_PORTS.BACKEND_PORT,
+    BACKEND_WEBSOCKET: exports.REMOTE_WSS_URL + ':' + exports.SERVER_PORTS.BACKEND_PORT + '/ws',
+    STRATEGY_ANALYZER_URL: exports.REMOTE_URL + ':' + exports.SERVER_PORTS.STRATEGY_ANALYZER_PORT,
+    POSITION_MANAGER_URL: exports.REMOTE_URL + ':' + exports.SERVER_PORTS.POSITION_MANAGER_PORT,
+    CENTRALIZATION_URL: 'centralization.' + exports.REMOTE_URL,
 };
+if (exports.REMOTE_URL.includes('127.0.0.1') || exports.REMOTE_URL.includes('localhost')) {
+    exports.PROJECT_URLS.CENTRALIZATION_URL = exports.REMOTE_URL + ":" + exports.SERVER_PORTS.CENTRALIZATION_PORT;
+}
 exports.BACKEND_ENDPOINTS = {
     LEVERAGE_ENDPOINTS: {
         getLeverageSymbols: '/api/symbols/leverage',

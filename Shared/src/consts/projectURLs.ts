@@ -1,7 +1,7 @@
 import config from './config.json';
 
-let REMOTE_URL: string;
-let REMOTE_WSS_URL: string;
+export let REMOTE_URL: string;
+export let REMOTE_WSS_URL: string;
 
 // Check if we are in a Node.js environment
 if (typeof process !== 'undefined' && process.versions && process.versions.node) {
@@ -35,8 +35,12 @@ export const PROJECT_URLS = {
     BACKEND_WEBSOCKET: REMOTE_WSS_URL + ':' + SERVER_PORTS.BACKEND_PORT + '/ws',
     STRATEGY_ANALYZER_URL: REMOTE_URL + ':' + SERVER_PORTS.STRATEGY_ANALYZER_PORT,
     POSITION_MANAGER_URL: REMOTE_URL + ':' + SERVER_PORTS.POSITION_MANAGER_PORT,
-    CENTRALIZATION_URL: REMOTE_URL + ':' + SERVER_PORTS.CENTRALIZATION_PORT,
+    CENTRALIZATION_URL: 'centralization.' + REMOTE_URL,
 };
+
+if (REMOTE_URL.includes('127.0.0.1') || REMOTE_URL.includes('localhost')) {
+    PROJECT_URLS.CENTRALIZATION_URL = REMOTE_URL + ":" + SERVER_PORTS.CENTRALIZATION_PORT
+}
 
 export const BACKEND_ENDPOINTS = {
     LEVERAGE_ENDPOINTS: {

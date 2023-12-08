@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { CENTRALIZATION_API_URLS } from 'trading-shared';
+import { apiConnector, CENTRALIZATION_API_URLS } from 'trading-shared';
 
 export const userStore = defineStore('user', {
   state: () => ({
@@ -23,36 +23,24 @@ export const userStore = defineStore('user', {
     async pushUserToBackend(user) {
       try {
         // Check if user exists
-        const checkResponse = await fetch(`http://${CENTRALIZATION_API_URLS.USERS}/${user.id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            // Include authorization headers if needed
-          }
-        });
+        const checkResponse = await apiConnector.get(`${CENTRALIZATION_API_URLS.USERS}/${user.id}`);
 
         let method = 'POST';
-        if (checkResponse.ok) {
+        if (checkResponse.status === 200) {
           // User exists, update the user
           method = 'PATCH';
         }
 
         // POST or PATCH request based on user existence
-        const response = await fetch(`${CENTRALIZATION_API_URLS.USERS}${method === 'PATCH' ? '/' + user.id + '/' : '/'}`, {
-          method: method,
-          headers: {
-            'Content-Type': 'application/json',
-            // Include authorization headers if needed
-          },
+        const response = await apiConnector.patch(`${CENTRALIZATION_API_URLS.USERS}${method === 'PATCH' ? '/' + user.id + '/' : '/'}`,
+          { id: user.id, details: user }
+        );
 
-          body: JSON.stringify({ id: user.id, details: user })
-        });
-
-        if (!response.ok) {
+        if (!response.status === 200) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data = await response.data.json();
         console.log("User data pushed to backend:", data);
         this.user = data;
         console.log("🚀 ~ file: userStore.ts:57 ~ this.user:", this.user);
