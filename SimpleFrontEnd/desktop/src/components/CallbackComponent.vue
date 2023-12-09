@@ -61,8 +61,18 @@ onMounted(() => {
                 console.log("User avatar UUID:", user.user_metadata.avatar_url); // Example for avatar URL
                 console.log("🚀 ~ file: CallbackComponent.vue:55 ~ user:", user);
 
-                // Redirect to the desired page
-                router.push('/app');
+
+                console.log("🚀 ~ file: CallbackComponent.vue:58 ~ store:", store.user, store.user.role);
+
+                if (store.user.role !== "Dev" || store.user.role !== "Admin") {
+                    router.push('/beta')
+                }
+                else {
+                    // Redirect to the desired page
+                    router.push('/app');
+
+                }
+
             }
         })
 

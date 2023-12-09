@@ -31,7 +31,7 @@ module.exports = configure(function (/* ctx */) {
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
       'i18n',
-      'pinia'
+      // 'pinia'
 
 
     ],
@@ -132,7 +132,22 @@ module.exports = configure(function (/* ctx */) {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
     framework: {
-      config: {},
+      config: {
+        // optional, set default locale and enable auto import
+        i18n: {
+          locale: 'en-US',
+          fallbackLocale: 'en-US',
+          import: 'all', // enable auto import
+          enableLegacy: true, // enable the `$q.i18n` syntax in older Quasar projects
+
+          // Define your languages here
+          locales: ['en-US', 'fr-FR'],
+          // Specify which Quasar components need to be translated
+          // You can skip this if you're not using the components in other languages
+          // You'll need to manually import them in that case
+          importTranslations: ['en-US', 'fr-FR']
+        }
+      },
 
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack

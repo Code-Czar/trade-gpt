@@ -1,19 +1,5 @@
 <template>
   <q-page class="home-page">
-    <!-- Top Menu -->
-    <q-header elevated class="bg-transparent" style="position:absolute; top:0;left:0">
-      <q-toolbar>
-        <q-btn flat round dense icon="menu" @click="toggleDrawer" />
-        <q-toolbar-title>
-          Opportunities
-        </q-toolbar-title>
-
-        <!-- New Login Button -->
-        <q-btn flat round dense icon="login" @click="goToLogin" />
-      </q-toolbar>
-    </q-header>
-
-
     <!-- Video Section -->
     <section class="video-section">
       <video id="videoBg2" autoplay loop muted playsinline width="250">
@@ -21,7 +7,7 @@
         Your browser does not support the video tag.
       </video>
       <div class="overlay-content">
-        <div class="text-h2">Headline</div>
+        <div class="text-h2">{{ $t('healineTitle') }}</div>
         <div class="text-subtitle1 q-my-md">Sub-Headline</div>
         <q-btn label="Call to Action" color="primary" @click="goToApp" />
       </div>
@@ -118,6 +104,10 @@ const toggleDrawer = () => {
 .home-page {
   display: flex;
   flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
 }
 
 .video-section {

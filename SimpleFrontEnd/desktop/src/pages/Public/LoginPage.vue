@@ -39,7 +39,7 @@ import { Platform } from 'quasar';
 
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'vue-router';
-import { userStore } from '../stores/userStore';
+import { userStore } from '@/stores/userStore';
 console.log("🚀 ~ file: LoginPage.vue:42 ~ userStore:", userStore);
 
 

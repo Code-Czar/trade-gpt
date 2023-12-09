@@ -9,6 +9,7 @@ class User(models.Model):
     ROLE_CHOICES = [
         ("Admin", "Admin"),
         ("Dev", "Developer"),
+        ("BetaTester", "BetaTester"),
         ("User", "User"),
     ]
 
@@ -20,7 +21,7 @@ class User(models.Model):
 
     id = models.UUIDField(primary_key=True, editable=False)
     details = models.JSONField()  # Updated to use the standard JSONField
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="User")
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="BetaTester")
     permission_level = models.CharField(
         max_length=10, choices=PERMISSION_CHOICES, default="Basic"
     )

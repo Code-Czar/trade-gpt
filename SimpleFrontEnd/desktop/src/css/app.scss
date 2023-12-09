@@ -1,1 +1,18 @@
-// app global css in SCSS form
+// src/styles/global.scss
+
+@import './divs.scss';
+
+$primary-color: #3498db;
+
+body {
+  background-color: $primary-color;
+}
+
+.q-page-container{
+  height:100vh; 
+  width:100vw;
+}
+
+.q-layout{
+   // background-color: red !important;
+}
