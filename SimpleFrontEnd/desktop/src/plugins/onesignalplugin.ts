@@ -5,8 +5,8 @@ console.log('THIS', this)
 export default ({ app, router, store, Vue }) => {
     console.log("🚀 ~ file: onesignalplugin.ts:5 ~ app:", app)
     // something to do
-    // app.use(OneSignalVuePlugin, {
-    //     appId: APP_ID,
-    // })
+    app.use(OneSignalVuePlugin, {
+        appId: APP_ID,
+    })
 
 }
