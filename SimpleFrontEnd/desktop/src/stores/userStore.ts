@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia';
 import { apiConnector, CENTRALIZATION_API_URLS } from 'trading-shared';
+import { LocalStorage } from 'quasar';
+
 
 export const userStore = defineStore('user', {
   state: () => ({
-    user: null,
+    user: (LocalStorage.getItem('user') || {}) as CreateMutable<User>,
     session: null,
     persist: true
   }),
@@ -16,8 +18,10 @@ export const userStore = defineStore('user', {
     async setUserCredentials(user, session) {  // From backend structure
       console.log("🚀 ~ file: userStore.ts:14 ~ session:", session);
       console.log("🚀 ~ file: userStore.ts:14 ~ user:", user);
-      this.user = user;
+      const userInfo = { id: user.id, details: user }
+      this.user = userInfo;
       this.session = session;
+      LocalStorage.set('user', { ...userInfo })
 
     },
     async pushUserToBackend(user) {
@@ -28,20 +32,24 @@ export const userStore = defineStore('user', {
 
         let response = null
         console.log("🚀 ~ file: userStore.ts:28 ~ checkResponse:", checkResponse, user.id);
+
         let method = 'POST';
+        const userInfo = { id: user.id, details: user }
         if (checkResponse.status === 200) {
           // User exists, update the user
           method = 'PATCH';
           response = await apiConnector.patch(`${CENTRALIZATION_API_URLS.USERS}/${user.id}/`,
-            { id: user.id, details: user }
+            userInfo
           );
         } else {
           console.log("🚀 ~ file: userStore.ts:41 ~ CENTRALIZATION_API_URLS.USERS:", CENTRALIZATION_API_URLS.USERS);
           response = await apiConnector.post(`${CENTRALIZATION_API_URLS.USERS}`,
-            { id: user.id, details: user }
+            userInfo
           );
 
         }
+        console.log("🚀 ~ file: userStore.ts:52 ~ response.data:", response.data);
+        LocalStorage.set('user', { ...response.data })
 
         // POST or PATCH request based on user existence
 

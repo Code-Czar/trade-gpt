@@ -36,6 +36,15 @@ execute_remote $root_user $remote_ip $remote_port $root_password "apt-get instal
 set certbot_command "certbot --apache -d $domain_name -m $email_address --agree-tos"
 execute_remote $root_user $remote_ip $remote_port $root_password "$certbot_command" $log_file
 
+# Give access to backends private key for HTTPS
+execute_remote $root_user $remote_ip $remote_port $root_password "rm -rf /etc/letsencrypt/live/$domain_name/privkey.pem" $log_file
+execute_remote $root_user $remote_ip $remote_port $root_password "chown -R root:www-data /etc/letsencrypt" $log_file
+execute_remote $root_user $remote_ip $remote_port $root_password "chmod -R g+rx root:www-data /etc/letsencrypt" $log_file
+execute_remote $root_user $remote_ip $remote_port $root_password "ln -s /etc /etc/letsencrypt/live/$domain_name/privkey.pem /etc/letsencrypt/archive/$domain_name/privkey2.pem" $log_file
+execute_remote $root_user $remote_ip $remote_port $root_password "chown -R root:www-data /etc /etc/letsencrypt/live/$domain_name/privkey.pem" $log_file
+execute_remote $root_user $remote_ip $remote_port $root_password "chmod -R g+rx root:www-data /etc/letsencrypt/live/$domain_name/privkey.pem" $log_file
+execute_remote $root_user $remote_ip $remote_port $root_password "chmod -R g-w root:www-data /etc/letsencrypt/live/$domain_name/privkey.pem" $log_file
+
 # Configure Apache to auto-redirect to HTTPS
 set apache_config_file "/etc/apache2/sites-available/$domain_name.conf"
 set redirect_config "Redirect permanent / https://$domain_name/"

@@ -14,7 +14,9 @@ const routes = [
     component: () => import('layouts/AuthLayout.vue'),
     children: [
       { path: '', component: () => import('pages/LoginPage.vue') }
-    ]
+    ],
+    meta: { requiresAuth: false, roles: [] }
+
   },
   {
     path: '/monitoring',

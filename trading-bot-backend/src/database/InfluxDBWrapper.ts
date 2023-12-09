@@ -63,7 +63,7 @@ export class InfluxDBWrapper {
                 },
             )
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 const errorData = await response.text()
                 throw new Error(`Failed to delete data: ${errorData}`)
             }
