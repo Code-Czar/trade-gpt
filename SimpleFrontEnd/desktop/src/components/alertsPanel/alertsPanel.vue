@@ -40,15 +40,28 @@
 
                         <!-- Notifications List -->
                         <div class="notifications-list">
-                            <q-btn v-if="notifications.length > 0" class="q-flex" style="display:flex; margin-left:auto"
-                                flat @click="clearAllNotifications"> Clear </q-btn>
+                            <q-btn v-if="Object.entries(notifications).length > 0" class="q-flex"
+                                style="display:flex; margin-left:auto" flat @click="clearAllNotifications"> Clear </q-btn>
                             <div class="notifications-container">
-                                <div v-for="(notif, index) in notifications" :key="index" class="notification-item">
+                                <div v-for="(value, pairName) in notifications" :key="pairName">
+                                    <div v-for="(value2, timeframe) in value" :key="pairName - timeframe">
+
+                                        <div v-for="(value3, notificationUUID) in value2" :key="notificationUUID"
+                                            class="notification-item">
+
+                                            {{ pairName }} - {{ timeframe }} - {{ value3?.parameters?.threshold }}
+                                            <br />
+                                            {{ value3?.type }} - {{ notificationUUID }}
+                                            <q-btn flat icon="remove" @click="removeNotification(index)" />
+                                        </div>
+
+
+                                    </div>
+
                                     <!-- {{ notif.type }} - Threshold: {{ notif.parameters.threshold }} - Pairs: {{
                                         notif.pairName
                                     }} -->
-                                    {{ notif.pairName }}
-                                    <q-btn flat icon="remove" @click="removeNotification(index)" />
+                                    <!-- {{ pairName }} - {{ value }} -->
                                 </div>
                             </div>
                         </div>
@@ -104,6 +117,8 @@ import { ref, onMounted } from 'vue';
 import { apiConnector, RSINotifDescription, CENTRALIZATION_API_URLS } from 'trading-shared';
 import { getLeveragePairNames } from "@/models"
 import { userStore } from '@/stores/userStore'
+import { v4 as uuidv4 } from "uuid";
+
 
 const accordion = ref([1, 2, 3, 4, 5, 6]); // Keeping all accordions open
 const rsiThresholdLower = ref(30);
@@ -114,7 +129,7 @@ const markPriceAlertEnabled = ref(false);
 const trendReversalEnabled = ref(false);
 const selectedPairsRsi = ref([]);
 const pairOptions = ref(['BTC/USD', 'ETH/USD', 'XRP/USD']); // Example pair options
-const notifications = ref([]);
+const notifications = ref({});
 const selectedTimeframes = ref([]);
 const timeframeOptions = ref(['1d', '1h', '5m']);
 
@@ -138,27 +153,48 @@ const clearSelection = () => {
     selectedPairsRsi.value = [];
 };
 
-
-
-function addNotification(type, threshold, pairs) {
-    const pairsText = Array.isArray(pairs) ? pairs.join(', ') : '';
-    console.log("🚀 ~ file: alertsPanel.vue:119 ~ pairsText:", pairsText, typeof pairsText, selectedPairsRsi);
-
-    pairs.forEach((pair) => {
-
-        console.log("🚀 ~ file: alertsPanel.vue:143 ~ pair:", pair);
-        notifications.value.push({
-            ...RSINotifDescription,
-            pairName: pair,
-            type,
-            parameters: {
-                threshold,
-            },
-            // preferences: { ... } // Set preferences as needed
+async function addNotification(type, threshold) {
+    selectedPairsRsi.value.forEach((pair) => {
+        selectedTimeframes.value.forEach((timeframe) => {
+            if (!notifications.value[pair]) {
+                notifications.value[pair] = {};
+            }
+            if (!notifications.value[pair][timeframe]) {
+                notifications.value[pair][timeframe] = {};
+            }
+            notifications.value[pair][timeframe][uuidv4()] = {
+                ...RSINotifDescription,
+                pairName: pair,
+                type,
+                parameters: {
+                    threshold,
+                },
+                userId: userStore().user.id
+            };
         });
-    })
-
+    });
+    console.log("🚀 ~ file: alertsPanel.vue:154 ~ notifications.value:", notifications.value);
 }
+
+// async function addNotification(type, threshold, pairs) {
+//     const pairsText = Array.isArray(pairs) ? pairs.join(', ') : '';
+//     console.log("🚀 ~ file: alertsPanel.vue:119 ~ pairsText:", pairsText, typeof pairsText, selectedPairsRsi);
+
+//     pairs.forEach((pair) => {
+
+//         console.log("🚀 ~ file: alertsPanel.vue:143 ~ pair:", pair);
+//         notifications.value.push({
+//             ...RSINotifDescription,
+//             pairName: pair,
+//             type,
+//             parameters: {
+//                 threshold,
+//             },
+//             // preferences: { ... } // Set preferences as needed
+//         });
+//     })
+
+// }
 
 function removeNotification(index) {
     notifications.value.splice(index, 1);
@@ -174,7 +210,7 @@ async function fetchUserNotifications() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const userData = await response.data;
-        notifications.value = userData.notifications['RSI'] || [];
+        notifications.value = userData.notifications || {};
         console.log("🚀 ~ file: alertsPanel.vue:165 ~ notifications.value:", notifications.value);
     } catch (error) {
         console.error("Error fetching user notifications:", error);
@@ -195,29 +231,38 @@ async function saveNotifications() {
 
         // Merge existing notifications with new RSI notifications
         const updatedNotifications = {
-            ...userData.notifications
+            ...userData.notifications,
+            ...notifications.value
         };
-        updatedNotifications['RSI'] = notifications.value.map((notification) => {
-            return {
-                [notification.pairName]: {
-                    notification,
-                    userID: userStore().user.id
-                }
-            }
-        });
+        // notifications.value.forEach((notification) => {
+        //     updatedNotifications[notification.pairName] = {
+        //         notification,
+        //         userID: userStore().user.id
+        //     }
+        // })
+
+        // updatedNotifications['RSI'] = notifications.value.map((notification) => {
+        //     console.log("🚀 ~ file: alertsPanel.vue:208 ~ notification:", notification);
+        //     return {
+        //         [notification.pairName]: {
+        //             notification,
+        //             userID: userStore().user.id
+        //         }
+        //     }
+        // });
+        console.log("🚀 ~ file: alertsPanel.vue:209 ~ notifications.value:", notifications.value);
         console.log("🚀 ~ file: alertsPanel.vue:185 ~ updatedNotifications:", updatedNotifications);
 
         // Update user with merged notifications
         const userUpdateUrl = userFetchUrl;
-        const updateResponse = await apiConnector.get(userUpdateUrl, {
-            method: 'PATCH',
-            headers: {
+        const updateResponse = await apiConnector.patch(userUpdateUrl,
+            { notifications: updatedNotifications },
+            {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ notifications: updatedNotifications }),
-        });
+        );
 
-        if (!updateResponse.ok) {
+        if (updateResponse.status !== 200) {
             throw new Error(`HTTP error! status: ${updateResponse.status}`);
         }
 
@@ -237,14 +282,14 @@ const clearTimeframeSelection = () => {
 
 const clearAllNotifications = async () => {
     console.log("🚀 ~ file: alertsPanel.vue:199 ~ clearAllNotifications:", clearAllNotifications);
-    notifications.value = []
+    notifications.value = {}
 }
 
 onMounted(async () => {
     fetchedPairs = await getLeveragePairNames()
     pairOptions.value = fetchedPairs
     console.log("🚀 ~ file: alertsPanel.vue:184 ~ pairOptions.value:", pairOptions.value);
-    // await fetchUserNotifications()
+    await fetchUserNotifications()
 }
 );
 

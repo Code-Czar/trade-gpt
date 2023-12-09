@@ -64,7 +64,7 @@ onMounted(() => {
 
                 console.log("🚀 ~ file: CallbackComponent.vue:58 ~ store:", store.user, store.user.role);
 
-                if (store.user.role !== "Dev" || store.user.role !== "Admin") {
+                if (store.user.role !== "Dev" && store.user.role !== "Admin") {
                     router.push('/beta')
                 }
                 else {

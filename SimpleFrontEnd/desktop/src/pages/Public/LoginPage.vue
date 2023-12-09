@@ -8,13 +8,13 @@
         <!-- Two-Column Layout -->
         <div class="row items-center full-height">
             <!-- Left Column (2/3 width) -->
-            <div class="col-8">
+            <div class="col-8 hidden-xs">
                 <!-- You can add content here if needed -->
             </div>
 
             <!-- Right Column (1/3 width) with Login Component -->
 
-            <div class="col-4" style="height: 100%">
+            <div class="col-md-4 col-xs-12" style="height: 100%">
                 <q-card class="q-ma-md" style=" height:100%;  background-color: rgba(255,255,255,0.6); margin:0">
                     <q-card-section class="row items-center justify-center" style="height: 100%; margin:0">
                         <div style="margin:0">
@@ -51,21 +51,24 @@ console.log("🚀 ~ file: LoginPage.vue:28 ~ supabase:", supabase)
 const router = useRouter();
 
 const mobileURLScheme = 'opportunities://auth'
-
-const login = async (provider: 'google' | 'github') => {
-    // Determine the redirect URI based on the platform
+const definePostLoginRedirection = (enableAppRedirect = false) => {
     let redirectUri = null;
-    if (Platform.is.android) {
+
+    if (Platform.is.android && enableAppRedirect) {
         redirectUri = mobileURLScheme
     } else if (window.location.origin.includes('localhost') || window.location.origin.includes('127.0.0.1')) {
-        // redirectUri = window.location.origin
+
         redirectUri = '/auth'
         console.log("🚀 ~ file: LoginPage.vue:62 ~ redirectUri:", window.location.origin, redirectUri);
     } else {
         redirectUri = window.location.origin + 'auth';
     }
+}
 
-    // let redirectUri = window.location.origin + '/auth';
+
+const login = async (provider: 'google' | 'github') => {
+    // Determine the redirect URI based on the platform
+    let redirectUri = definePostLoginRedirection()
 
 
     const { user, session, error } = await supabase.auth.signInWithOAuth({

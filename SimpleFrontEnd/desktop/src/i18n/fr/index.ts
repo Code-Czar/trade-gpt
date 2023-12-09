@@ -4,5 +4,7 @@
 export default {
     healineTitle: 'Infinite-Opportunities FR',
     failed: 'Action failed',
-    success: 'Action was successful'
+    success: 'Action was successful',
+    selectedLanguage: 'Français'
+
 };

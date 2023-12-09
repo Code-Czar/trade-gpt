@@ -1,15 +1,18 @@
 <template>
-  <q-header elevated class="bg-transparent" style="position: absolute; top: 0; left: 0">
+  <q-header class="bg-transparent" style="position: absolute; top: 0; left: 0">
     <q-toolbar>
-      <q-btn flat round dense icon="menu" @click="toggleDrawer" />
       <q-toolbar-title>
         Opportunities
       </q-toolbar-title>
-      <I18nProvider>
 
-        <LanguageSwitchButton />
-      </I18nProvider>
-      <q-btn flat round dense icon="login" @click="goToLogin" />
+      <!-- Flex Container for Navigation Items -->
+      <div class="flex-container">
+        <span class="nav-menu-item">{{ $t('navigationMenu.homeHeader.home') }}</span>
+        <q-btn flat rounded dense class="nav-menu-item" @click="goToLogin"> {{ $t('buttons.login') }} </q-btn>
+        <I18nProvider>
+          <LanguageSwitchButton />
+        </I18nProvider>
+      </div>
     </q-toolbar>
   </q-header>
 </template>
@@ -32,6 +35,20 @@ const toggleDrawer = () => {
 
 <style >
 .bg-transparent {
-  background-color: transparent;
+  background-color: transparent !important;
+  box-shadow: unset !important;
+}
+
+.nav-menu-item {
+  margin-right: 1rem;
+  /* Adjust as needed */
+}
+
+.flex-container {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  /* Align items vertically */
+  /* Add any additional styling as needed */
 }
 </style>

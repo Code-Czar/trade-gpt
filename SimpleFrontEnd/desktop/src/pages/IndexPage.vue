@@ -6,16 +6,25 @@
         <source src="@/assets/stocks_1.webm" type="video/webm" />
         Your browser does not support the video tag.
       </video>
+      <div class="video-overlay"></div>
+
+
       <div class="overlay-content">
-        <div class="text-h2">{{ $t('healineTitle') }}</div>
-        <div class="text-subtitle1 q-my-md">Sub-Headline</div>
-        <q-btn label="Call to Action" color="primary" @click="goToApp" />
+        <div class="text-h2 text-white">
+          <h1>{{ $t('healineTitle') }}</h1>
+        </div>
+        <div class="text-subtitle1 q-my-md text-white">Sub-Headline</div>
+        <q-btn color="primary" @click="goToApp">{{ $t('buttons.discover') }}</q-btn>
       </div>
     </section>
 
     <!-- Other Sections -->
     <section class="bg-primary text-white">
-      Content for section 1...
+      Purpose
+
+    </section>
+    <section class="bg-primary text-white">
+      Roadmap
 
     </section>
 
@@ -33,10 +42,7 @@
 
     <!-- ... Add more sections as needed ... -->
 
-    <!-- Footer -->
-    <footer class="bg-dark text-white text-center q-py-md">
-      © 2023 by My App. All Rights Reserved.
-    </footer>
+    <PublicFooter />
   </q-page>
 </template>
 
@@ -45,6 +51,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { STRATEGY_ANALYZER_URL } from '@/models/consts'
+import PublicFooter from '@/components/publicPages/PublicFooter.vue';
 // import { userStore } from '../stores/userStore';
 // console.log("🚀 ~ file: IndexPage.vue:63 ~ userStore:", userStore);
 
@@ -123,6 +130,16 @@ const toggleDrawer = () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Adjust opacity as needed */
 }
 
 .overlay-content {

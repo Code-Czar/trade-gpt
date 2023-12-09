@@ -2,8 +2,7 @@
 <template>
     <div>
 
-        <q-select v-model="locale" :options="localeOptions" label="Quasar Language" dense borderless emit-value map-options
-            options-dense style="min-width: 150px" />
+        <q-select v-model="locale" :options="localeOptions" dense borderless emit-value map-options options-dense />
     </div>
 </template>
   
@@ -14,8 +13,8 @@ import { useI18n } from 'vue-i18n';
 const { locale, t } = useI18n({ useScope: 'global' });
 
 const localeOptions = [
-    { value: 'en-US', label: 'English' },
-    { value: 'fr', label: 'Français' },
+    { value: 'en-US', label: '🇺🇸' },
+    { value: 'fr', label: '🇫🇷' },
 ];
 </script>
 

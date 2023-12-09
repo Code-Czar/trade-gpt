@@ -1,11 +1,15 @@
 // src/styles/global.scss
 
+@import './colors.scss';
 @import './divs.scss';
+@import './headersAndText.scss';
 
-$primary-color: #3498db;
+
+
+
 
 body {
-  background-color: $primary-color;
+  background-color: $pristine-white;
 }
 
 .q-page-container{
