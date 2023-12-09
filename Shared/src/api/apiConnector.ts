@@ -55,7 +55,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
             //@ts-ignore
             if (response.responseType === "blob") {
                 // result.data = await response.blob();
-                result.data = await response.arrayBuffer();
+                result.data = response.arrayBuffer();
                 //@ts-ignore
                 result.filename = (await response.headers)
                     ?.get("content-disposition")?.split("/");
@@ -64,7 +64,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
                 result.filename = result.filename.replace(/"/g, "");
             } else {
                 //@ts-ignore
-                result.data = await response.json();
+                result.data = response.json();
             }
         } else {
             console.error("Error status:", response.status);
