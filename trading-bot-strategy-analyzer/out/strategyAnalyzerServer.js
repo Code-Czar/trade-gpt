@@ -7,7 +7,7 @@ var cors = require('cors');
 var fs = require('fs');
 var https = require('https');
 var http = require('http'); // Import the HTTP module
-var fetch = require('node-fetch');
+// const fetch = require('node-fetch');
 var dotenv = require('dotenv');
 var path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -38,8 +38,9 @@ server.listen(trading_shared_2.SERVER_PORTS.STRATEGY_ANALYZER_PORT, function () 
     global.logger.debug("SA Server running on port ".concat(trading_shared_2.SERVER_PORTS.STRATEGY_ANALYZER_PORT));
 });
 app.use(cors());
-// Start the loop
+// Start clients 
 var strategyAnalyzer = new strategyAnalyzerClass_1.StrategyAnalyzer();
+strategyAnalyzer.init();
 var client = new backendWebSocket_1.BackendClient(strategyAnalyzer);
 app.get('/health', function (req, res) {
     res.status(200).send('Hello from SA!');

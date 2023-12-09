@@ -7,7 +7,7 @@ const fs = require('fs');
 const https = require('https');
 const http = require('http'); // Import the HTTP module
 
-const fetch = require('node-fetch');
+// const fetch = require('node-fetch');
 
 const dotenv = require('dotenv');
 const path = require('path');
@@ -47,8 +47,13 @@ server.listen(SERVER_PORTS.STRATEGY_ANALYZER_PORT, () => {
 });
 app.use(cors());
 
-// Start the loop
+
+
+
+// Start clients 
 const strategyAnalyzer = new StrategyAnalyzer();
+strategyAnalyzer.init()
+
 const client = new BackendClient(strategyAnalyzer);
 
 app.get('/health', (req, res) => {

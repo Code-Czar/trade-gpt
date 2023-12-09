@@ -24,7 +24,7 @@ const apiKey = 'T6mYLquMbR2vRU3ukL';
 const apiSecret = '3PBXd8rPDs3uju8N3t1gOrH08TezVfFw0YmB';
 const expires = Math.round(new Date().getTime() + 1000);
 const PONG_TIMEOUT = 40000;
-const PONG_TIMEOUT_COUNT = 10;
+const PONG_TIMEOUT_COUNT = 4;
 
 export class ByBitWebSocket {
     publicClient: WebSocket;

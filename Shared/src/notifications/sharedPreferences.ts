@@ -31,10 +31,10 @@ interface SharedPreferences {
     frequency: FrequencyType;
 }
 
-interface Preferences {
+export interface Preferences {
     pairName: string;
     status: string;
-    preferences: SharedPreferences;
+    // preferences: SharedPreferences;
 }
 
 // Notification status object
@@ -63,5 +63,5 @@ export const sharedPreferences: SharedPreferences = {
 export const preferences: Preferences = {
     status: "active",
     pairName: '',
-    preferences: { ...sharedPreferences }
+    ...sharedPreferences
 };

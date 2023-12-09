@@ -162,13 +162,17 @@ async function addNotification(type, threshold) {
             if (!notifications.value[pair][timeframe]) {
                 notifications.value[pair][timeframe] = {};
             }
-            notifications.value[pair][timeframe][uuidv4()] = {
+            if (!notifications.value[pair][timeframe][type]) {
+                notifications.value[pair][timeframe][type] = {};
+            }
+            notifications.value[pair][timeframe][type][uuidv4()] = {
                 ...RSINotifDescription,
                 pairName: pair,
                 type,
                 parameters: {
                     threshold,
                 },
+                timeframe,
                 userId: userStore().user.id
             };
         });

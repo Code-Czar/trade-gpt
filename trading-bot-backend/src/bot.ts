@@ -20,12 +20,7 @@ import { InfluxDBWrapper } from './database'
 import ByBitDataFetcher from './dataFetchers/byBitDataFetcher'
 
 import moment from 'moment';
-const fs = require('fs')
-const path = require('path')
 
-
-const binanceDataFile = 'binanceData.json'
-const bybitDataFile = 'bybitData.json'
 
 const ACTIVE_TIMEFRAMES = ['1d', '1h', '5m', '1m']
 // const ACTIVE_TIMEFRAMES = ['5m']
@@ -100,7 +95,7 @@ export class TradingBot {
 
             // Diagnostic logs
             // global.logger.info(`Last candle timestamp: ${ohlcvs[ohlcvs.length - 1][0]}, Start Time: ${lastCandleStartTime}`);
-            // global.logger.info(`New item timestamp: ${newItem[0]}, Start Time: ${newItemStartTime}`);
+            global.logger.info(`New item timestamp: ${newItem[0]}, Start Time: ${newItemStartTime}`);
 
             if (lastCandleStartTime === newItemStartTime) {
                 ohlcvs[ohlcvs.length - 1] = newItem

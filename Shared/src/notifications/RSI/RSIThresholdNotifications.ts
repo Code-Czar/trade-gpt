@@ -10,7 +10,7 @@ interface NotificationParameters {
 
 interface NotificationPreferences {
     status: string;
-    preferences: any;  // You can further define the structure of preferences if needed
+    // preferences: any;  // You can further define the structure of preferences if needed
 }
 
 interface NotificationDescription {
