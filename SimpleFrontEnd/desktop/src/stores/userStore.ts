@@ -23,24 +23,35 @@ export const userStore = defineStore('user', {
     async pushUserToBackend(user) {
       try {
         // Check if user exists
+        console.log("🚀 ~ file: userStore.ts:28 ~ CENTRALIZATION_API_URLS.USERS:", CENTRALIZATION_API_URLS.USERS);
         const checkResponse = await apiConnector.get(`${CENTRALIZATION_API_URLS.USERS}/${user.id}`);
 
+        let response = null
+        console.log("🚀 ~ file: userStore.ts:28 ~ checkResponse:", checkResponse, user.id);
         let method = 'POST';
         if (checkResponse.status === 200) {
           // User exists, update the user
           method = 'PATCH';
+          response = await apiConnector.patch(`${CENTRALIZATION_API_URLS.USERS}/${user.id}/`,
+            { id: user.id, details: user }
+          );
+        } else {
+          console.log("🚀 ~ file: userStore.ts:41 ~ CENTRALIZATION_API_URLS.USERS:", CENTRALIZATION_API_URLS.USERS);
+          response = await apiConnector.post(`${CENTRALIZATION_API_URLS.USERS}`,
+            { id: user.id, details: user }
+          );
+
         }
 
         // POST or PATCH request based on user existence
-        const response = await apiConnector.patch(`${CENTRALIZATION_API_URLS.USERS}${method === 'PATCH' ? '/' + user.id + '/' : '/'}`,
-          { id: user.id, details: user }
-        );
+
 
         if (!response.status === 200) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.data.json();
+        console.log("🚀 ~ file: userStore.ts:54 ~ response:", response);
+        const data = await response.data;
         console.log("User data pushed to backend:", data);
         this.user = data;
         console.log("🚀 ~ file: userStore.ts:57 ~ this.user:", this.user);

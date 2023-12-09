@@ -170,7 +170,7 @@ async function fetchUserNotifications() {
 
     try {
         const response = await apiConnector.get(userUrl);
-        if (!response.ok) {
+        if (response.status !== 200) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const userData = await response.data;
@@ -188,7 +188,7 @@ async function saveNotifications() {
     try {
         // Fetch current user data
         const userResponse = await apiConnector.get(userFetchUrl);
-        if (!userResponse.ok) {
+        if (!userResponse.status !== 200) {
             throw new Error(`HTTP error! status: ${userResponse.status}`);
         }
         const userData = await userResponse.data;

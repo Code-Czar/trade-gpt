@@ -54,6 +54,12 @@ const routes = [
 
   },
   {
+    path: '/:access_token',
+    component: () => import('components/CallbackComponent.vue'),
+    meta: { requiresAuth: false, roles: [] }
+
+  },
+  {
     path: '/app',
     component: () => import('layouts/MainLayout.vue'),
     children: [

@@ -56,7 +56,8 @@ async function redirectToCheckout(priceId = subscriptionProductID) {
             },
         );
 
-        if (!response.ok) {
+        console.log("🚀 ~ file: SrCheckout.vue:48 ~ response:", response);
+        if (response.status !== 200) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
@@ -74,21 +75,23 @@ async function redirectToCheckout(priceId = subscriptionProductID) {
 
 const handleSubscribe = async () => {
     const customerResult = await apiConnector.post(`${CENTRALIZATION_API_URLS.STRIPE_CREATE_CUSTOMER}/`,
-        JSON.stringify({
-            email: userEmail,
-        }),
         {
-            'Content-Type': 'application/json',
+            email: userEmail,
         },
+
     )
-    const customerDetails = (await customerResult.data).customer
+    console.log("🚀 ~ file: SrCheckout.vue:79 ~ customerResult:", customerResult);
+    const customerData = await customerResult.data
+    console.log("🚀 ~ file: SrCheckout.vue:83 ~ customerData:", customerData);
+    const customerEmail = customerData.customer.email
+    const customerDetails = customerData
     const customerID = customerDetails.id
-    console.log("🚀 ~ file: SrCheckout.vue:45 ~ customerResult:", customerDetails, customerID);
+    console.log("🚀 ~ file: SrCheckout.vue:45 ~ customerResult:", customerDetails, customerEmail, customerID);
 
 
     const subscriptionResult = await apiConnector.post(`${CENTRALIZATION_API_URLS.STRIPE_CREATE_CUSTOMER}/`,
         JSON.stringify({
-            email: userEmail,
+            email: customerEmail,
         }),
         {
             'Content-Type': 'application/json',

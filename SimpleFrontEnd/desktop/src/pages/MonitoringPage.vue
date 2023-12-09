@@ -40,7 +40,7 @@ const fetchHealthData = async () => {
     while (true) {
         try {
             const response = await apiConnector.get(BACKEND_URL + `/health`);
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error('Network response was not ok');
             }
             healthData.value = await response.data;

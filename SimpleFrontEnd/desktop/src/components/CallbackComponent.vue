@@ -18,8 +18,20 @@ const router = useRouter();
 const store = userStore();
 
 onMounted(() => {
-    console.log("🚀 ~ file: CallbackComponent.vue:19 ~ onMounted ~ window.location:", window.location)
-    const hashParams = new URLSearchParams(window.location.hash.split('auth#')[1]);
+    console.log("🚀 ~ file: CallbackComponent.vue:19 ~ onMounted ~ window.location:", window.location);
+
+    // Use a regular expression to extract the part of the hash that starts with 'access_token='
+    const hashMatch = window.location.hash.match(/access_token=([^&]+)/);
+    let hashParams;
+    if (hashMatch) {
+        // Create URLSearchParams from the extracted part of the hash
+        hashParams = new URLSearchParams(hashMatch[0]);
+    } else {
+        console.error("No access token found in the callback URL.");
+        // Handle error, possibly redirecting to an error page
+        return;
+    }
+
     const accessToken = hashParams.get("access_token");
     const tokenType = hashParams.get("token_type");
     const expiresAt = hashParams.get("expires_at");

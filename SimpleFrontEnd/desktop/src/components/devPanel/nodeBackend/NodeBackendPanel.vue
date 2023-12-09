@@ -114,7 +114,7 @@ const getHistoricalDataForPair = async (pairName) => {
                         }
                     );
 
-                    if (!response.ok) {
+                    if (response.status !== 200) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
                     }
                     const data = await response.data;
