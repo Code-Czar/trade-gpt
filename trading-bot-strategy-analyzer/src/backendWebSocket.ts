@@ -2,7 +2,7 @@ import { BACKEND_URLS } from 'trading-shared';
 // global.logger.debug("🚀 ~ file: backendWebSocket.ts:2 ~ BACKEND_URLS:", BACKEND_URLS)
 
 // const WebSocket = require('ws')
-import * as WebSocket from 'ws';
+import WebSocket from 'ws';
 
 
 export class BackendClient {

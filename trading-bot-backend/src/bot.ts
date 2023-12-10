@@ -54,9 +54,7 @@ export class TradingBot {
         this.dataFetchers.bybitDataFetcher.setReconnectCallback(
             this.populateDataStoreParallel.bind(this),
         )
-        this.dataFetchers.bybitDataFetcher.setUpdateOHLCVCallback(
-            this.newOHLCVDataAvailable.bind(this),
-        )
+
 
         this.dbWrapper = new InfluxDBWrapper()
         if (CLEAR_DATABASE) {
@@ -230,7 +228,6 @@ export class TradingBot {
 
     async populateDataStoreParallel(
         timeframes = ACTIVE_TIMEFRAMES,
-
     ) {
 
         if (this.isUpdating) {
@@ -241,6 +238,9 @@ export class TradingBot {
         while (!dataFetcher?.isReady()) {
             await new Promise((resolve) => setTimeout(resolve, 10))
         }
+        this.dataFetchers.bybitDataFetcher.setUpdateOHLCVCallback(
+            this.newOHLCVDataAvailable.bind(this),
+        )
 
         this.isUpdating = true
 
@@ -252,6 +252,7 @@ export class TradingBot {
             timeframes.forEach((timeframe) => {
                 fetchPromises.push(async () => {
                     const result = await dataFetcher.getInitialOHLCV(symbol, timeframe)
+                    // console.log("🚀 ~ file: bot.ts:255 ~ result:", result);
                     if (result && result.data) {
                         const inputData = {
                             details: result.symbolDetails,
@@ -266,7 +267,8 @@ export class TradingBot {
                         )
                         // console.log("🚀 ~ file: bot.ts:272 ~ storePair:", storePair);
                         this.writePairToDatabase(storePair)
-                        this.dataFetchers.bybitDataFetcher?.registerToOHLCVDataUpdates(
+                        console.log("🚀 ~ file: bot.ts:270 ~ this.dataFetchers.bybitDataFetcher:", this.dataFetchers.bybitDataFetcher ? 'Fetch not null' : 'Fetcher NULL');
+                        await this.dataFetchers.bybitDataFetcher.registerToOHLCVDataUpdates(
                             symbol.name,
                             timeframe,
                         )
@@ -421,7 +423,7 @@ export class TradingBot {
     async writePairToDatabase(pairData) {
         global.logger.debug(
             '🚀 ~ file: bot.ts:304 ~ writePairToDatabase:',
-            pairData,
+            // pairData,
         )
         await this.dbWrapper?.writePairToDatabase(pairData)
     }

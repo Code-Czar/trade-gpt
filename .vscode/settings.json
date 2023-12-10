@@ -4,10 +4,112 @@
         "titleBar.activeBackground": "#423C54",
         "titleBar.activeForeground": "#FAFAFB"
     },
-    
-    
-    
     "turboConsoleLog.addSemicolonInTheEnd": true,
     "turboConsoleLog.insertEnclosingFunction": false,
-    "turboConsoleLog.insertEnclosingClass": false
+    "turboConsoleLog.insertEnclosingClass": false,
+    "multiCommand.commands": [
+        {
+            "command": "multiCommand.styleTerminals",
+            "sequence": [
+                "workbench.action.terminal.focusAtIndex1",
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "sleep 0.02"
+                    }
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "xdotool type ansiGreen"
+                    }
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "xdotool key Return"
+                    }
+                },
+                {
+                    "command": "workbench.action.terminal.changeColor"
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "sleep 0.02"
+                    }
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "xdotool type circuit-board"
+                    }
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "xdotool key Return"
+                    }
+                },
+                {
+                    "command": "workbench.action.terminal.changeIcon"
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "sleep 0.02"
+                    }
+                },
+                "workbench.action.terminal.focusAtIndex2",
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "sleep 0.02"
+                    }
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "xdotool type ansiGreen"
+                    }
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "xdotool key Return"
+                    }
+                },
+                {
+                    "command": "workbench.action.terminal.changeColor"
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "sleep 0.02"
+                    }
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "xdotool type logo-github"
+                    }
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "xdotool key Return"
+                    }
+                },
+                {
+                    "command": "workbench.action.terminal.changeIcon"
+                },
+                {
+                    "command": "command-runner.run",
+                    "args": {
+                        "command": "sleep 0.02"
+                    }
+                },
+            ]
+        }
+    ]
 }

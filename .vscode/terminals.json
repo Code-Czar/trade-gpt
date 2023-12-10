@@ -1,0 +1,41 @@
+{
+  "autorun": false,
+  "terminals": [
+    {
+      "name": "L - Frontend",
+      "description": "This is a description",
+      "focus": true,
+      "persistent": "L - Frontend",
+      "command": "cd SimpleFrontEnd/desktop"
+    },
+    {
+      "name": "L - Shared",
+      "persistent": "L - Shared",
+      "commands": [
+        "cd Shared"
+      ]
+    },
+    {
+      "name": "L - BE",
+      "persistent": "L - BE",
+      "commands": [
+        "cd trading-bot-backend"
+      ]
+    },
+    {
+      "name": "L - SA",
+      "persistent": "L - SA",
+      "commands": [
+        "cd trading-bot-strategy-analyzer"
+      ]
+    },
+    {
+      "name": "L - CE",
+      "persistent": "L - CE",
+      "commands": [
+        "cd trading-bot-centralization-server/trading-center",
+        "source env/bin/activate"
+      ]
+    }
+  ]
+}

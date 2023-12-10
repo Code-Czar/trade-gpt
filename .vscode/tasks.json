@@ -1,17 +1,24 @@
-// .vscode/tasks.json
 {
-    "version": "2.0.0",
-    "tasks": [
-      {
-        "type": "typescript",
-        "tsconfig": "tsconfig.json",
-        "label": "build", // Name of the task
-        "group": "build",
-        "problemMatcher": ["$tsc"],
-        "presentation": {
-          "reveal": "silent"
-        }
-      }
-    ]
-  }
-  
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Open Terminal 1",
+      "type": "shell",
+      "command": "echo Terminal 1",
+      "presentation": {
+        "group": "group1"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Open Terminal 2",
+      "type": "shell",
+      "command": "echo Terminal 2",
+      "presentation": {
+        "group": "group2"
+      },
+      "problemMatcher": []
+    },
+    // Add more tasks for additional terminals as needed
+  ]
+}

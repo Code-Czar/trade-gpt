@@ -8978,17 +8978,6 @@ trading-shared@../../Shared:
     node-fetch "^3.3.2"
     technicalindicators "^3.1.0"
 
-trading-shared@../../Shared/:
-  version "1.0.0"
-  dependencies:
-    "@influxdata/influxdb-client" "^1.33.2"
-    "@types/node" "^20.8.6"
-    dotenv "^16.3.1"
-    loglevel "^1.8.1"
-    moment "^2.29.4"
-    node-fetch "^3.3.2"
-    technicalindicators "^3.1.0"
-
 trim-newlines@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/trim-newlines/-/trim-newlines-3.0.1.tgz#260a5d962d8b752425b32f3a7db0dcacd176c144"

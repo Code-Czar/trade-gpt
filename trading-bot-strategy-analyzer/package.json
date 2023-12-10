@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "main": "src/strategyAnalyzer.js",
   "scripts": {
-    "linkShared": "yarn link \"trading-shared\"",
     "start": "yarn build; pm2 start ./out/strategyAnalyzerServer.js --no-daemon",
     "dev": "nodemon",
-    "prebuild": "yarn install; yarn linkShared",
-    "build": "rm -rf ./out/* && tsc src/*.ts --outDir ./out",
+    "prebuild": "cd ../Shared && yarn build && cd -; rm -rf ./dist/*; yarn install; copyfiles -u 1 src/**/*.json dist/",
+    "build": "tsc src/*.ts --outDir ./dist",
     "test": "mocha --timeout 5000 -r ts-node/register -r tsconfig-paths/register 'src/**/*.test.ts'"
   },
   "dependencies": {

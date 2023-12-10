@@ -17,6 +17,8 @@ set email_address "contact@benjamintourrette.com"
 set public_keys_files [split [lindex $argv 6] ","]
 set local_folder [lindex $argv 7]
 set project_folder "/var/www/trading-gpt"
+set django_folder "$project_folder/trading-bot-centralization-server"
+set tmux_config "$project_folder/InstallServer/.tmux.conf"
 
 # Enable logging to both file and stdout
 log_file -a $log_file
@@ -56,8 +58,12 @@ execute_remote $root_user $remote_ip $remote_port $root_password "a2enmod ssl" $
 execute_remote $root_user $remote_ip $remote_port $root_password "systemctl restart apache2" $log_file
 
 
+
+# Copy Tmux config file
+execute_remote $normal_user $remote_ip $remote_port $root_password "cp $tmux_config ~/" $log_file
+
 # Create virtual env for Django backend
-set django_folder "$project_folder/trading-bot-centralization-server"
+
 execute_remote $normal_user $remote_ip $remote_port $root_password "cd $django_folder && python3 -m venv env && source env/bin/activate && pip install -r requirements.txt" $log_file
 
 # Set node 18.0 as default version
