@@ -6,7 +6,7 @@ export enum API_STATUS {
 }
 type APIResult = {
     status: number | API_STATUS;
-    data?: BasicObject | ReadableStream<Uint8Array> | undefined | null;
+    data?: BasicObject | ReadableStream<Uint8Array> | string | undefined | null;
     headers?: BasicObject | undefined | null;
     filename?: string
 };

@@ -131,7 +131,7 @@ const selectedPairsRsi = ref([]);
 const pairOptions = ref(['BTC/USD', 'ETH/USD', 'XRP/USD']); // Example pair options
 const notifications = ref({});
 const selectedTimeframes = ref([]);
-const timeframeOptions = ref(['1d', '1h', '5m']);
+const timeframeOptions = ref(['1d', '1h', '5m', '1m']);
 
 let fetchedPairs = null
 
