@@ -1,4 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
+import stripe
+
 
 @csrf_exempt
 def cancel_subscription(request):

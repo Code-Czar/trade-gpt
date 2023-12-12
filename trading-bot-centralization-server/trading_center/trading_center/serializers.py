@@ -26,7 +26,7 @@ class PositionSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "details", "role", "permission_level", "notifications"]
+        fields = ["id", "details", "role", "permission_level", "notifications", "stripe_customer_id", "stripe_customer_details"]
 
     def validate_id(self, value):
         if value:
@@ -37,4 +37,5 @@ class UserSerializer(serializers.ModelSerializer):
 
             if User.objects.filter(id=value).exists():
                 raise ValidationError("A user with this UUID already exists.")
+
         return value
