@@ -14,7 +14,7 @@ proc execute_remote {root_user remote_ip remote_port root_password command_to_ex
             send "yes\r"
             exp_continue
         }
-        -re {root@opportunities:~#} {  # Adjusted to match the server's prompt
+        -re {root@localhost:~#} {  # Adjusted to match the server's prompt
             send "$command_to_execute; echo '===COMMAND_END===' \r"
         }
     }
