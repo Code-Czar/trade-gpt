@@ -24,7 +24,7 @@ const apiKey = 'T6mYLquMbR2vRU3ukL';
 const apiSecret = '3PBXd8rPDs3uju8N3t1gOrH08TezVfFw0YmB';
 const expires = Math.round(new Date().getTime() + 1000);
 const PONG_TIMEOUT = 40000;
-const PONG_TIMEOUT_COUNT = 10;
+const PONG_TIMEOUT_COUNT = 4;
 
 export class ByBitWebSocket {
     publicClient: WebSocket;
@@ -57,8 +57,6 @@ export class ByBitWebSocket {
         this.setupPingPongHandlers(this.publicClient, WEB_SOCKETS_URLS.FUTURES);
     }
     private initPrivateClient(callbacks): void {
-
-
         this.privateClient.on('open', () => {
             global.logger.info('"open" PRIVATE event!')
             global.logger.info('WebSocket PRIVATE Client Connected')
@@ -102,14 +100,13 @@ export class ByBitWebSocket {
 
         this.pingPongInterval = setInterval(() => {
             client.ping()
-            this.pongTimeout = setTimeout(() => {
+            this.pongTimeout = setTimeout(async () => {
                 global.logger.info('Pong not received')
                 this.pongTimeoutCount++
                 if (this.pongTimeoutCount >= PONG_TIMEOUT_COUNT) {
                     console.error('Pong not received, reconnecting')
                     try {
-                        this.publicClient.terminate()
-                        this.initPublicClient()
+                        await this.reconnectClient()
                         this.callbacks.restartCallback?.()
                         this.pongTimeoutCount = 0
                         clearInterval(this.pingPongInterval)
@@ -124,6 +121,28 @@ export class ByBitWebSocket {
             }, PONG_TIMEOUT)
         }, 30000) // Send ping every 30 seconds
     }
+
+    // ... existing class code ...
+
+    private async reconnectClient(): Promise<void> {
+        try {
+            this.publicClient.close();  // Close the existing connection
+            this.publicClient = new WebSocket(WEB_SOCKETS_URLS.FUTURES);  // Reinitialize WebSocket
+            this.initPublicClient(this.callbacks);  // Set up the client again
+
+            // Wait until the WebSocket is open before resubscribing
+            await new Promise((resolve) => {
+                this.publicClient.on('open', resolve);
+            });
+
+            // Resubscribe to the necessary topics
+            // Example: this.webSocketRegisterToAllOHLCVDataUpdates(...);
+        } catch (error) {
+            global.logger.error('Error during WebSocket reconnection:', error);
+        }
+    }
+
+
 
     public setReconnectCallback(restartCallback: () => void): void {
         this.callbacks.restartCallback = restartCallback;
@@ -141,6 +160,8 @@ export class ByBitWebSocket {
     }
 
     public async webSocketRegisterToOHLCVDataForPair(symbolName: string, timeframe: string): Promise<void> {
+        console.log("🚀 ~ file: ByBitWebSocket.ts:163 ~ timeframe:", timeframe);
+        console.log("🚀 ~ file: ByBitWebSocket.ts:163 ~ symbolName:", symbolName);
         try {
             this.publicClient.send(
                 JSON.stringify({
@@ -167,6 +188,7 @@ export class ByBitWebSocket {
 
         symbolNames.forEach((symbolName) => {
             timeframes.forEach((timeframe) => {
+                console.log("🚀 ~ file: ByBitWebSocket.ts:199 ~ symbolName:", symbolName, timeframe);
                 this.publicClient.send(
                     JSON.stringify({
                         op: 'subscribe',

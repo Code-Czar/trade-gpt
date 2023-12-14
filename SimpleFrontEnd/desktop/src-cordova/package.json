@@ -1,8 +1,8 @@
 {
-  "name": "org.cordova.quasar.app",
-  "displayName": "Quasar App",
+  "name": "opportunitie.app",
+  "displayName": "Opportunities",
   "version": "1.0.0",
-  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "description": "Opportunities mobile App",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,17 +10,26 @@
   "keywords": [
     "ecosystem:cordova"
   ],
-  "author": "Apache Cordova Team",
+  "author": "Benjamin Tourrette",
   "license": "Apache-2.0",
   "devDependencies": {
-    "cordova-android": "^12.0.1"
+    "cordova-android": "^12.0.1",
+    "cordova-find-config": "^0.1.2",
+    "cordova-plugin-customurlscheme": "^5.0.2"
   },
   "cordova": {
     "platforms": [
       "android"
     ],
     "plugins": {
-      "onesignal-cordova-plugin": {}
+      "onesignal-cordova-plugin": {},
+      "cordova-plugin-exclude-files": {},
+      "cordova-plugin-customurlscheme": {
+        "URL_SCHEME": "opportunities",
+        "ANDROID_SCHEME": " ",
+        "ANDROID_HOST": " ",
+        "ANDROID_PATHPREFIX": "/"
+      }
     }
   },
   "dependencies": {

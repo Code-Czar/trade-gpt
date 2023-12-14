@@ -6,16 +6,20 @@ export ANDROID_HOME="$HOME/Library/Android/sdk"
 export ANDROID_SDK_ROOT="$HOME/Library/Android/sdk"
 export PATH=$PATH:$ANDROID_SDK_ROOT/tools; PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
 
-# Check if ffmpeg is present
+# Building the shared library
+cd ../Shared
+yarn install
+yarn build
+cd -
+
+cp -r ../Shared/dist ./desktop/node_modules/trading-shared
+
+# FFmpeg checks and conversion
 if command -v ffmpeg &>/dev/null; then
-    # Loop through all mp4 files in ./desktop/src/assets
     for file in ./desktop/src/assets/*.mp4; do
-        # Get the file name without the extension
         filename=$(basename -- "$file")
         name_no_ext="${filename%.*}"
         webm_file="./desktop/src/assets/$name_no_ext.webm"
-
-        # Check if webm file does not exist, then convert
         if [[ ! -e $webm_file ]]; then
             ffmpeg -i "$file" -vf "scale=-1:480,fps=25" -c:v libvpx -c:a libvorbis "$webm_file"
         fi
@@ -24,8 +28,10 @@ else
     echo "ffmpeg is not installed or not found in PATH."
 fi
 
+# Building the desktop project
 cd desktop
-quasar build -m cordova -T android
+# quasar build -m cordova -T android
+quasar build -m cordova -T android --debug
 cd src-cordova
 adb kill-server 
 adb start-server

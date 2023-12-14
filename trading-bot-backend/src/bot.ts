@@ -20,14 +20,9 @@ import { InfluxDBWrapper } from './database'
 import ByBitDataFetcher from './dataFetchers/byBitDataFetcher'
 
 import moment from 'moment';
-const fs = require('fs')
-const path = require('path')
 
 
-const binanceDataFile = 'binanceData.json'
-const bybitDataFile = 'bybitData.json'
-
-const ACTIVE_TIMEFRAMES = ['5m', '1m']
+const ACTIVE_TIMEFRAMES = ['1d', '1h', '5m', '1m']
 // const ACTIVE_TIMEFRAMES = ['5m']
 
 let once = true
@@ -59,9 +54,7 @@ export class TradingBot {
         this.dataFetchers.bybitDataFetcher.setReconnectCallback(
             this.populateDataStoreParallel.bind(this),
         )
-        this.dataFetchers.bybitDataFetcher.setUpdateOHLCVCallback(
-            this.newOHLCVDataAvailable.bind(this),
-        )
+
 
         this.dbWrapper = new InfluxDBWrapper()
         if (CLEAR_DATABASE) {
@@ -100,7 +93,7 @@ export class TradingBot {
 
             // Diagnostic logs
             // global.logger.info(`Last candle timestamp: ${ohlcvs[ohlcvs.length - 1][0]}, Start Time: ${lastCandleStartTime}`);
-            // global.logger.info(`New item timestamp: ${newItem[0]}, Start Time: ${newItemStartTime}`);
+            global.logger.info(`New item timestamp: ${newItem[0]}, Start Time: ${newItemStartTime}`);
 
             if (lastCandleStartTime === newItemStartTime) {
                 ohlcvs[ohlcvs.length - 1] = newItem
@@ -235,7 +228,6 @@ export class TradingBot {
 
     async populateDataStoreParallel(
         timeframes = ACTIVE_TIMEFRAMES,
-
     ) {
 
         if (this.isUpdating) {
@@ -246,6 +238,9 @@ export class TradingBot {
         while (!dataFetcher?.isReady()) {
             await new Promise((resolve) => setTimeout(resolve, 10))
         }
+        this.dataFetchers.bybitDataFetcher.setUpdateOHLCVCallback(
+            this.newOHLCVDataAvailable.bind(this),
+        )
 
         this.isUpdating = true
 
@@ -257,6 +252,7 @@ export class TradingBot {
             timeframes.forEach((timeframe) => {
                 fetchPromises.push(async () => {
                     const result = await dataFetcher.getInitialOHLCV(symbol, timeframe)
+                    // console.log("🚀 ~ file: bot.ts:255 ~ result:", result);
                     if (result && result.data) {
                         const inputData = {
                             details: result.symbolDetails,
@@ -271,7 +267,8 @@ export class TradingBot {
                         )
                         // console.log("🚀 ~ file: bot.ts:272 ~ storePair:", storePair);
                         this.writePairToDatabase(storePair)
-                        this.dataFetchers.bybitDataFetcher?.registerToOHLCVDataUpdates(
+                        console.log("🚀 ~ file: bot.ts:270 ~ this.dataFetchers.bybitDataFetcher:", this.dataFetchers.bybitDataFetcher ? 'Fetch not null' : 'Fetcher NULL');
+                        await this.dataFetchers.bybitDataFetcher.registerToOHLCVDataUpdates(
                             symbol.name,
                             timeframe,
                         )
@@ -353,6 +350,38 @@ export class TradingBot {
 
         return true
     }
+    fetchAllHistoricalDataForPair(pairName, timeframe) {
+        const leveragePairs = this.dataStore.get(PAIR_TYPES.leveragePairs)
+        const pairData = leveragePairs.get(pairName)
+        return async () => { // Return a function that returns a promise
+            const earliestTimestamp = pairData.ohlcvs.get(timeframe)[0][0];
+            const timeframeMs = convertTimeframeToMs(timeframe);
+            let currentTimestamp = earliestTimestamp;
+            const limit = 1000;
+
+            while (true) {
+                // continue until we've fetched all data
+                const previousShiftTimestamp = currentTimestamp - timeframeMs * limit;
+                console.log('🚀 ~ file: bot.ts:277 ~ pairName:', pairName, timeframe);
+                console.log(`🚀 ~ file: bot.ts:277 ~ timestamp from :${moment(currentTimestamp).format('DD-MM-YYYY HH:mm')} to:${moment(previousShiftTimestamp).format('DD-MM-YYYY HH:mm')}`);
+
+                const hasData = await this.fetchBatchHistoricalDataForPair(
+                    pairName,
+                    timeframe,
+                    previousShiftTimestamp,
+                    currentTimestamp,
+                    limit,
+                );
+
+                if (!hasData) {
+                    break; // exit the while loop
+                }
+
+                currentTimestamp = currentTimestamp - timeframeMs * limit;
+            }
+        };
+
+    }
 
     async fetchAllHistoricalData() {
         while (
@@ -371,33 +400,7 @@ export class TradingBot {
 
         for (const timeframe of ACTIVE_TIMEFRAMES) {
             const pairsPromises = Array.from(leveragePairs.entries()).map(([pairName, pairData]) => {
-                return async () => { // Return a function that returns a promise
-                    const earliestTimestamp = pairData.ohlcvs.get(timeframe)[0][0];
-                    const timeframeMs = convertTimeframeToMs(timeframe);
-                    let currentTimestamp = earliestTimestamp;
-                    const limit = 1000;
-
-                    while (true) {
-                        // continue until we've fetched all data
-                        const previousShiftTimestamp = currentTimestamp - timeframeMs * limit;
-                        console.log('🚀 ~ file: bot.ts:277 ~ pairName:', pairName, timeframe);
-                        console.log(`🚀 ~ file: bot.ts:277 ~ timestamp from :${moment(currentTimestamp).format('DD-MM-YYYY HH:mm')} to:${moment(previousShiftTimestamp).format('DD-MM-YYYY HH:mm')}`);
-
-                        const hasData = await this.fetchBatchHistoricalDataForPair(
-                            pairName,
-                            timeframe,
-                            previousShiftTimestamp,
-                            currentTimestamp,
-                            limit,
-                        );
-
-                        if (!hasData) {
-                            break; // exit the while loop
-                        }
-
-                        currentTimestamp = currentTimestamp - timeframeMs * limit;
-                    }
-                };
+                this.fetchAllHistoricalDataForPair(pairName, pairData, timeframe)
             });
 
             fetchPromises.push(...pairsPromises);
@@ -420,8 +423,8 @@ export class TradingBot {
     async writePairToDatabase(pairData) {
         /*global.logger.debug(
             '🚀 ~ file: bot.ts:304 ~ writePairToDatabase:',
-            pairData,
-        )*/
+            // pairData,
+        )
         await this.dbWrapper?.writePairToDatabase(pairData)
     }
 

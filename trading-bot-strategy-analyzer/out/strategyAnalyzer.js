@@ -56,30 +56,19 @@ var fetchRSI = function (timeframes) {
                 case 0:
                     symbolsUrl = trading_shared_1.BACKEND_URLS.LEVERAGE_URLS.getLeverageSymbols;
                     rsiBulkUrl = trading_shared_1.BACKEND_URLS.RSI_URLS.getAllRSIValues;
-                    return [4 /*yield*/, fetch(symbolsUrl, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                        })];
+                    return [4 /*yield*/, trading_shared_1.apiConnector.get(symbolsUrl)];
                 case 1:
                     symbolsResponse = _a.sent();
-                    return [4 /*yield*/, symbolsResponse.json()
-                        // global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ symbolsObjects:", symbolsObjects)
-                    ];
+                    return [4 /*yield*/, symbolsResponse.data];
                 case 2:
                     symbolsObjects = _a.sent();
                     symbols = symbolsObjects.map(function (pair) { return pair.name; });
-                    return [4 /*yield*/, fetch(rsiBulkUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ symbols: symbols, timeframes: timeframes })
+                    return [4 /*yield*/, trading_shared_1.apiConnector.post(rsiBulkUrl, JSON.stringify({ symbols: symbols, timeframes: timeframes }), {
+                            'Content-Type': 'application/json'
                         })];
                 case 3:
                     rsiResponse = _a.sent();
-                    return [4 /*yield*/, rsiResponse.json()];
+                    return [4 /*yield*/, rsiResponse.data];
                 case 4:
                     rsiValues = _a.sent();
                     // global.logger.debug("🚀 ~ file: strategyAnalyzer.ts:27 ~ fetchRSIAndCheckThreshold ~ rsiResponse:", rsiValues)
@@ -298,7 +287,7 @@ function openLongPosition(symbol, price) {
                     position = JSON.stringify({
                         symbol: symbol,
                         buyPrice: price,
-                        quantity: positionUSDTAmount,
+                        quantity: positionUSDTAmount, // TODO: adjust the quantity based on your strategy
                         type: 'long' // this is a long position
                     });
                     _a.label = 1;
@@ -335,7 +324,7 @@ function openShortPosition(symbol, price) {
                     position = JSON.stringify({
                         symbol: symbol,
                         sellPrice: price,
-                        quantity: positionUSDTAmount,
+                        quantity: positionUSDTAmount, // TODO: adjust the quantity based on your strategy
                         type: 'short' // this is a short position
                     });
                     _a.label = 1;

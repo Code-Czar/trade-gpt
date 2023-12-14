@@ -31,6 +31,9 @@ module.exports = configure(function (/* ctx */) {
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
       'i18n',
+      // 'onesignalplugin'
+
+      // 'pinia'
 
 
     ],
@@ -48,7 +51,7 @@ module.exports = configure(function (/* ctx */) {
     extras: [
       // 'ionicons-v4',
       // 'mdi-v5',
-      // 'fontawesome-v6',
+      'fontawesome-v6',
       // 'eva-icons',
       // 'themify',
       // 'line-awesome',
@@ -78,7 +81,7 @@ module.exports = configure(function (/* ctx */) {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      // publicPath: '/',
+      publicPath: '/',
       // analyze: true,
       // env: {},
       // rawDefine: {}
@@ -89,6 +92,18 @@ module.exports = configure(function (/* ctx */) {
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
+      vite: {
+        optimizeDeps: {
+          exclude: ['winston'] // Add Node.js-specific modules here
+        },
+        build: {
+          sourcemap: true,
+
+          // other build options...
+        },
+
+        // other Vite options...
+      },
 
       vitePlugins: [
         ['@intlify/vite-plugin-vue-i18n', {
@@ -114,12 +129,28 @@ module.exports = configure(function (/* ctx */) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
     devServer: {
       // https: true
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically, 
+      port: 8080
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
     framework: {
-      config: {},
+      config: {
+        // optional, set default locale and enable auto import
+        i18n: {
+          locale: 'en-US',
+          fallbackLocale: 'en-US',
+          import: 'all', // enable auto import
+          enableLegacy: true, // enable the `$q.i18n` syntax in older Quasar projects
+
+          // Define your languages here
+          locales: ['en-US', 'fr-FR'],
+          // Specify which Quasar components need to be translated
+          // You can skip this if you're not using the components in other languages
+          // You'll need to manually import them in that case
+          importTranslations: ['en-US', 'fr-FR']
+        }
+      },
 
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack

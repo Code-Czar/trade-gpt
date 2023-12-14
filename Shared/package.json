@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf ./dist/* && yarn install && tsc --outDir ./dist  && cp .env_shared ./dist/",
+    "build": "rm -rf ./dist; tsc --outDir ./dist  && cp .env_shared ./dist/",
     "main": "dist/index.js"
   },
   "keywords": [],
@@ -19,8 +19,9 @@
     "@influxdata/influxdb-client": "^1.33.2",
     "@types/node": "^20.8.6",
     "dotenv": "^16.3.1",
+    "loglevel": "^1.8.1",
     "moment": "^2.29.4",
-    "technicalindicators": "^3.1.0",
-    "winston": "^3.11.0"
+    "node-fetch": "^3.3.2",
+    "technicalindicators": "^3.1.0"
   }
 }

@@ -1,8 +1,19 @@
+<!-- Layout.vue -->
+
 <template>
-    <q-layout view="hHh lpR fFf">
-        <q-page-container style="padding:0">
+    <q-layout>
+        <PublicHeader />
+        <q-page-container>
             <router-view />
         </q-page-container>
     </q-layout>
 </template>
+  
+<script setup>
+import PublicHeader from '@/components/publicPages/PublicHeader.vue';
+</script>
+  
+<style scoped>
+/* Add any styles specific to the layout component */
+</style>
   

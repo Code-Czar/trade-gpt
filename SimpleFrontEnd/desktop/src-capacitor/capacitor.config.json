@@ -1,8 +1,0 @@
-{
-  "appId": "org.capacitor.quasar.app",
-  "appName": "Opportunities",
-  "webDir": "www",
-  "server": {
-    "androidScheme": "https"
-  }
-}

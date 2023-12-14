@@ -22,7 +22,7 @@ const client = new OneSignal.DefaultApi(configuration);
 
 
 // Define the notification content
-export const sendNotification = async (message: string) => {
+export const sendNotification = async (message: string, userId: null | string = null) => {
     const notification = new OneSignal.Notification();
     notification.app_id = APP_ID;
     notification.included_segments = ['All'];

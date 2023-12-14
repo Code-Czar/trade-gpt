@@ -28,6 +28,16 @@
         </q-item>
         <q-item v-if="isDev" clickable>
           <q-item-section avatar>
+            <q-icon name="alert" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>
+              <span @click="gotToAlertsPage">Alerts Panel</span>
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item v-if="isDev" clickable>
+          <q-item-section avatar>
             <q-icon name="Admin" />
           </q-item-section>
           <q-item-section>
@@ -77,5 +87,8 @@ const goToCheckout = () => {
 }
 const goToAdminPage = () => {
   router.push('/devOnly');
+}
+const gotToAlertsPage = () => {
+  router.push('/premiumAlerts');
 }
 </script>

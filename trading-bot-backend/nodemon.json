@@ -3,9 +3,9 @@
     "src/",
     "../Shared"
   ],
-  "ext": ".ts,.tsx",
+  "ext": "ts,tsx",
   "ignore": [
     "src/**/*.spec.ts"
   ],
-  "exec": "ts-node --transpile-only src/backend-server.ts"
+  "exec": "./startService.sh"
 }

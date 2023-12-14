@@ -1,8 +1,7 @@
 from django.db import models
-import uuid
 from django.utils import timezone
-
 from django.contrib.postgres.fields import JSONField
+
 import uuid
 
 
@@ -10,6 +9,7 @@ class User(models.Model):
     ROLE_CHOICES = [
         ("Admin", "Admin"),
         ("Dev", "Developer"),
+        ("BetaTester", "BetaTester"),
         ("User", "User"),
     ]
 
@@ -21,13 +21,14 @@ class User(models.Model):
 
     id = models.UUIDField(primary_key=True, editable=False)
     details = models.JSONField()  # Updated to use the standard JSONField
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="User")
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="BetaTester")
     permission_level = models.CharField(
         max_length=10, choices=PERMISSION_CHOICES, default="Basic"
     )
 
     stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
-    stripe_customer_details = models.JSONField(default=dict)
+    stripe_customer_details = models.JSONField(default=dict, blank=True, null=True)
+    notifications = models.JSONField(default=list, blank=True, null=True)
 
     def __str__(self):
         return str(self.id)

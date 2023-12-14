@@ -2,9 +2,13 @@
 TESTNET_BYBIT="https://testnet.bybit.com"
 PROJECT_PATH="/Users/beniben/Domaines_De_Vie/Business/GPT_Trading"
 
+PRODUCTION_IP="195.35.29.209"
+
 # Init
 # alias nvm="~/.nvm/nvm.sh"
 # nvm use 18.0
+alias openByBit="open $TESTNET_BYBIT"
+alias cdProject="cd $PROJECT_PATH"
 
 alias pushToGit="ssh-add ~/.ssh/Code-Czar && git push origin main"
 
@@ -19,9 +23,13 @@ alias deployPI2="deploy_to_pi 2233 \"beniben\" \"$rpi2\" \"/var/www/trading-chat
 # alias deployPI2="rsync -avz --exclude=node_modules --exclude=env --exclude .git -e 'ssh -p 2233' . beniben@$rpi2:/var/www/trading-chatgpt"
 
 alias recreateDB="cd trading-bot-centralization-server/trading_center && rm -rf db.sqlite3 && python manage.py makemigrations && python manage.py migrate && cd ../.."
+alias relinkLibrary="make link_shared_lib; cd - "
+alias deployAndroid="cd $PROJECT_PATH; make deploy_android; cd - "
+alias deployProduction='./deployToServer.sh production'
+alias deployStaging='./deployToServer.sh staging'
 
-alias openByBit="open $TESTNET_BYBIT"
-alias cdProject="cd $PROJECT_PATH"
+
+
 
 
 function deploy_to_pi() {
@@ -51,3 +59,7 @@ alias startFront="cd trading-bot-frontend; yarn start"
 alias startBack="cd trading-bot-backend; yarn start"
 alias startTelegraf="telegraf --config /usr/local/etc/telegraf.conf"
 alias startInfluxMac="brew services  restart influxdb"
+
+
+# Go to servers 
+alias gotoProduction="ssh -p2233 opDevUser@$PRODUCTION_IP"

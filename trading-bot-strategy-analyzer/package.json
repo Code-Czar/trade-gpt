@@ -2,6 +2,13 @@
   "name": "trading-bot-analyzer",
   "version": "1.0.0",
   "main": "src/strategyAnalyzer.js",
+  "scripts": {
+    "start": "yarn build; pm2 start ./out/strategyAnalyzerServer.js --no-daemon",
+    "dev": "nodemon",
+    "prebuild": "cd ../Shared && yarn build && cd -; rm -rf ./dist/*; yarn install; copyfiles -u 1 src/**/*.json dist/",
+    "build": "tsc src/*.ts --outDir ./dist",
+    "test": "mocha --timeout 5000 -r ts-node/register -r tsconfig-paths/register 'src/**/*.test.ts'"
+  },
   "dependencies": {
     "@onesignal/node-onesignal": "^2.0.1-beta2",
     "@sendgrid/mail": "^7.7.0",
@@ -31,17 +38,9 @@
     "onesignal-node": "^3.4.0",
     "prettier": "^2.8.8",
     "supertest": "^6.3.3",
-    "trading-shared": "../Shared",
+    "trading-shared": "../Shared/",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.2"
-  },
-  "scripts": {
-    "linkShared": "yarn add --force ../Shared",
-    "start": "yarn build ; pm2 start ./out/strategyAnalyzerServer.js --no-daemon",
-    "dev": "nodemon --exec ts-node src/strategyAnalyzerServer.ts",
-    "prebuild": "yarn install; yarn linkShared",
-    "build": "rm -rf ./out/* && tsc src/*.ts --outDir ./out",
-    "test": "mocha --timeout 5000 -r ts-node/register -r tsconfig-paths/register 'src/**/*.test.ts'"
   },
   "devDependencies": {
     "@types/ws": "^8.5.7",

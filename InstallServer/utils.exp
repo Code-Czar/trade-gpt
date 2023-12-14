@@ -1,0 +1,73 @@
+# utils.exp
+
+proc execute_remote {root_user remote_ip remote_port root_password command_to_execute log_file_path} {
+    # Enable detailed debugging
+    # exp_internal 1
+
+   spawn ssh -p $remote_port $root_user@$remote_ip
+    expect {
+        -re "assword:" {
+            send "$root_password\r"
+            exp_continue
+        }
+        -re "yes/no" {
+            send "yes\r"
+            exp_continue
+        }
+        -re {root@localhost:~#} {  # Adjusted to match the server's prompt
+            send "$command_to_execute; echo '===COMMAND_END===' \r"
+        }
+    }
+
+    expect {
+        "===COMMAND_END===" {
+            set output $expect_out(buffer)
+            send_user "Executed command: $command_to_execute\n"
+            send_user "Command output:\n$output\n"
+        }
+        timeout {
+            send_user "Command timed out\n"
+        }
+    }
+
+    send "exit\r"
+    expect eof
+}
+
+
+# Function to execute scp command
+proc execute_remote_scp {root_user remote_ip remote_port root_password local_file_path remote_file_path log_file_path} {
+    # Enable detailed debugging (uncomment for debugging)
+    # exp_internal 1
+
+    spawn scp -P $remote_port $local_file_path $root_user@$remote_ip:$remote_file_path
+    expect {
+        -re "assword:" {
+            send "$root_password\r"
+            exp_continue
+        }
+        -re "yes/no" {
+            send "yes\r"
+            exp_continue
+        }
+        eof {
+            # End of file indicates successful transfer
+            send_user "SCP transfer complete for $local_file_path to $remote_file_path\n"
+        }
+        timeout {
+            send_user "SCP command timed out\n"
+        }
+    }
+}
+
+
+
+
+
+# Function to execute rsync command
+proc rsync_folder {local_folder remote_user remote_ip remote_port remote_folder} {
+    spawn rsync -arvvti -e "ssh -p $remote_port" $local_folder $remote_user@$remote_ip:$remote_folder
+
+    send "exit\r"
+    expect eof
+}

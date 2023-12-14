@@ -59,7 +59,7 @@ export class PositionManager {
                 }),
             });
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 const responseBody = await response.text();
                 console.error(
                     `Failed to update PnL for position ${id}: ${response.status} ${response.statusText} - ${responseBody}`,

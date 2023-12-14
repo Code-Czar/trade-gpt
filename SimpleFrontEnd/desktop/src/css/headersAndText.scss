@@ -1,0 +1,51 @@
+
+@import './colors.scss';
+
+.base-text{
+    // color: white;
+}
+body{
+    // @extend .base-text;
+}
+
+h1, h2, h3, h4, h5{
+    @extend .base-text;
+}
+
+h1{
+    font-size:4rem;
+    font-weight:600;
+    margin: unset; 
+}
+h2{
+    font-size:4rem;
+}
+h3{
+    font-size:3rem;
+}
+h4{
+    font-size:2rem;
+}
+
+h5{
+    @extend .base-text;
+    font-size: 1rem;
+}
+
+.text-subtitle1{
+    @extend .base-text; 
+
+}
+
+.text-white{
+    color:white;
+}
+
+
+.q-tab__label{
+    // @extend .base-text;
+}
+
+.q-item__label{
+    // color:$deep-blue;
+}

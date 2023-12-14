@@ -24,7 +24,7 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
-  // Navigation Guard
+  // Navigation Guardw
   Router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
     const userStore_ = userStore();  // Use your user store
     console.log("🚀 ~ file: router before ~ userStore_:", userStore_.user);

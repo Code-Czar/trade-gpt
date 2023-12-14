@@ -7,3 +7,5 @@ __pycache__
 **/env
 .env
 db.sqlite3
+trading-bot-position-manager/src/*.js
+**/notificationsLog.txt

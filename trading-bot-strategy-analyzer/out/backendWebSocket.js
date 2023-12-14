@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BackendClient = void 0;
 var trading_shared_1 = require("trading-shared");
+// global.logger.debug("🚀 ~ file: backendWebSocket.ts:2 ~ BACKEND_URLS:", BACKEND_URLS)
 // const WebSocket = require('ws')
 var WebSocket = require("ws");
 var BackendClient = /** @class */ (function () {

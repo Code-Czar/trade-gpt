@@ -1,7 +1,7 @@
 import config from './config.json';
 
-let REMOTE_URL: string;
-let REMOTE_WSS_URL: string;
+export let REMOTE_URL: string;
+export let REMOTE_WSS_URL: string;
 
 // Check if we are in a Node.js environment
 if (typeof process !== 'undefined' && process.versions && process.versions.node) {
@@ -19,7 +19,6 @@ if (typeof process !== 'undefined' && process.versions && process.versions.node)
     REMOTE_WSS_URL = config.REMOTE_WSS;
 }
 
-// ... rest of the code remains unchanged
 
 console.log("🚀 ~ file: projectURLs.ts:19 ~ config:", config, REMOTE_URL);
 
@@ -33,19 +32,37 @@ export const SERVER_PORTS = {
 
 export const PROJECT_URLS = {
     BACKEND_URL: REMOTE_URL + ':' + SERVER_PORTS.BACKEND_PORT,
-    BACKEND_WEBSOCKET: REMOTE_WSS_URL + '/ws',
+    BACKEND_WEBSOCKET: REMOTE_WSS_URL + ':' + SERVER_PORTS.BACKEND_PORT + '/ws',
     STRATEGY_ANALYZER_URL: REMOTE_URL + ':' + SERVER_PORTS.STRATEGY_ANALYZER_PORT,
     POSITION_MANAGER_URL: REMOTE_URL + ':' + SERVER_PORTS.POSITION_MANAGER_PORT,
-    CENTRALIZATION_URL: REMOTE_URL + ':' + SERVER_PORTS.CENTRALIZATION_PORT,
+    CENTRALIZATION_URL: 'centralization.' + REMOTE_URL,
 };
+
+if (REMOTE_URL.includes('127.0.0.1') || REMOTE_URL.includes('localhost')) {
+    PROJECT_URLS.CENTRALIZATION_URL = REMOTE_URL + ":" + SERVER_PORTS.CENTRALIZATION_PORT
+}
 
 export const BACKEND_ENDPOINTS = {
     LEVERAGE_ENDPOINTS: {
-        getLeverageSymbols: '/api/symbols/leverage'
+        getLeverageSymbols: '/api/symbols/leverage',
+        getHistoricalDataForPair: '/api/fetchHistoricalDataForPair'
     },
     RSI_ENDPOINTS: {
         getAllRSIValues: '/api/rsi/getValues',
     }
+};
+
+export const BACKEND_URLS = {
+    ROOT: PROJECT_URLS.BACKEND_URL,
+    WEBSOCKET: PROJECT_URLS.BACKEND_WEBSOCKET,
+    LEVERAGE_URLS: {
+        getLeverageSymbols: PROJECT_URLS.BACKEND_URL + BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getLeverageSymbols,
+        getHistoricalDataForPair: PROJECT_URLS.BACKEND_URL + BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getHistoricalDataForPair,
+
+    },
+    RSI_URLS: {
+        getAllRSIValues: PROJECT_URLS.BACKEND_URL + BACKEND_ENDPOINTS.RSI_ENDPOINTS.getAllRSIValues,
+    },
 };
 
 export const CENTRALIZATION_ENDPOINTS = {
@@ -56,6 +73,14 @@ export const CENTRALIZATION_ENDPOINTS = {
     STRIPE_CHECKOUT_SESSION: '/create_checkout_session'
 };
 
+export const CENTRALIZATION_API_URLS = {
+    USERS: PROJECT_URLS.CENTRALIZATION_URL + CENTRALIZATION_ENDPOINTS.USERS,
+    STRIPE_CONFIG: PROJECT_URLS.CENTRALIZATION_URL + CENTRALIZATION_ENDPOINTS.STRIPE_CONFIG,
+    STRIPE_PAYMENT_ATTEMPT: PROJECT_URLS.CENTRALIZATION_URL + CENTRALIZATION_ENDPOINTS.STRIPE_PAYMENT_ATTEMPT,
+    STRIPE_CREATE_CUSTOMER: PROJECT_URLS.CENTRALIZATION_URL + CENTRALIZATION_ENDPOINTS.STRIPE_CREATE_CUSTOMER,
+    STRIPE_CHECKOUT_SESSION: PROJECT_URLS.CENTRALIZATION_URL + CENTRALIZATION_ENDPOINTS.STRIPE_CHECKOUT_SESSION
+};
+
 export const STRATEGY_ANALYZER_URLS = {
     SIGNALS: {
         getEMA28Signals: PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals',
@@ -63,16 +88,6 @@ export const STRATEGY_ANALYZER_URLS = {
     }
 };
 
-export const BACKEND_URLS = {
-    ROOT: PROJECT_URLS.BACKEND_URL,
-    WEBSOCKET: PROJECT_URLS.BACKEND_WEBSOCKET,
-    LEVERAGE_URLS: {
-        getLeverageSymbols: PROJECT_URLS.BACKEND_URL + BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getLeverageSymbols,
-    },
-    RSI_URLS: {
-        getAllRSIValues: PROJECT_URLS.BACKEND_URL + BACKEND_ENDPOINTS.RSI_ENDPOINTS.getAllRSIValues,
-    },
-};
 
 
-// export default { PROJECT_URLS }
+

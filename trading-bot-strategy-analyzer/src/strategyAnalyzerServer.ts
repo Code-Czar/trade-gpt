@@ -7,7 +7,7 @@ const fs = require('fs');
 const https = require('https');
 const http = require('http'); // Import the HTTP module
 
-const fetch = require('node-fetch');
+// const fetch = require('node-fetch');
 
 const dotenv = require('dotenv');
 const path = require('path');
@@ -47,15 +47,18 @@ server.listen(SERVER_PORTS.STRATEGY_ANALYZER_PORT, () => {
 });
 app.use(cors());
 
-// Start the loop
+
+
+
+// Start clients 
 const strategyAnalyzer = new StrategyAnalyzer();
+strategyAnalyzer.init()
+
 const client = new BackendClient(strategyAnalyzer);
 
 app.get('/health', (req, res) => {
     res.status(200).send('Hello from SA!');
 });
-
-
 
 app.get('/api/getRSISignals/:symbolName', (req, res) => {
     const { symbolName } = req.params;
@@ -66,6 +69,7 @@ app.get('/api/getRSISignals/:symbolName', (req, res) => {
     }
     res.status(404).send('No RSI signals found for this symbol');
 });
+
 app.get('/api/getEMA28Signals/:symbolName', (req, res) => {
     const { symbolName } = req.params;
     if (strategyAnalyzer.pastEMA28Signals[symbolName]) {
