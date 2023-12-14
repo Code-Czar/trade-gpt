@@ -1,0 +1,138 @@
+{
+  "stats": {
+    "suites": 2,
+    "tests": 2,
+    "passes": 2,
+    "pending": 0,
+    "failures": 0,
+    "start": "2023-12-14T10:39:04.329Z",
+    "end": "2023-12-14T10:39:04.805Z",
+    "duration": 476,
+    "testsRegistered": 2,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "00919c5c-d63c-4703-9e9e-fda3b6924081",
+      "title": "",
+      "fullFile": "/Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/apiComponents/backend/routes.test.js",
+      "file": "/apiComponents/backend/routes.test.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "c75b7c0b-1301-4e70-8d48-9c5d7d88089a",
+          "title": "Backend",
+          "fullFile": "/Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/apiComponents/backend/routes.test.js",
+          "file": "/apiComponents/backend/routes.test.js",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "b67a2c25-2c07-4981-b3af-5d7f8e06b45e",
+              "title": "routes",
+              "fullFile": "/Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/apiComponents/backend/routes.test.js",
+              "file": "/apiComponents/backend/routes.test.js",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "health",
+                  "fullTitle": "Backend routes health",
+                  "timedOut": false,
+                  "duration": 184,
+                  "state": "passed",
+                  "speed": "slow",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const result = await apiConnector.get(BACKEND_URLS.HEALTH)\n// console.log(\"🚀 ~ file: firstTest.test.js:11 ~ result:\", result);\nexpect(result.status).to.equal(200);\n// Assert that the sum is correct",
+                  "err": {},
+                  "uuid": "3470d294-a528-4178-a22d-f412124d34ab",
+                  "parentUUID": "b67a2c25-2c07-4981-b3af-5d7f8e06b45e",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "getLeverageSymbols",
+                  "fullTitle": "Backend routes getLeverageSymbols",
+                  "timedOut": false,
+                  "duration": 286,
+                  "state": "passed",
+                  "speed": "slow",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const result = await apiConnector.get(BACKEND_URLS.LEVERAGE_URLS.getLeverageSymbols)\n// console.log(\"🚀 ~ file: firstTest.test.js:11 ~ result:\", result);\nexpect(result.status).to.equal(200);\n// Assert that the sum is correct",
+                  "err": {},
+                  "uuid": "c3f722ef-7cd5-4019-8d5e-380491a8ffe5",
+                  "parentUUID": "b67a2c25-2c07-4981-b3af-5d7f8e06b45e",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "3470d294-a528-4178-a22d-f412124d34ab",
+                "c3f722ef-7cd5-4019-8d5e-380491a8ffe5"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 470,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 2000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "10.2.0"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": null,
+      "version": "6.2.0"
+    }
+  }
+}

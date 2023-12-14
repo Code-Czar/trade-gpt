@@ -38,6 +38,7 @@ if (exports.REMOTE_URL.includes('127.0.0.1') || exports.REMOTE_URL.includes('loc
     exports.PROJECT_URLS.CENTRALIZATION_URL = exports.REMOTE_URL + ":" + exports.SERVER_PORTS.CENTRALIZATION_PORT;
 }
 exports.BACKEND_ENDPOINTS = {
+    HEALTH: '/health',
     LEVERAGE_ENDPOINTS: {
         getLeverageSymbols: '/api/symbols/leverage',
         getHistoricalDataForPair: '/api/fetchHistoricalDataForPair'
@@ -48,6 +49,7 @@ exports.BACKEND_ENDPOINTS = {
 };
 exports.BACKEND_URLS = {
     ROOT: exports.PROJECT_URLS.BACKEND_URL,
+    HEALTH: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.HEALTH,
     WEBSOCKET: exports.PROJECT_URLS.BACKEND_WEBSOCKET,
     LEVERAGE_URLS: {
         getLeverageSymbols: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getLeverageSymbols,

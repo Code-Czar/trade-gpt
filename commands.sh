@@ -63,3 +63,12 @@ alias startInfluxMac="brew services  restart influxdb"
 
 # Go to servers 
 alias gotoProduction="ssh -p2233 opDevUser@$PRODUCTION_IP"
+
+
+# Testing 
+function testapis() {
+    cd Testing && ./runTests.sh "$@" && cd -
+}
+
+
+alias testapis="testapis"

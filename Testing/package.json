@@ -1,0 +1,20 @@
+{
+  "name": "testing_opportunities",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "mocha --reporter mocha-multi --reporter-options spec=-,mocha-file-reporter=./test-results.txt"
+  },
+  "author": "Benjamin Tourrette",
+  "license": "ISC",
+  "dependencies": {
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0"
+  },
+  "devDependencies": {
+    "mocha-multi": "^1.1.7",
+    "mochawesome": "^7.1.3"
+  }
+}

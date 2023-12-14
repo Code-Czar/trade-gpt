@@ -43,6 +43,7 @@ if (REMOTE_URL.includes('127.0.0.1') || REMOTE_URL.includes('localhost')) {
 }
 
 export const BACKEND_ENDPOINTS = {
+    HEALTH: '/health',
     LEVERAGE_ENDPOINTS: {
         getLeverageSymbols: '/api/symbols/leverage',
         getHistoricalDataForPair: '/api/fetchHistoricalDataForPair'
@@ -54,6 +55,7 @@ export const BACKEND_ENDPOINTS = {
 
 export const BACKEND_URLS = {
     ROOT: PROJECT_URLS.BACKEND_URL,
+    HEALTH: PROJECT_URLS.BACKEND_URL + BACKEND_ENDPOINTS.HEALTH,
     WEBSOCKET: PROJECT_URLS.BACKEND_WEBSOCKET,
     LEVERAGE_URLS: {
         getLeverageSymbols: PROJECT_URLS.BACKEND_URL + BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getLeverageSymbols,
