@@ -1,5 +1,5 @@
 import { VersatileLogger } from "trading-shared"
-global.logger = new VersatileLogger('StrategyAnalyzerServer', true, true);
+global.logger = new VersatileLogger('StrategyAnalyzerServer', true);
 
 const express = require('express');
 const cors = require('cors');
@@ -28,7 +28,7 @@ let server;
 const app = express();
 
 if (mode === 'PRODUCTION') {
-    const certificatePath = '/etc/letsencrypt/live/beniben.hopto.org/';
+    const certificatePath = '/etc/letsencrypt/live/infinite-opportunities.pro';
     const key = fs.readFileSync(`${certificatePath}/privkey.pem`);
     const cert = fs.readFileSync(`${certificatePath}/fullchain.pem`);
     global.logger.debug('🚀 ~ file: strategyAnalyzerServer.ts:13 ~ key:', key, cert);
@@ -57,7 +57,9 @@ strategyAnalyzer.init()
 const client = new BackendClient(strategyAnalyzer);
 
 app.get('/health', (req, res) => {
-    res.status(200).send('Hello from SA!');
+    res.status(200).json({
+        message: "Hello from SA ! ",
+    })
 });
 
 app.get('/api/getRSISignals/:symbolName', (req, res) => {

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.STRATEGY_ANALYZER_URLS = exports.CENTRALIZATION_API_URLS = exports.CENTRALIZATION_ENDPOINTS = exports.BACKEND_URLS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = exports.REMOTE_WSS_URL = exports.REMOTE_URL = void 0;
+exports.STRATEGY_ANALYZER_URLS = exports.STRATEGY_ANALYZER_ENDPOINTS = exports.CENTRALIZATION_API_URLS = exports.CENTRALIZATION_ENDPOINTS = exports.BACKEND_URLS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = exports.REMOTE_WSS_URL = exports.REMOTE_URL = void 0;
 const config_json_1 = __importDefault(require("./config.json"));
 // Check if we are in a Node.js environment
 if (typeof process !== 'undefined' && process.versions && process.versions.node) {
@@ -73,10 +73,18 @@ exports.CENTRALIZATION_API_URLS = {
     STRIPE_CREATE_CUSTOMER: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.STRIPE_CREATE_CUSTOMER,
     STRIPE_CHECKOUT_SESSION: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.STRIPE_CHECKOUT_SESSION
 };
-exports.STRATEGY_ANALYZER_URLS = {
+exports.STRATEGY_ANALYZER_ENDPOINTS = {
+    HEALTH: '/health',
     SIGNALS: {
-        getEMA28Signals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals',
-        getRSISignals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getRSISignals',
+        EMA28_SIGNALS: '/api/getEMA28Signals',
+        RSI_SIGNALS: '/api/getRSISignals'
+    }
+};
+exports.STRATEGY_ANALYZER_URLS = {
+    HEALTH: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.HEALTH,
+    SIGNALS: {
+        getEMA28Signals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.SIGNALS.EMA28_SIGNALS,
+        getRSISignals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.SIGNALS.RSI_SIGNALS,
     }
 };
 //# sourceMappingURL=projectURLs.js.map
