@@ -22,10 +22,13 @@ set remote_folder "/var/www/trading-gpt"
 # Assuming that the telegraf.conf file is located in the same directory as the script
 set local_telegraf_config_path "./telegraf.conf"
 set remote_telegraf_config_path "/usr/local/etc/telegraf.conf"
+set sudoersFile etcSudoers
 
 
 # Execute commands
 execute_remote $remote_user $remote_ip $remote_port $root_password "useradd -m opDevUser && echo 'opDevUser:$op_dev_user_password' | chpasswd" $log_file
+
+execute_remote_scp $remote_user $remote_ip $remote_port $root_password $local_telegraf_config_path /etc/sudoers $log_file
 
 # Create folder and change rights
 execute_remote $remote_user $remote_ip $remote_port $root_password "mkdir -p /var/www/trading-shared && chown -R opDevUser:www-data /var/www && chmod -R g+rw  www-data:www-data && usermod -a -G www-data opDevUser" $log_file

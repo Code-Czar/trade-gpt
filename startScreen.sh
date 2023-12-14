@@ -10,21 +10,22 @@ session="trading_bot"
 screen -dmS $session
 
 # List of trading bot components with npm start command
-components=("trading-bot-backend"  "trading-bot-position-manager" "trading-bot-strategy-analyzer")
-# components=("trading-bot-strategy-analyzer")
+components=("trading-bot-backend" "trading-bot-position-manager" "trading-bot-strategy-analyzer")
 
 # Start the Django server in a new screen window
-screen -S $session -X screen -t "trading-bot-centralization-server" bash -c "cd trading-bot-centralization-server && source env/bin/activate && cd trading_center && python manage.py runserver; read"
+screen -S $session -X screen -t "Shared" bash -c "echo 'Shared'; bash"
+screen -S $session -X screen -t "trading-bot-centralization-server" bash -c "cd trading-bot-centralization-server && source env/bin/activate && cd trading_center && python manage.py runserver; bash"
+
 wait 5
+
+make link_shared_library
 
 # Start each component in a new screen window
 for component in "${components[@]}"
 do
-    # Navigate to component directory and run 'yarn start', then wait for user input
-    screen -S $session -X screen -t $component bash -c "cd $component && yarn start; read"
+    # Navigate to component directory and run 'yarn start', then switch to bash shell
+    screen -S $session -X screen -t $component bash -c "cd $component && yarn dev; bash"
 done
-
-
 
 # Attach to the screen session
 screen -r $session

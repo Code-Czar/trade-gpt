@@ -1,6 +1,7 @@
 import { sendNotification } from './notifiers';
 import { apiConnector, CENTRALIZATION_API_URLS, convertPairToJSON } from "trading-shared"
 import { formatOHLCVForChartData, computeEMASignals, unixTimestampToDate } from 'trading-shared';
+import fetch from 'node-fetch'
 
 const fs = require('fs');
 
@@ -22,7 +23,28 @@ export class StrategyAnalyzer {
         let aggregatedUserNotifications = {};
 
         console.log("🚀 ~ file: strategyAnalyzerServer.ts:55 ~ CENTRALIZATION_ENDPOINTS.USERS:", CENTRALIZATION_API_URLS.USERS);
-        const usersResponse = await apiConnector.get(CENTRALIZATION_API_URLS.USERS);
+        // const usersResponse = await apiConnector.get(CENTRALIZATION_API_URLS.USERS);
+        // const usersResponse = await apiConnector.get("https://centralization.infinite-opportunities.pro/users");
+        // const result = {}
+
+        const usersResponse = await apiConnector.get("centralization.infinite-opportunities.pro/users", {
+            'Content-Type': 'application/json'
+        });
+
+        // const usersResponse = await fetch("https://centralization.infinite-opportunities.pro/users",
+
+        //     {
+        //         method: "GET",
+        //         'Content-Type': 'application/json'
+        //     }
+
+        //     // Add other fetch options here as needed
+        // );
+
+
+        // result.status = usersResponse.status;
+        // result.headers = usersResponse.headers;
+
         const users = await usersResponse.data;
         console.log("🚀 ~ file: strategyAnalyzerServer.ts:55 ~ users:", users);
 
