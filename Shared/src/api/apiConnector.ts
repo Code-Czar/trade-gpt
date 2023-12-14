@@ -24,30 +24,35 @@ async function handleResponse(response: Response): Promise<any> {
     }
 }
 
-export async function get(url: string, parameters = {}, headers = defaultHeaders) {
-    console.log("🚀 ~ file: apiConnector.ts:21 ~ url:", url);
+async function handleURL(url: string) {
     url = url.trim();
-
     if (!url.includes("localhost") && !url.includes("127.0.0.1") && !url.startsWith('https://') && !url.startsWith('http://')) {
         url = "https://" + url;
+    } else if (url.startsWith('127.0.0.1')) {
+        url = 'http://' + url
     }
-    console.log("🚀 ~ file: apiConnector.ts:27 ~ url:", url);
+    console.log("🚀 ~ file: apiConnector.ts:28 ~ url:", url);
+    return url;
+
+}
+
+export async function get(url: string, parameters = {}, headers = defaultHeaders) {
+
+    url = await handleURL(url)
 
     const result: APIResult = {
         data: {},
         status: 0,
     };
-
+    let response;
     try {
-        console.log("🚀 ~ file: apiConnector.ts:47 ~ s: LOG");
         console.log("🚀 ~ file: apiConnector.ts:102 ~ url:", url);
 
-        const response = await fetch(url, {
+        response = await fetch(url, {
             method: "GET",
             headers,
             // Add other fetch options here as needed
         });
-        // console.log("🚀 ~ file: apiConnector.ts:47 ~ response:", response);
 
         result.status = response.status;
         result.headers = response.headers;
@@ -76,7 +81,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
             // Handle other HTTP status codes as needed
         }
     } catch (error) {
-        console.error("Fetch error 2:", error);
+        console.error("Fetch error 2:", error, error?.message, response, url);
         result.status = API_STATUS.ERROR;
     }
 

@@ -9,3 +9,4 @@ __pycache__
 db.sqlite3
 trading-bot-position-manager/src/*.js
 **/notificationsLog.txt
+mochawesome-report

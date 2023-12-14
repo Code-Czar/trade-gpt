@@ -6,15 +6,29 @@ echo $ENVIRONMENT
 SHARED_LIB_FOLDER="../Shared"
 SHARED_CONFIG_FOLDER="src/consts"
 CONFIG_FILE="$SHARED_CONFIG_FOLDER/config_${ENVIRONMENT}.json"
+LOCAL_CONFIG_FILE="$SHARED_CONFIG_FOLDER/config_local.json"
 
 # Set shared config
 pwd
 cd $SHARED_LIB_FOLDER
+
 cp $CONFIG_FILE $SHARED_CONFIG_FOLDER/config.json
-yarn build
-cd ..
-make link_shared_lib
-cd Testing
+
+# Check if rebuild is necessary
+REBUILD_SHARED=false
+if ! diff $SHARED_CONFIG_FOLDER/config.json $LOCAL_CONFIG_FILE > /dev/null; then
+    REBUILD_SHARED=true
+fi
+
+if [ "$REBUILD_SHARED" = true ]; then
+    yarn build
+    cd ..
+    make link_shared_lib
+else
+    echo "No changes in configuration, skipping rebuild."
+fi
+
+cd ../Testing
 clear
 
 echo "####### STARTING TESTS #######"
@@ -34,10 +48,7 @@ if [ -f "$CONFIG_FILE" ]; then
     for dir in ./apiComponents/*; do
         if [ -d "$dir" ]; then
             echo "Running tests in $dir"
-            # yarn mocha "$dir"/*.test.js >> testResults.txt
-            # yarn mocha --reporter mocha-multi --reporter-options spec=-,mocha-file-reporter=./test-results.txt "$dir"/*.test.js
             yarn mocha --reporter mochawesome "$dir"/*.test.js | tee test-results.txt
-
         fi
     done
 
@@ -49,10 +60,14 @@ fi
 
 echo "####### END TESTS #######"
 
-
-cd $SHARED_LIB_FOLDER
-pwd
-cp $SHARED_CONFIG_FOLDER/config_local.json $SHARED_CONFIG_FOLDER/config.json
-yarn build 
-cd ..
-make link_shared_lib
+# Rebuild to local config if necessary
+if [ "$REBUILD_SHARED" = true ]; then
+    cd $SHARED_LIB_FOLDER
+    pwd
+    cp $LOCAL_CONFIG_FILE $SHARED_CONFIG_FOLDER/config.json
+    yarn build
+    cd ..
+    make link_shared_lib
+else
+    echo "Configuration already set to local, skipping rebuild."
+fi

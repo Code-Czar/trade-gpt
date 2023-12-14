@@ -1,46 +1,21 @@
 yarn run v1.22.19
 $ /Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/node_modules/.bin/mocha --reporter mochawesome ./apiComponents/strategy-analyzer/userNotifications.test.js
-🚀 ~ file: projectURLs.ts:19 ~ config: {
-  REMOTE_URL: 'infinite-opportunities.pro',
-  REMOTE_WSS: 'wss://infinite-opportunities.pro'
-} infinite-opportunities.pro
+🚀 ~ file: projectURLs.ts:19 ~ config: { REMOTE_URL: '127.0.0.1', REMOTE_WSS: 'ws://127.0.0.1' } 127.0.0.1
 
 
   Strategy-Analyzer
+🚀 ~ file: apiConnector.ts:28 ~ url: http://127.0.0.1:3002/health
+🚀 ~ file: apiConnector.ts:102 ~ url: http://127.0.0.1:3002/health
     routes
-🚀 ~ file: apiConnector.ts:21 ~ url: infinite-opportunities.pro:3002/health
-🚀 ~ file: apiConnector.ts:27 ~ url: https://infinite-opportunities.pro:3002/health
-🚀 ~ file: apiConnector.ts:47 ~ s: LOG
-🚀 ~ file: apiConnector.ts:102 ~ url: https://infinite-opportunities.pro:3002/health
-🚀 ~ file: userNotifications.test.js:11 ~ result: {
-  data: { message: 'Hello from SA ! ' },
-  status: 200,
-  headers: HeadersList(16) [
-    'access-control-allow-origin',
-    '*',
-    'connection',
-    'keep-alive',
-    'content-length',
-    '30',
-    'content-type',
-    'application/json; charset=utf-8',
-    'date',
-    'Thu, 14 Dec 2023 11:38:25 GMT',
-    'etag',
-    'W/"1e-kiw66kZ2Uo4rpk4JY4QuM2ILzxc"',
-    'keep-alive',
-    'timeout=5',
-    'x-powered-by',
-    'Express'
-  ]
-}
-      ✔ health (150ms)
+🚀 ~ file: apiConnector.ts:28 ~ url: http://127.0.0.1:3002/health
+🚀 ~ file: apiConnector.ts:102 ~ url: http://127.0.0.1:3002/health
+      ✔ health
 
 
-  1 passing (157ms)
+  1 passing (144ms)
 
 [mochawesome] Report JSON saved to /Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/mochawesome-report/mochawesome.json
 
 [mochawesome] Report HTML saved to /Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/mochawesome-report/mochawesome.html
 
-Done in 0.60s.
+Done in 1.00s.

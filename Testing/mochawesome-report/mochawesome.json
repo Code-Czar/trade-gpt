@@ -5,9 +5,9 @@
     "passes": 1,
     "pending": 0,
     "failures": 0,
-    "start": "2023-12-14T11:38:25.312Z",
-    "end": "2023-12-14T11:38:25.469Z",
-    "duration": 157,
+    "start": "2023-12-14T16:30:26.577Z",
+    "end": "2023-12-14T16:30:26.721Z",
+    "duration": 144,
     "testsRegistered": 1,
     "passPercent": 100,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "2a2cb4cc-1353-4871-818f-09630f0f3d0f",
+      "uuid": "101d5229-a6a8-4c0a-8eec-e7e6d6a1bb81",
       "title": "",
       "fullFile": "/Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js",
       "file": "/apiComponents/strategy-analyzer/userNotifications.test.js",
@@ -27,16 +27,35 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "90f82852-6b5d-4b59-92b3-1d8c5b62b35c",
+          "uuid": "52c52481-e52f-4ef2-abaa-dd2c64019c7f",
           "title": "Strategy-Analyzer",
           "fullFile": "/Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js",
           "file": "/apiComponents/strategy-analyzer/userNotifications.test.js",
-          "beforeHooks": [],
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"Strategy-Analyzer\"",
+              "fullTitle": "Strategy-Analyzer \"before all\" hook in \"Strategy-Analyzer\"",
+              "timedOut": false,
+              "duration": 110,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "this.timeout(10000); // Increase timeout to 10 seconds\nawait waitForServerToBeReady(STRATEGY_ANALYZER_URLS.HEALTH)",
+              "err": {},
+              "uuid": "73d76e81-6f64-481b-b6a6-c137d07fe801",
+              "parentUUID": "52c52481-e52f-4ef2-abaa-dd2c64019c7f",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
           "afterHooks": [],
           "tests": [],
           "suites": [
             {
-              "uuid": "dfa757ec-1c27-4038-9201-c4eaa4a78191",
+              "uuid": "65056237-079f-4757-862b-733d5e68811f",
               "title": "routes",
               "fullFile": "/Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js",
               "file": "/apiComponents/strategy-analyzer/userNotifications.test.js",
@@ -47,29 +66,29 @@
                   "title": "health",
                   "fullTitle": "Strategy-Analyzer routes health",
                   "timedOut": false,
-                  "duration": 150,
+                  "duration": 19,
                   "state": "passed",
-                  "speed": "slow",
+                  "speed": "fast",
                   "pass": true,
                   "fail": false,
                   "pending": false,
                   "context": null,
-                  "code": "const result = await apiConnector.get(STRATEGY_ANALYZER_URLS.HEALTH)\nconsole.log(\"🚀 ~ file: userNotifications.test.js:11 ~ result:\", await result);\nexpect(await result.status).to.equal(200);",
+                  "code": "const result = await apiConnector.get(STRATEGY_ANALYZER_URLS.HEALTH)\nexpect(await result.status).to.equal(200);",
                   "err": {},
-                  "uuid": "c9a97edd-d4ac-47b7-8b72-bdcdd1838663",
-                  "parentUUID": "dfa757ec-1c27-4038-9201-c4eaa4a78191",
+                  "uuid": "83cb7786-0930-4603-8238-9512badf8af7",
+                  "parentUUID": "65056237-079f-4757-862b-733d5e68811f",
                   "isHook": false,
                   "skipped": false
                 }
               ],
               "suites": [],
               "passes": [
-                "c9a97edd-d4ac-47b7-8b72-bdcdd1838663"
+                "83cb7786-0930-4603-8238-9512badf8af7"
               ],
               "failures": [],
               "pending": [],
               "skipped": [],
-              "duration": 150,
+              "duration": 19,
               "root": false,
               "rootEmpty": false,
               "_timeout": 2000

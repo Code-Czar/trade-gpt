@@ -27,23 +27,7 @@ export class StrategyAnalyzer {
         // const usersResponse = await apiConnector.get("https://centralization.infinite-opportunities.pro/users");
         // const result = {}
 
-        const usersResponse = await apiConnector.get("centralization.infinite-opportunities.pro/users", {
-            'Content-Type': 'application/json'
-        });
-
-        // const usersResponse = await fetch("https://centralization.infinite-opportunities.pro/users",
-
-        //     {
-        //         method: "GET",
-        //         'Content-Type': 'application/json'
-        //     }
-
-        //     // Add other fetch options here as needed
-        // );
-
-
-        // result.status = usersResponse.status;
-        // result.headers = usersResponse.headers;
+        const usersResponse = await apiConnector.get(CENTRALIZATION_API_URLS.USERS);
 
         const users = await usersResponse.data;
         console.log("🚀 ~ file: strategyAnalyzerServer.ts:55 ~ users:", users);
@@ -77,9 +61,7 @@ export class StrategyAnalyzer {
             });
         })
 
-        // Pausing execution for 20 seconds
 
-        // console.log("🚀 ~ file: strategyAnalyzerServer.ts:60 ~ FINAL userNotifications:", aggregatedUserNotifications);
 
         this.usersNotifications = aggregatedUserNotifications;
         fs.writeFileSync('usersNotifications.json', JSON.stringify(aggregatedUserNotifications));

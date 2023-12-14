@@ -1,7 +1,6 @@
 {
   "watch": [
-    "src/",
-    "../Shared"
+    "src/"
   ],
   "ext": ".ts,.tsx",
   "ignore": [
