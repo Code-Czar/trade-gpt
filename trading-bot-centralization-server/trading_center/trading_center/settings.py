@@ -36,9 +36,9 @@ CSRF_COOKIE_SECURE = True  # Send the CSRF cookie only over HTTPS
 
 
 STATIC_URL = "static/"
-# STATIC_ROOT = (
-#     "/var/www/trading-gpt/trading-bot-centralization-server/trading_center/staticfiles"
-# )
+STATIC_ROOT = (
+    "/var/www/trading-gpt/trading-bot-centralization-server/trading_center/staticfiles"
+)
 # STRIPE_SECRET_KEY = 'pk_test_51OGQQoJ5PV7GuigYwTYVEmyl3e1kT9jh6Oh859hcIQo6xDFh21HMWfUJexNE4oZ9bwtlfctUSbWXw0wdmX4srovX00jEAc9PgN'
 
 STRIPE_PUB_KEY = "pk_test_51OGQQoJ5PV7GuigYwTYVEmyl3e1kT9jh6Oh859hcIQo6xDFh21HMWfUJexNE4oZ9bwtlfctUSbWXw0wdmX4srovX00jEAc9PgN"

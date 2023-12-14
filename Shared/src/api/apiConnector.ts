@@ -76,7 +76,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
             // Handle other HTTP status codes as needed
         }
     } catch (error) {
-        console.error("Fetch error 2:", { ...error });
+        console.error("Fetch error 2:", error);
         result.status = API_STATUS.ERROR;
     }
 
