@@ -6,7 +6,6 @@
   "scripts": {
     "start": "yarn build; pm2 start ./dist/backend-server.js --no-daemon",
     "dev": "nodemon",
-    "prebuild": "cd ../Shared && yarn build && cd -; rm -rf ./dist/*; yarn install; copyfiles -u 1 src/**/*.json dist/",
     "build": "tsc src/*.ts --outDir ./dist",
     "test": "mocha -r ts-node/register -r tsconfig-paths/register 'src/**/*.test.ts'"
   },

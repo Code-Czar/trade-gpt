@@ -28,7 +28,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
     console.log("🚀 ~ file: apiConnector.ts:21 ~ url:", url);
     url = url.trim();
 
-    if (!url.includes("localhost") && !url.includes("127.0.0.1")) {
+    if (!url.includes("localhost") && !url.includes("127.0.0.1") && !url.startsWith('https://') && !url.startsWith('http://')) {
         url = "https://" + url;
     }
     console.log("🚀 ~ file: apiConnector.ts:27 ~ url:", url);
@@ -39,11 +39,15 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
     };
 
     try {
+        console.log("🚀 ~ file: apiConnector.ts:47 ~ s: LOG");
+        console.log("🚀 ~ file: apiConnector.ts:102 ~ url:", url);
+
         const response = await fetch(url, {
             method: "GET",
             headers,
             // Add other fetch options here as needed
         });
+        // console.log("🚀 ~ file: apiConnector.ts:47 ~ response:", response);
 
         result.status = response.status;
         result.headers = response.headers;
@@ -64,14 +68,15 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
                 result.filename = result.filename.replace(/"/g, "");
             } else {
                 //@ts-ignore
-                result.data = response.json();
+                result.data = await response.json();
+                // console.log("🚀 ~ file: apiConnector.ts:68 ~ result.data:", result.data);
             }
         } else {
             console.error("Error status:", response.status);
             // Handle other HTTP status codes as needed
         }
     } catch (error) {
-        console.error("Fetch error:", error);
+        console.error("Fetch error 2:", error);
         result.status = API_STATUS.ERROR;
     }
 
@@ -95,6 +100,7 @@ export async function post(url: string, data: Object, headers = defaultHeaders):
     };
 
     try {
+        console.log("🚀 ~ file: apiConnector.ts:102 ~ url:", url);
         const response = await fetch(url, {
             body: typeof data === 'object' ? JSON.stringify(data) : data,
             headers,
