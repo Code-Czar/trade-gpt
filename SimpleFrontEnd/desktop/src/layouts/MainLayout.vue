@@ -2,7 +2,7 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
+        <q-btn id="navMenuDrawer-toggleButton" flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
         <q-toolbar-title>
           Opportunities
         </q-toolbar-title>
@@ -20,9 +20,9 @@
           <q-item-section avatar>
             <q-icon name="Admin" />
           </q-item-section>
-          <q-item-section>
+          <q-item-section @click="goToAdminPage">
             <q-item-label>
-              <span @click="goToAdminPage">Dev Panel</span>
+              <span >Dev Panel</span>
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -30,9 +30,9 @@
           <q-item-section avatar>
             <q-icon name="alert" />
           </q-item-section>
-          <q-item-section>
+          <q-item-section id="navMenu-alertPanel-link" @click="gotToAlertsPage">
             <q-item-label>
-              <span @click="gotToAlertsPage">Alerts Panel</span>
+              <span >Alerts Panel</span>
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -40,9 +40,9 @@
           <q-item-section avatar>
             <q-icon name="Admin" />
           </q-item-section>
-          <q-item-section>
+          <q-item-section @click="goToCheckout">
             <q-item-label>
-              <span @click="goToCheckout">Checkout</span>
+              <span >Checkout</span>
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -50,9 +50,9 @@
           <q-item-section avatar>
             <q-icon name="monitor" />
           </q-item-section>
-          <q-item-section>
+          <q-item-section @click="gotToMonitoringPage">
             <q-item-label>
-              <span @click="gotToMonitoringPage">Monitoring</span>
+              <span >Monitoring</span>
             </q-item-label>
           </q-item-section>
         </q-item>

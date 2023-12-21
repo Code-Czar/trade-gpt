@@ -6,7 +6,7 @@
 
     <q-separator />
     <Suspense>
-      <TradingChart :key="forceRefresh" :input-symbol-data="symbolToChartData" />
+      <TradingChart id="pair-chart" :key="forceRefresh" :input-symbol-data="symbolToChartData" />
     </Suspense>
 
     <q-tab-panels v-model="tab">

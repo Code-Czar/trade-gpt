@@ -20,8 +20,8 @@
                         <div style="margin:0">
                             <div class="text-h2 q-mb-md" style="text-align:center">Opportunities</div>
 
-                            <q-btn label="Login with Google" @click="login('google')" color="primary"
-                                class="full-width q-mb-sm" />
+                            <q-btn id="login-google-button" label="Login with Google" @click="login('google')"
+                                color="primary" class="full-width q-mb-sm" />
                             <q-btn label="Login with GitHub" @click="login('github')" color="secondary"
                                 class="full-width q-mb-sm" />
                             <!-- Add more buttons for other providers as needed -->
