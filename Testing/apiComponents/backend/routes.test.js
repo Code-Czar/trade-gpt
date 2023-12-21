@@ -1,11 +1,12 @@
-import pkg from 'trading-shared'
-const { apiConnector, BACKEND_URLS } = pkg;
+const { apiConnector, BACKEND_URLS } = require('trading-shared');
 
 // import { waitForServerToBeReady } from '../../common/beforeEach'
 
 
-import { expect } from 'chai';
-export async function waitForServerToBeReady(url, maxRetries = 5) {
+const expect = require('chai')
+
+
+ async function waitForServerToBeReady(url, maxRetries = 5) {
     let retries = 0;
     while (retries < maxRetries) {
         try {
@@ -25,7 +26,7 @@ export async function waitForServerToBeReady(url, maxRetries = 5) {
 }
 
 
-describe.only('Backend', () => {
+describe('Backend', () => {
     before(async function () {
         this.timeout(10000); // Increase timeout to 10 seconds
         await waitForServerToBeReady(BACKEND_URLS.HEALTH)

@@ -1,10 +1,8 @@
-import pkg from 'trading-shared'
-const { apiConnector, STRATEGY_ANALYZER_URLS } = pkg;
+const { apiConnector, STRATEGY_ANALYZER_URLS } = require('trading-shared');
 // import { waitForServerToBeReady } from '../../common/beforeEach';
-
-import { expect } from 'chai';
+const expect = require('chai')
 // Function to check if the server is up and running
-export async function waitForServerToBeReady(url, maxRetries = 5) {
+async function waitForServerToBeReady(url, maxRetries = 5) {
     let retries = 0;
     while (retries < maxRetries) {
         try {
@@ -37,7 +35,7 @@ describe('Strategy-Analyzer',function(){
             expect(await result.status).to.equal(200);
         });
 
-        it.only('loadUserNotifications', async function(){
+        it('loadUserNotifications', async function(){
             // console.log("🚀 ~ file: userNotifications.test.js:41 ~ STRATEGY_ANALYZER_URLS.USERS_NOTIFICATIONS.loadUserNotifications:", STRATEGY_ANALYZER_URLS.USERS_NOTIFICATIONS.loadUserNotifications);
             const result = await apiConnector.get(STRATEGY_ANALYZER_URLS.USERS_NOTIFICATIONS.loadUserNotifications);
             // console.log("🚀 ~ file: userNotifications.test.js:66 ~ result:", await result.data);
@@ -59,7 +57,7 @@ describe('Strategy-Analyzer',function(){
             // Add more assertions as needed to check the response data
         });
 
-        it.only('removeNotification', async function(){
+        it('removeNotification', async function(){
             // Arrange
             this.timeout(10000);
             // 1. Get notifications

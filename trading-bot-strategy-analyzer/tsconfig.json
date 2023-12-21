@@ -4,6 +4,7 @@
   },
   // "include": ["src/types/*.d.ts"],
   "compilerOptions": {
+    "noEmitOnError": false, 
     "noImplicitAny": false,
     "paths": {
       "@/*": [
