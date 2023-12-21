@@ -77,3 +77,7 @@ deploy_staging:
 
 deploy_production:
 	./deployToServer.sh production
+
+tests:
+	cd SimpleFrontEnd/desktop && yarn cy:run
+	cd Testing && ./runTests.sh local

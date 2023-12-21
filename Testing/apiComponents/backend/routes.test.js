@@ -9,7 +9,7 @@ export async function waitForServerToBeReady(url, maxRetries = 5) {
     let retries = 0;
     while (retries < maxRetries) {
         try {
-            console.log("🚀 ~ file: routes.test.js:9 ~ url:", url);
+            // console.log("🚀 ~ file: routes.test.js:9 ~ url:", url);
             const result = await apiConnector.get(url)
             await expect(await result.status).to.equal(200);
 
@@ -25,7 +25,7 @@ export async function waitForServerToBeReady(url, maxRetries = 5) {
 }
 
 
-describe('Backend', () => {
+describe.only('Backend', () => {
     before(async function () {
         this.timeout(10000); // Increase timeout to 10 seconds
         await waitForServerToBeReady(BACKEND_URLS.HEALTH)

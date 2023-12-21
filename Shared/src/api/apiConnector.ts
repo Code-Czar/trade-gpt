@@ -31,7 +31,7 @@ async function handleURL(url: string) {
     } else if (url.startsWith('127.0.0.1')) {
         url = 'http://' + url
     }
-    console.log("🚀 ~ file: apiConnector.ts:28 ~ url:", url);
+    // console.log("🚀 ~ file: apiConnector.ts:28 ~ url:", url);
     return url;
 
 }
@@ -46,7 +46,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
     };
     let response;
     try {
-        console.log("🚀 ~ file: apiConnector.ts:102 ~ url:", url);
+        // console.log("🚀 ~ file: apiConnector.ts:102 ~ url:", url);
 
         response = await fetch(url, {
             method: "GET",
@@ -75,7 +75,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
             } else {
                 //@ts-ignore
                 result.data = await response.json();
-                // console.log("🚀 ~ file: apiConnector.ts:68 ~ result.data:", result.data);
+                // // console.log("🚀 ~ file: apiConnector.ts:68 ~ result.data:", result.data);
             }
         } else {
             console.error("Error status:", response.status);
@@ -90,7 +90,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
 }
 
 export async function post(url: string, data: Object, headers = defaultHeaders): Promise<APIResult> {
-    console.log("🚀 ~ file: apiConnector.ts:73 ~ data:", data, typeof data, url);
+    // console.log("🚀 ~ file: apiConnector.ts:73 ~ data:", data, typeof data, url);
 
     url = await handleURL(url)
 
@@ -100,7 +100,7 @@ export async function post(url: string, data: Object, headers = defaultHeaders):
     };
 
     try {
-        console.log("🚀 ~ file: apiConnector.ts:102 ~ url:", url);
+        // console.log("🚀 ~ file: apiConnector.ts:102 ~ url:", url);
         const response = await fetch(url, {
             body: typeof data === 'object' ? JSON.stringify(data) : data,
             headers,
@@ -111,11 +111,11 @@ export async function post(url: string, data: Object, headers = defaultHeaders):
 
         try {
             result.data = await response.json();
-            console.log("🚀 ~ file: apiConnector.ts:96 ~ result.data:", result.data);
+            // console.log("🚀 ~ file: apiConnector.ts:96 ~ result.data:", result.data);
         } catch (error) {
             // If parsing JSON fails, store the raw response body
             result.data = await response.text();
-            console.log("🚀 ~ file: apiConnector.ts:100 ~ result.data:", result.data);
+            // console.log("🚀 ~ file: apiConnector.ts:100 ~ result.data:", result.data);
         }
     } catch (error) {
         // If the fetch itself fails, set the status to error
@@ -154,7 +154,7 @@ export async function put(url: string, data: Object, headers = defaultHeaders): 
 }
 
 export async function patch(url: string, data: Object, headers = defaultHeaders): Promise<APIResult> {
-    console.log("🚀 ~ file: apiConnector.ts:163 ~ data:", data, typeof data);
+    // console.log("🚀 ~ file: apiConnector.ts:163 ~ data:", data, typeof data);
 
     url = await handleURL(url)
     const result: APIResult = {

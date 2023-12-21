@@ -46,6 +46,7 @@ if [ -f "$CONFIG_FILE" ]; then
 
     # Run Mocha tests for all files in apiComponents
     yarn mocha --reporter mochawesome --reporter-options reportDir=./reports,reportFilename=combined_report "./apiComponents/**/*.test.js" | tee ./reports/apiComponents_test-results.txt
+    STATUS=$?
 
     # Add other test directories as needed
     # mocha ./another-component-tests/*.test.js
@@ -66,3 +67,5 @@ if [ "$REBUILD_SHARED" = true ]; then
 else
     echo "Configuration already set to local, skipping rebuild."
 fi
+
+exit $STATUS
