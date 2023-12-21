@@ -6,5 +6,5 @@
   "ignore": [
     "src/**/*.spec.ts"
   ],
-  "exec": "ts-node --transpile-only src/strategyAnalyzerServer.ts"
+  "exec": "ts-node --transpile-only src/strategyAnalyzerServer.ts | tee logs/SA.log"
 }

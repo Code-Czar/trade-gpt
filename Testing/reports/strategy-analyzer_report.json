@@ -5,9 +5,9 @@
     "passes": 1,
     "pending": 0,
     "failures": 0,
-    "start": "2023-12-14T16:30:26.577Z",
-    "end": "2023-12-14T16:30:26.721Z",
-    "duration": 144,
+    "start": "2023-12-14T16:53:37.662Z",
+    "end": "2023-12-14T16:53:37.991Z",
+    "duration": 329,
     "testsRegistered": 1,
     "passPercent": 100,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "101d5229-a6a8-4c0a-8eec-e7e6d6a1bb81",
+      "uuid": "1c2897b1-ae75-4c96-a252-1db04a2281e6",
       "title": "",
       "fullFile": "/Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js",
       "file": "/apiComponents/strategy-analyzer/userNotifications.test.js",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "52c52481-e52f-4ef2-abaa-dd2c64019c7f",
+          "uuid": "bb159bac-7cd3-4624-a85c-5314fb344844",
           "title": "Strategy-Analyzer",
           "fullFile": "/Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js",
           "file": "/apiComponents/strategy-analyzer/userNotifications.test.js",
@@ -36,7 +36,7 @@
               "title": "\"before all\" hook in \"Strategy-Analyzer\"",
               "fullTitle": "Strategy-Analyzer \"before all\" hook in \"Strategy-Analyzer\"",
               "timedOut": false,
-              "duration": 110,
+              "duration": 282,
               "state": null,
               "speed": null,
               "pass": false,
@@ -45,8 +45,8 @@
               "context": null,
               "code": "this.timeout(10000); // Increase timeout to 10 seconds\nawait waitForServerToBeReady(STRATEGY_ANALYZER_URLS.HEALTH)",
               "err": {},
-              "uuid": "73d76e81-6f64-481b-b6a6-c137d07fe801",
-              "parentUUID": "52c52481-e52f-4ef2-abaa-dd2c64019c7f",
+              "uuid": "11721ce6-78a3-474a-b009-58dbcbd15d1e",
+              "parentUUID": "bb159bac-7cd3-4624-a85c-5314fb344844",
               "isHook": true,
               "skipped": false
             }
@@ -55,7 +55,7 @@
           "tests": [],
           "suites": [
             {
-              "uuid": "65056237-079f-4757-862b-733d5e68811f",
+              "uuid": "371e7d4a-26b9-4050-8bc0-dc3e67a5c39b",
               "title": "routes",
               "fullFile": "/Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js",
               "file": "/apiComponents/strategy-analyzer/userNotifications.test.js",
@@ -66,7 +66,7 @@
                   "title": "health",
                   "fullTitle": "Strategy-Analyzer routes health",
                   "timedOut": false,
-                  "duration": 19,
+                  "duration": 32,
                   "state": "passed",
                   "speed": "fast",
                   "pass": true,
@@ -75,20 +75,20 @@
                   "context": null,
                   "code": "const result = await apiConnector.get(STRATEGY_ANALYZER_URLS.HEALTH)\nexpect(await result.status).to.equal(200);",
                   "err": {},
-                  "uuid": "83cb7786-0930-4603-8238-9512badf8af7",
-                  "parentUUID": "65056237-079f-4757-862b-733d5e68811f",
+                  "uuid": "1aeadaf4-9f55-421f-b790-6805c2c4416c",
+                  "parentUUID": "371e7d4a-26b9-4050-8bc0-dc3e67a5c39b",
                   "isHook": false,
                   "skipped": false
                 }
               ],
               "suites": [],
               "passes": [
-                "83cb7786-0930-4603-8238-9512badf8af7"
+                "1aeadaf4-9f55-421f-b790-6805c2c4416c"
               ],
               "failures": [],
               "pending": [],
               "skipped": [],
-              "duration": 19,
+              "duration": 32,
               "root": false,
               "rootEmpty": false,
               "_timeout": 2000
@@ -121,7 +121,7 @@
     "mochawesome": {
       "options": {
         "quiet": false,
-        "reportFilename": "mochawesome",
+        "reportFilename": "./apiComponents/strategy-analyzer_report",
         "saveHtml": true,
         "saveJson": true,
         "consoleReporter": "spec",
@@ -131,7 +131,10 @@
       "version": "7.1.3"
     },
     "marge": {
-      "options": null,
+      "options": {
+        "reportDir": "./reports",
+        "reportFilename": "./apiComponents/strategy-analyzer_report"
+      },
       "version": "6.2.0"
     }
   }

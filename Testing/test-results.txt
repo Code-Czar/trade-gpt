@@ -12,10 +12,10 @@ $ /Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/node_modules/.bin/
       ✔ health
 
 
-  1 passing (144ms)
+  1 passing (145ms)
 
 [mochawesome] Report JSON saved to /Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/mochawesome-report/mochawesome.json
 
 [mochawesome] Report HTML saved to /Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/mochawesome-report/mochawesome.html
 
-Done in 1.00s.
+Done in 1.22s.

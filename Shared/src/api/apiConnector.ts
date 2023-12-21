@@ -58,6 +58,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
         result.headers = response.headers;
 
         for (var pair of response.headers.entries()) {
+            //@ts-ignore
             result.headers[pair[0]] = pair[1];
         }
         if (response.status === 200) {
@@ -80,7 +81,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
             console.error("Error status:", response.status);
             // Handle other HTTP status codes as needed
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error("Fetch error 2:", error, error?.message, response, url);
         result.status = API_STATUS.ERROR;
     }

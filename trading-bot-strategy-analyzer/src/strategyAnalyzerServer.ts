@@ -19,6 +19,7 @@ import { SERVER_PORTS } from 'trading-shared';
 
 import { BackendClient } from './backendWebSocket';
 import { StrategyAnalyzer } from './strategyAnalyzerClass';
+import { UsersNotificationsController } from "./controllers";
 
 const mode = process.env.MODE;
 
@@ -42,12 +43,28 @@ else {
     // Use HTTP for DEV mode
     server = http.createServer(app);
 }
+
+
+
+function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
+    console.error(`Error occurred while processing route ${req.originalUrl}`);
+    console.error(err);
+  
+    // You can customize the error response as needed
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+  
+  // Add the error handling middleware to your Express app
+
+app.use(errorHandler); 
+app.use(cors());
+
 server.listen(SERVER_PORTS.STRATEGY_ANALYZER_PORT, () => {
     global.logger.debug(`SA Server running on port ${SERVER_PORTS.STRATEGY_ANALYZER_PORT}`);
 });
-app.use(cors());
 
-
+//  Init controllers 
+const usersNotificationsController = new UsersNotificationsController(app)
 
 
 // Start clients 

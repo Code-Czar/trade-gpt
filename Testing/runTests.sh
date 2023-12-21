@@ -48,9 +48,11 @@ if [ -f "$CONFIG_FILE" ]; then
     for dir in ./apiComponents/*; do
         if [ -d "$dir" ]; then
             echo "Running tests in $dir"
-            yarn mocha --reporter mochawesome "$dir"/*.test.js | tee test-results.txt
+            yarn mocha --reporter mochawesome --reporter-options reportDir=./reports,reportFilename=${dir}_report "$dir"/*.test.js | tee ./reports/${dir}_test-results.txt
         fi
     done
+    # npx mochawesome-merge ./reports/*.json > ./reports/combined-report.json
+    # npx merge ./reports/combined-report.json -f combined-report -o ./reports
 
     # Add other test directories as needed
     # mocha ./another-component-tests/*.test.js

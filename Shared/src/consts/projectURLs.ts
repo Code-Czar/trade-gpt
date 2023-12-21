@@ -88,6 +88,17 @@ export const STRATEGY_ANALYZER_ENDPOINTS = {
     SIGNALS: {
         EMA28_SIGNALS: '/api/getEMA28Signals',
         RSI_SIGNALS: '/api/getRSISignals'
+    },
+    USERS_NOTIFICATIONS: {
+        loadUserNotifications: '/api/loadUserNotifications',
+    saveUserNotifications: '/api/saveUserNotifications',
+    addNotification: '/api/addNotification',
+    removeNotification: '/api/removeNotification', // Removed URL parameters
+    updateNotification: '/api/updateNotification', // Removed URL parameters
+    getNotification: '/api/getNotification', // Removed URL parameters
+    getNotificationForPairAndTimeframe: '/api/getNotificationForPairAndTimeframe',
+    markNotificationAsSent: '/api/markNotificationAsSent', // Removed URL parameters
+    resetNotificationSentStatus: '/api/resetNotificationSentStatus', // Removed URL parameters
     }
 }
 
@@ -96,7 +107,18 @@ export const STRATEGY_ANALYZER_URLS = {
     SIGNALS: {
         getEMA28Signals: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.SIGNALS.EMA28_SIGNALS,
         getRSISignals: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.SIGNALS.RSI_SIGNALS,
-    }
+    },
+    USERS_NOTIFICATIONS: {
+        loadUserNotifications: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.loadUserNotifications,
+        saveUserNotifications: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.saveUserNotifications,
+        addNotification: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.addNotification,
+        removeNotification: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.removeNotification,
+        updateNotification: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.updateNotification,
+        getNotification: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.getNotification,
+        getNotificationForPairAndTimeframe: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.getNotificationForPairAndTimeframe,
+        markNotificationAsSent: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.markNotificationAsSent,
+        resetNotificationSentStatus: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.resetNotificationSentStatus,
+    },
 };
 
 

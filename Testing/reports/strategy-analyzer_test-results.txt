@@ -1,0 +1,24 @@
+yarn run v1.22.19
+$ /Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/node_modules/.bin/mocha --reporter mochawesome --reporter-options reportDir=./reports,reportFilename=./apiComponents/strategy-analyzer_report ./apiComponents/strategy-analyzer/userNotifications.test.js
+🚀 ~ file: projectURLs.ts:19 ~ config: {
+  REMOTE_URL: 'infinite-opportunities.pro',
+  REMOTE_WSS: 'wss://infinite-opportunities.pro'
+} infinite-opportunities.pro
+
+
+  Strategy-Analyzer
+🚀 ~ file: apiConnector.ts:28 ~ url: https://infinite-opportunities.pro:3002/health
+🚀 ~ file: apiConnector.ts:102 ~ url: https://infinite-opportunities.pro:3002/health
+    routes
+🚀 ~ file: apiConnector.ts:28 ~ url: https://infinite-opportunities.pro:3002/health
+🚀 ~ file: apiConnector.ts:102 ~ url: https://infinite-opportunities.pro:3002/health
+      ✔ health
+
+
+  1 passing (329ms)
+
+[mochawesome] Report JSON saved to /Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/reports/apiComponents/strategy-analyzer_report.json
+
+[mochawesome] Report HTML saved to /Users/beniben/Domaines_De_Vie/Business/GPT_Trading/Testing/reports/apiComponents/strategy-analyzer_report.html
+
+Done in 1.20s.

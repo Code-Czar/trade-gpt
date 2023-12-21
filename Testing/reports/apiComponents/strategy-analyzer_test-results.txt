@@ -1,0 +1,121 @@
+yarn run v1.22.21
+$ /Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/node_modules/.bin/mocha --reporter mochawesome --reporter-options reportDir=./reports,reportFilename=./apiComponents/strategy-analyzer_report ./apiComponents/strategy-analyzer/userNotifications.test.js
+🚀 ~ file: projectURLs.ts:19 ~ config: { REMOTE_URL: '127.0.0.1', REMOTE_WSS: 'ws://127.0.0.1' } 127.0.0.1
+
+
+  Strategy-Analyzer
+🚀 ~ file: apiConnector.ts:28 ~ url: http://127.0.0.1:3002/health
+🚀 ~ file: apiConnector.ts:102 ~ url: http://127.0.0.1:3002/health
+    routes
+🚀 ~ file: apiConnector.ts:28 ~ url: http://127.0.0.1:3002/health
+🚀 ~ file: apiConnector.ts:102 ~ url: http://127.0.0.1:3002/health
+      ✔ health
+🚀 ~ file: apiConnector.ts:28 ~ url: http://127.0.0.1:3002/api/loadUserNotifications
+🚀 ~ file: apiConnector.ts:102 ~ url: http://127.0.0.1:3002/api/loadUserNotifications
+      1) loadUserNotifications
+🚀 ~ file: apiConnector.ts:73 ~ data: undefined undefined 127.0.0.1:3002/api/saveUserNotifications
+🚀 ~ file: apiConnector.ts:102 ~ url: 127.0.0.1:3002/api/saveUserNotifications/
+      2) saveUserNotifications
+🚀 ~ file: apiConnector.ts:73 ~ data: undefined undefined 127.0.0.1:3002/api/addNotification
+🚀 ~ file: apiConnector.ts:102 ~ url: 127.0.0.1:3002/api/addNotification/
+      3) addNotification
+      4) removeNotification
+      5) updateNotification
+🚀 ~ file: apiConnector.ts:28 ~ url: http://127.0.0.1:3002/api/getNotification
+🚀 ~ file: apiConnector.ts:102 ~ url: http://127.0.0.1:3002/api/getNotification
+      6) getNotification
+🚀 ~ file: apiConnector.ts:28 ~ url: http://127.0.0.1:3002/api/getNotificationForPairAndTimeframe
+🚀 ~ file: apiConnector.ts:102 ~ url: http://127.0.0.1:3002/api/getNotificationForPairAndTimeframe
+      7) getNotificationForPairAndTimeframe
+      8) markNotificationAsSent
+      9) resetNotificationSentStatus
+
+
+  1 passing (64ms)
+  9 failing
+
+  1) Strategy-Analyzer
+       routes
+         loadUserNotifications:
+
+      AssertionError: expected 500 to equal 200
+      + expected - actual
+
+      -500
+      +200
+      
+      at Context.<anonymous> (file:///Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js:41:44)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+  2) Strategy-Analyzer
+       routes
+         saveUserNotifications:
+     AssertionError: expected 'Error' to equal 200
+      at Context.<anonymous> (file:///Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js:47:44)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+  3) Strategy-Analyzer
+       routes
+         addNotification:
+     AssertionError: expected 'Error' to equal 200
+      at Context.<anonymous> (file:///Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js:53:44)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+  4) Strategy-Analyzer
+       routes
+         removeNotification:
+     TypeError: apiConnector.delete is not a function
+      at Context.<anonymous> (file:///Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js:64:53)
+      at process.processImmediate (node:internal/timers:478:21)
+
+  5) Strategy-Analyzer
+       routes
+         updateNotification:
+     AssertionError: expected 'Error' to equal 200
+      at Context.<anonymous> (file:///Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js:77:44)
+
+  6) Strategy-Analyzer
+       routes
+         getNotification:
+
+      AssertionError: expected 500 to equal 200
+      + expected - actual
+
+      -500
+      +200
+      
+      at Context.<anonymous> (file:///Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js:89:44)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+  7) Strategy-Analyzer
+       routes
+         getNotificationForPairAndTimeframe:
+
+      AssertionError: expected 500 to equal 200
+      + expected - actual
+
+      -500
+      +200
+      
+      at Context.<anonymous> (file:///Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js:100:44)
+      at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+  8) Strategy-Analyzer
+       routes
+         markNotificationAsSent:
+     AssertionError: expected 'Error' to equal 200
+      at Context.<anonymous> (file:///Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js:109:44)
+
+  9) Strategy-Analyzer
+       routes
+         resetNotificationSentStatus:
+     AssertionError: expected 'Error' to equal 200
+      at Context.<anonymous> (file:///Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/strategy-analyzer/userNotifications.test.js:118:44)
+
+
+
+[mochawesome] Report JSON saved to /Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/reports/apiComponents/strategy-analyzer_report.json
+
+[mochawesome] Report HTML saved to /Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/reports/apiComponents/strategy-analyzer_report.html
+
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

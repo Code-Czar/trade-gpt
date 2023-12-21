@@ -78,6 +78,17 @@ exports.STRATEGY_ANALYZER_ENDPOINTS = {
     SIGNALS: {
         EMA28_SIGNALS: '/api/getEMA28Signals',
         RSI_SIGNALS: '/api/getRSISignals'
+    },
+    USERS_NOTIFICATIONS: {
+        loadUserNotifications: '/api/loadUserNotifications',
+        saveUserNotifications: '/api/saveUserNotifications',
+        addNotification: '/api/addNotification',
+        removeNotification: '/api/removeNotification', // Removed URL parameters
+        updateNotification: '/api/updateNotification', // Removed URL parameters
+        getNotification: '/api/getNotification', // Removed URL parameters
+        getNotificationForPairAndTimeframe: '/api/getNotificationForPairAndTimeframe',
+        markNotificationAsSent: '/api/markNotificationAsSent', // Removed URL parameters
+        resetNotificationSentStatus: '/api/resetNotificationSentStatus', // Removed URL parameters
     }
 };
 exports.STRATEGY_ANALYZER_URLS = {
@@ -85,6 +96,17 @@ exports.STRATEGY_ANALYZER_URLS = {
     SIGNALS: {
         getEMA28Signals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.SIGNALS.EMA28_SIGNALS,
         getRSISignals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.SIGNALS.RSI_SIGNALS,
-    }
+    },
+    USERS_NOTIFICATIONS: {
+        loadUserNotifications: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.loadUserNotifications,
+        saveUserNotifications: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.saveUserNotifications,
+        addNotification: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.addNotification,
+        removeNotification: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.removeNotification,
+        updateNotification: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.updateNotification,
+        getNotification: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.getNotification,
+        getNotificationForPairAndTimeframe: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.getNotificationForPairAndTimeframe,
+        markNotificationAsSent: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.markNotificationAsSent,
+        resetNotificationSentStatus: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.resetNotificationSentStatus,
+    },
 };
 //# sourceMappingURL=projectURLs.js.map

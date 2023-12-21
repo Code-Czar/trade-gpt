@@ -11,7 +11,9 @@
   "license": "ISC",
   "dependencies": {
     "chai": "^4.3.10",
-    "mocha": "^10.2.0"
+    "mocha": "^10.2.0",
+    "mochawesome-merge": "^4.3.0",
+    "mochawesome-report-generator": "^6.2.0"
   },
   "devDependencies": {
     "mocha-multi": "^1.1.7",
