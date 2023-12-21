@@ -80,6 +80,7 @@ exports.STRATEGY_ANALYZER_ENDPOINTS = {
         RSI_SIGNALS: '/api/getRSISignals'
     },
     USERS_NOTIFICATIONS: {
+        getUsersNotifications: '/api/getUsersNotifications',
         loadUserNotifications: '/api/loadUserNotifications',
         saveUserNotifications: '/api/saveUserNotifications',
         addNotification: '/api/addNotification',
@@ -98,6 +99,7 @@ exports.STRATEGY_ANALYZER_URLS = {
         getRSISignals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.SIGNALS.RSI_SIGNALS,
     },
     USERS_NOTIFICATIONS: {
+        getUsersNotifications: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.getUsersNotifications,
         loadUserNotifications: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.loadUserNotifications,
         saveUserNotifications: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.saveUserNotifications,
         addNotification: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.addNotification,

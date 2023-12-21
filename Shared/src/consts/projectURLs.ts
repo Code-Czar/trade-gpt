@@ -90,15 +90,16 @@ export const STRATEGY_ANALYZER_ENDPOINTS = {
         RSI_SIGNALS: '/api/getRSISignals'
     },
     USERS_NOTIFICATIONS: {
+        getUsersNotifications: '/api/getUsersNotifications',
         loadUserNotifications: '/api/loadUserNotifications',
-    saveUserNotifications: '/api/saveUserNotifications',
-    addNotification: '/api/addNotification',
-    removeNotification: '/api/removeNotification', // Removed URL parameters
-    updateNotification: '/api/updateNotification', // Removed URL parameters
-    getNotification: '/api/getNotification', // Removed URL parameters
-    getNotificationForPairAndTimeframe: '/api/getNotificationForPairAndTimeframe',
-    markNotificationAsSent: '/api/markNotificationAsSent', // Removed URL parameters
-    resetNotificationSentStatus: '/api/resetNotificationSentStatus', // Removed URL parameters
+        saveUserNotifications: '/api/saveUserNotifications',
+        addNotification: '/api/addNotification',
+        removeNotification: '/api/removeNotification', // Removed URL parameters
+        updateNotification: '/api/updateNotification', // Removed URL parameters
+        getNotification: '/api/getNotification', // Removed URL parameters
+        getNotificationForPairAndTimeframe: '/api/getNotificationForPairAndTimeframe',
+        markNotificationAsSent: '/api/markNotificationAsSent', // Removed URL parameters
+        resetNotificationSentStatus: '/api/resetNotificationSentStatus', // Removed URL parameters
     }
 }
 
@@ -109,6 +110,7 @@ export const STRATEGY_ANALYZER_URLS = {
         getRSISignals: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.SIGNALS.RSI_SIGNALS,
     },
     USERS_NOTIFICATIONS: {
+        getUsersNotifications: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.getUsersNotifications,
         loadUserNotifications: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.loadUserNotifications,
         saveUserNotifications: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.saveUserNotifications,
         addNotification: PROJECT_URLS.STRATEGY_ANALYZER_URL + STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.addNotification,

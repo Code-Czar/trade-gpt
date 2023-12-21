@@ -13,13 +13,13 @@ $ /Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/node_modules/.bin/
       ✔ health
 🚀 ~ file: apiConnector.ts:28 ~ url: http://127.0.0.1:3000/api/symbols/leverage
 🚀 ~ file: apiConnector.ts:102 ~ url: http://127.0.0.1:3000/api/symbols/leverage
-      ✔ getLeverageSymbols (279ms)
+      ✔ getLeverageSymbols (536ms)
 
 
-  2 passing (318ms)
+  2 passing (577ms)
 
 [mochawesome] Report JSON saved to /Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/reports/apiComponents/backend_report.json
 
 [mochawesome] Report HTML saved to /Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/reports/apiComponents/backend_report.html
 
-Done in 0.74s.
+Done in 0.84s.

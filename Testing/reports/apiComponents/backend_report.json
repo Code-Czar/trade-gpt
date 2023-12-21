@@ -5,9 +5,9 @@
     "passes": 2,
     "pending": 0,
     "failures": 0,
-    "start": "2023-12-20T11:32:21.132Z",
-    "end": "2023-12-20T11:32:21.450Z",
-    "duration": 318,
+    "start": "2023-12-21T09:38:43.396Z",
+    "end": "2023-12-21T09:38:43.973Z",
+    "duration": 577,
     "testsRegistered": 2,
     "passPercent": 100,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "a25ff8c9-0744-4ccf-b333-3a10bb1c0b8b",
+      "uuid": "8e2911e0-e318-45e3-b64d-5a0bafba9995",
       "title": "",
       "fullFile": "/Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/backend/routes.test.js",
       "file": "/apiComponents/backend/routes.test.js",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "796303be-7798-4550-adc8-b0378d476033",
+          "uuid": "4f90426b-1871-442e-a4a9-1f21a2f819e9",
           "title": "Backend",
           "fullFile": "/Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/backend/routes.test.js",
           "file": "/apiComponents/backend/routes.test.js",
@@ -36,7 +36,7 @@
               "title": "\"before all\" hook in \"Backend\"",
               "fullTitle": "Backend \"before all\" hook in \"Backend\"",
               "timedOut": false,
-              "duration": 32,
+              "duration": 34,
               "state": null,
               "speed": null,
               "pass": false,
@@ -45,8 +45,8 @@
               "context": null,
               "code": "this.timeout(10000); // Increase timeout to 10 seconds\nawait waitForServerToBeReady(BACKEND_URLS.HEALTH)",
               "err": {},
-              "uuid": "3bfc792e-1438-4268-88ce-3f23e9dabd0d",
-              "parentUUID": "796303be-7798-4550-adc8-b0378d476033",
+              "uuid": "c1d483a5-d34d-482a-afec-403cba3fc54a",
+              "parentUUID": "4f90426b-1871-442e-a4a9-1f21a2f819e9",
               "isHook": true,
               "skipped": false
             }
@@ -55,7 +55,7 @@
           "tests": [],
           "suites": [
             {
-              "uuid": "61728ab6-3012-4a0d-927e-8844fd5308d4",
+              "uuid": "2b09b7a4-58b1-4216-96a4-f1f63e82ccf4",
               "title": "routes",
               "fullFile": "/Users/beniben/Domaines_De_vie/Business/GPT_Trading/Testing/apiComponents/backend/routes.test.js",
               "file": "/apiComponents/backend/routes.test.js",
@@ -66,7 +66,7 @@
                   "title": "health",
                   "fullTitle": "Backend routes health",
                   "timedOut": false,
-                  "duration": 4,
+                  "duration": 6,
                   "state": "passed",
                   "speed": "fast",
                   "pass": true,
@@ -75,8 +75,8 @@
                   "context": null,
                   "code": "const result = await apiConnector.get(BACKEND_URLS.HEALTH)\nexpect(result.status).to.equal(200);",
                   "err": {},
-                  "uuid": "b208f169-7939-4437-b7f8-08f36180066b",
-                  "parentUUID": "61728ab6-3012-4a0d-927e-8844fd5308d4",
+                  "uuid": "ab2c0663-d9ab-4d2a-8a54-ada4ba7a974d",
+                  "parentUUID": "2b09b7a4-58b1-4216-96a4-f1f63e82ccf4",
                   "isHook": false,
                   "skipped": false
                 },
@@ -84,7 +84,7 @@
                   "title": "getLeverageSymbols",
                   "fullTitle": "Backend routes getLeverageSymbols",
                   "timedOut": false,
-                  "duration": 279,
+                  "duration": 536,
                   "state": "passed",
                   "speed": "slow",
                   "pass": true,
@@ -93,21 +93,21 @@
                   "context": null,
                   "code": "const result = await apiConnector.get(BACKEND_URLS.LEVERAGE_URLS.getLeverageSymbols)\nconst data = await result.data\nexpect(result.status).to.equal(200);\nexpect(result.data.length).to.be.greaterThan(0);",
                   "err": {},
-                  "uuid": "300aca9e-8745-4ca6-b688-c035fb6e179c",
-                  "parentUUID": "61728ab6-3012-4a0d-927e-8844fd5308d4",
+                  "uuid": "d1947605-d935-4085-b2a4-255b1fa72608",
+                  "parentUUID": "2b09b7a4-58b1-4216-96a4-f1f63e82ccf4",
                   "isHook": false,
                   "skipped": false
                 }
               ],
               "suites": [],
               "passes": [
-                "b208f169-7939-4437-b7f8-08f36180066b",
-                "300aca9e-8745-4ca6-b688-c035fb6e179c"
+                "ab2c0663-d9ab-4d2a-8a54-ada4ba7a974d",
+                "d1947605-d935-4085-b2a4-255b1fa72608"
               ],
               "failures": [],
               "pending": [],
               "skipped": [],
-              "duration": 283,
+              "duration": 542,
               "root": false,
               "rootEmpty": false,
               "_timeout": 2000

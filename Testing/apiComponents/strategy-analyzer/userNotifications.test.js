@@ -24,7 +24,7 @@ export async function waitForServerToBeReady(url, maxRetries = 5) {
 
 
 
-describe('Strategy-Analyzer', () => {
+describe.only('Strategy-Analyzer', () => {
     before(async function () {
         this.timeout(10000); // Increase timeout to 10 seconds
         await waitForServerToBeReady(STRATEGY_ANALYZER_URLS.HEALTH);
@@ -37,8 +37,12 @@ describe('Strategy-Analyzer', () => {
         });
 
         it('loadUserNotifications', async () => {
+            console.log("🚀 ~ file: userNotifications.test.js:41 ~ STRATEGY_ANALYZER_URLS.USERS_NOTIFICATIONS.loadUserNotifications:", STRATEGY_ANALYZER_URLS.USERS_NOTIFICATIONS.loadUserNotifications);
             const result = await apiConnector.get(STRATEGY_ANALYZER_URLS.USERS_NOTIFICATIONS.loadUserNotifications);
+            console.log("🚀 ~ file: userNotifications.test.js:66 ~ result:", await result.data);
+
             expect(await result.status).to.equal(200);
+            expect(Object.keys(await result.data).length).to.be.greaterThan(0)
             // Add more assertions as needed to check the response data
         });
 
@@ -54,15 +58,47 @@ describe('Strategy-Analyzer', () => {
             // Add more assertions as needed to check the response data
         });
 
-        it('removeNotification', async () => {
-            const queryParams = {
-                pairName: 'someValue',
-                timeframe: 'someValue',
-                notificationType: 'someValue',
-                notificationId: 'someValue',
-            };
-            const result = await apiConnector.delete(STRATEGY_ANALYZER_URLS.USERS_NOTIFICATIONS.removeNotification, queryParams);
-            expect(await result.status).to.equal(200);
+        it.only('removeNotification', async () => {
+            // Arrange
+
+            // 1. Get notifications
+            let count = 0;
+            let getResult = await apiConnector.get(STRATEGY_ANALYZER_URLS.USERS_NOTIFICATIONS.loadUserNotifications);
+            let entries = Object.entries(await getResult.data);
+
+            for (const [pairName, timeframesObject] of entries) {
+                for (const [timeframeKey, alertObject] of Object.entries(timeframesObject)) {
+                    for (const [alertName, alertContentObject] of Object.entries(alertObject)) {
+                        // Act
+                        // Remove each notification
+                        const queryParams = {
+                            pairName,
+                            timeframe: timeframeKey,
+                            notificationType: Object.values(alertContentObject)?.[0]?.type,
+                            notificationId: Object.keys(alertContentObject)?.[0],
+                        };
+                        console.log("🚀 ~ file: userNotifications.test.js:80 ~ queryParams:", queryParams);
+
+                        const result = await apiConnector.post(STRATEGY_ANALYZER_URLS.USERS_NOTIFICATIONS.removeNotification, queryParams);
+                        console.log("🚀 ~ result:", result);
+
+                        // Check 
+                        count += 1;
+                        console.log("🚀 ~ count:", count);
+                        expect(await result.status).to.equal(200);
+                        expect(await result.data.removed).to.equal(true);
+                    }
+                }
+            }
+
+            // Verify data is empty
+            getResult = await apiConnector.get(STRATEGY_ANALYZER_URLS.USERS_NOTIFICATIONS.getUsersNotifications);
+            entries = Object.entries(await getResult.data);
+            expect(await entries.length).to.equal(0);
+
+
+
+
             // Add more assertions as needed to check the response data
         });
 

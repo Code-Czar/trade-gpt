@@ -49,9 +49,9 @@ export class BackendClient {
 
     private onMessage(data: any) {
         const dataObject = JSON.parse(data);
-        global.logger.debug(`Received data from BE`);
+        // global.logger.debug(`Received data from BE`);
         try {
-            global.logger.debug("🚀 ~ file: backendWebSocket.ts:64 ~ BackendClient ~ dataObject:", dataObject.topic)
+            // global.logger.debug("🚀 ~ file: backendWebSocket.ts:64 ~ BackendClient ~ dataObject:", dataObject.topic)
             if (dataObject.topic === 'getRealTimeData') {
                 this.strategyAnalyzer?.analyzeRSIRealTime(dataObject.data);
                 this.strategyAnalyzer?.analyzeRSIPastData(dataObject.data);

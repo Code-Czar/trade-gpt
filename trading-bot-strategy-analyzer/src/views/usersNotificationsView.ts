@@ -3,6 +3,7 @@ import { UsersNotificationsController } from '@/controllers'; // Import the cont
 import { AbstractView } from './AbstractView'; // Import the abstract view
 
 const routesURLS = {
+    getUsersNotifications: '/api/getUsersNotifications',
     loadUserNotifications: '/api/loadUserNotifications',
     saveUserNotifications: '/api/saveUserNotifications',
     addNotification: '/api/addNotification',
@@ -25,11 +26,12 @@ export class UsersNotificationsView extends AbstractView {
         this.usersNotificationsController = controller;
         this.expressApp = app;
         this.bindExpressRoutes();
-        console.log("🚀 ~ file: usersNotificationsView.ts:26 ~ this.usersNotificationsController:", this.usersNotificationsController);
+        // console.log("🚀 ~ file: usersNotificationsView.ts:26 ~ this.usersNotificationsController:", this.usersNotificationsController);
     }
 
     bindExpressRoutes() {
         // Getters
+        this.expressApp.get(this.routes.getUsersNotifications, this.wrapAsync(this.getUsersNotifications.bind(this)));
         this.expressApp.get(this.routes.loadUserNotifications, this.wrapAsync(this.loadUserNotifications.bind(this)));
 
         // Setters
@@ -40,7 +42,7 @@ export class UsersNotificationsView extends AbstractView {
         this.expressApp.put(this.routes.updateNotification, this.wrapAsync(this.updateNotification.bind(this)));
 
         // Removers
-        this.expressApp.delete(this.routes.removeNotification, this.wrapAsync(this.removeNotification.bind(this)));
+        this.expressApp.post(this.routes.removeNotification, this.wrapAsync(this.removeNotification.bind(this)));
 
         // Getters
         this.expressApp.get(this.routes.getNotification, this.wrapAsync(this.getNotification.bind(this)));
@@ -60,7 +62,7 @@ export class UsersNotificationsView extends AbstractView {
     async loadUserNotifications(req: Request, res: Response) {
         try {
             // Your code to load user notifications here
-            const notifications = await this.usersNotificationsController.loadUserNotifications(req);
+            const notifications = await this.usersNotificationsController.loadUserNotifications(req, res);
             res.status(200).json(notifications);
         } catch (error) {
             console.error("Error loading user notifications:", error);
@@ -71,7 +73,7 @@ export class UsersNotificationsView extends AbstractView {
     async saveUserNotifications(req: Request, res: Response) {
         try {
             // Your code to save user notifications here
-            const result = await this.usersNotificationsController.saveUserNotifications(req);
+            const result = await this.usersNotificationsController.saveUserNotifications(req, res);
             res.status(200).json(result);
         } catch (error) {
             console.error("Error saving user notifications:", error);
@@ -79,10 +81,22 @@ export class UsersNotificationsView extends AbstractView {
         }
     }
 
+    async getUsersNotifications(req: Request, res: Response) {
+        try {
+            // Your code to get user notifications here
+            const notifications = await this.usersNotificationsController.getUsersNotifications(req, res);
+            res.status(200).json(notifications);
+        } catch (error) {
+            console.error("Error getting user notifications:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+
+
     async addNotification(req: Request, res: Response) {
         try {
             // Your code to add a notification here
-            const result = await this.usersNotificationsController.addNotification(req);
+            const result = await this.usersNotificationsController.addNotification(req, res);
             res.status(200).json(result);
         } catch (error) {
             console.error("Error adding a notification:", error);
@@ -93,14 +107,17 @@ export class UsersNotificationsView extends AbstractView {
     async removeNotification(req: Request, res: Response) {
         try {
             // Your code to remove a notification here
-            const { pairName, timeframe, notificationType, notificationId } = req.query;
+            const { pairName, timeframe, notificationType, notificationId } = req.body;
+            console.log("🚀 ~ file: usersNotificationsView.ts:97 ~ req.query:", req.body);
             const result = await this.usersNotificationsController.removeNotification(
-                pairName,
-                timeframe,
-                notificationType,
-                notificationId
+                {
+                    pairName,
+                    timeframe,
+                    notificationType,
+                    notificationId
+                }
             );
-            res.status(200).json(result);
+            res.status(200).json({ removed: result });
         } catch (error) {
             console.error("Error removing a notification:", error);
             res.status(500).json({ error: "Internal Server Error" });

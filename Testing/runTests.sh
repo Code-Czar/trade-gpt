@@ -44,15 +44,8 @@ if [ -f "$CONFIG_FILE" ]; then
     echo $REMOTE_URL
     echo $REMOTE_WSS
 
-    # Run Mocha tests for each folder in apiComponents
-    for dir in ./apiComponents/*; do
-        if [ -d "$dir" ]; then
-            echo "Running tests in $dir"
-            yarn mocha --reporter mochawesome --reporter-options reportDir=./reports,reportFilename=${dir}_report "$dir"/*.test.js | tee ./reports/${dir}_test-results.txt
-        fi
-    done
-    # npx mochawesome-merge ./reports/*.json > ./reports/combined-report.json
-    # npx merge ./reports/combined-report.json -f combined-report -o ./reports
+    # Run Mocha tests for all files in apiComponents
+    yarn mocha --reporter mochawesome --reporter-options reportDir=./reports,reportFilename=combined_report "./apiComponents/**/*.test.js" | tee ./reports/apiComponents_test-results.txt
 
     # Add other test directories as needed
     # mocha ./another-component-tests/*.test.js

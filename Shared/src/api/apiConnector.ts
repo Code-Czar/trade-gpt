@@ -92,13 +92,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
 export async function post(url: string, data: Object, headers = defaultHeaders): Promise<APIResult> {
     console.log("🚀 ~ file: apiConnector.ts:73 ~ data:", data, typeof data, url);
 
-    if (!url.includes("localhost") && !url.includes("127.0.0.1")) {
-        url = "https://" + url;
-    }
-
-    if (!url.includes("?") && !url.includes("#") && !url.endsWith("/")) {
-        url += "/";
-    }
+    url = await handleURL(url)
 
     const result: APIResult = {
         data: {},
@@ -140,13 +134,7 @@ export async function put(url: string, data: Object, headers = defaultHeaders): 
         status: 0,
     };
 
-    if (!url.includes("localhost") && !url.includes("127.0.0.1")) {
-        url = "https://" + url;
-    }
-
-    if (!url.includes("?") && !url.includes("#") && !url.endsWith("/")) {
-        url += "/";
-    }
+    url = await handleURL(url)
 
     try {
         const response = await fetch(url, {
@@ -168,14 +156,7 @@ export async function put(url: string, data: Object, headers = defaultHeaders): 
 export async function patch(url: string, data: Object, headers = defaultHeaders): Promise<APIResult> {
     console.log("🚀 ~ file: apiConnector.ts:163 ~ data:", data, typeof data);
 
-    if (!url.includes("localhost") && !url.includes("127.0.0.1")) {
-        url = "https://" + url;
-    }
-
-    if (!url.includes("?") && !url.includes("#") && !url.endsWith("/")) {
-        url += "/";
-    }
-
+    url = await handleURL(url)
     const result: APIResult = {
         data: {},
         status: 0,
@@ -202,34 +183,22 @@ export async function patch(url: string, data: Object, headers = defaultHeaders)
 }
 
 
-export async function remove(url: string, headers = defaultHeaders) {
+export async function remove(url: string, data, headers = defaultHeaders) {
     const result: APIResult = {
         data: {},
         status: 0,
     };
+    url = await handleURL(url)
 
     try {
-        const requestResult: APIResult = await fetch(url, {
+        const response = await fetch(url, {
             headers,
             method: "DELETE",
-            //@ts-ignore
-            async onResponse({ response }) {
-                result.status = response.status;
-
-                result.status = response.status;
-                try {
-
-                    result.data = response.body.json();
-                } catch (error) {
-
-                    result.data = response.body;
-                }
-            },
-            async onResponseError({ response }) {
-                result.status = response.status;
-            },
+            body: typeof data === 'object' ? JSON.stringify(data) : data,
         });
-        result.data = requestResult;
+        result.status = response.status;
+        result.data = await handleResponse(response);
+        // result.data = requestResult;
     } catch (error) {
         result.status = API_STATUS.ERROR;
     }

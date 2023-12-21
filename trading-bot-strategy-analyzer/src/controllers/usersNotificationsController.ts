@@ -14,7 +14,7 @@ export class UsersNotificationsController {
         // this.view.setRoutes(app)
     }
 
-    async getView (){
+    async getView() {
         return this.view
     }
 
@@ -36,6 +36,16 @@ export class UsersNotificationsController {
             this.view.renderError(res, 'Internal Server Error'); // Use the view to render the error response
         }
     }
+    async getUsersNotifications(req: Request, res: Response) {
+        try {
+            // Your code to get user notifications here
+            const notifications = await this.model.getUsersNotifications();
+            res.status(200).json(notifications);
+        } catch (error) {
+            console.error("Error getting user notifications:", error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
 
     addNotification(req: Request, res: Response) {
         const { pairName, timeframe, notificationType, notificationDetails, notificationId } = req.body;
@@ -48,14 +58,15 @@ export class UsersNotificationsController {
         }
     }
 
-    removeNotification(req: Request, res: Response) {
-        const { pairName, timeframe, notificationType, notificationId } = req.params;
+    removeNotification(inputParams) {
+        const { pairName, timeframe, notificationType, notificationId } = inputParams;
 
         try {
-            this.model.removeNotification(pairName, timeframe, notificationType, notificationId);
-            this.view.renderMessage(res, 'Notification removed successfully'); // Use the view to render a success message
+            return this.model.removeNotification(pairName, timeframe, notificationType, notificationId);
+            // this.view.renderMessage(res, 'Notification removed successfully'); // Use the view to render a success message
         } catch (error) {
-            this.view.renderError(res, 'Notification not found'); // Use the view to render the error response
+            // this.view.renderError(res, 'Notification not found'); // Use the view to render the error response
+            return false;
         }
     }
 

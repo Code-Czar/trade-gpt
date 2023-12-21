@@ -27,6 +27,11 @@ let httpsOptions = {};
 let server;
 
 const app = express();
+app.use(errorHandler);
+app.use(cors());
+app.use(express.json()); // for parsing application/json
+app.use(express.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+
 
 if (mode === 'PRODUCTION') {
     const certificatePath = '/etc/letsencrypt/live/infinite-opportunities.pro';
@@ -49,15 +54,13 @@ else {
 function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
     console.error(`Error occurred while processing route ${req.originalUrl}`);
     console.error(err);
-  
+
     // You can customize the error response as needed
     res.status(500).json({ error: 'Internal Server Error' });
-  }
-  
-  // Add the error handling middleware to your Express app
+}
 
-app.use(errorHandler); 
-app.use(cors());
+// Add the error handling middleware to your Express app
+
 
 server.listen(SERVER_PORTS.STRATEGY_ANALYZER_PORT, () => {
     global.logger.debug(`SA Server running on port ${SERVER_PORTS.STRATEGY_ANALYZER_PORT}`);
