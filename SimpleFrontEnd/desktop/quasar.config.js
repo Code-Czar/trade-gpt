@@ -31,11 +31,7 @@ module.exports = configure(function (/* ctx */) {
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
       'i18n',
-      // 'onesignalplugin'
-
-      // 'pinia'
-
-
+      'pinia'
     ],
     plugins: [
       // 'onesignal'
@@ -75,6 +71,9 @@ module.exports = configure(function (/* ctx */) {
       ],
 
       vueRouterMode: 'hash', // available values: 'hash', 'history'
+      /*transpile: [
+        /quasar[\\/]src[\\/]store[\\/]/,
+      ],*/
       // vueRouterBase,
       // vueDevtools,
       // vueOptionsAPI: false,
@@ -130,7 +129,7 @@ module.exports = configure(function (/* ctx */) {
     devServer: {
       // https: true
       open: true, // opens browser window automatically, 
-      port: 8080
+      port: 9000
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
