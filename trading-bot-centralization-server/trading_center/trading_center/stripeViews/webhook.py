@@ -33,7 +33,6 @@ def webhook_received(request):
     # Handle the event
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-        # Perform actions (e.g., update customer status)
         handle_checkout_session(session)
 
     # Other event types can be handled here
@@ -44,12 +43,13 @@ def webhook_received(request):
 def handle_checkout_session(session):
     customer_email = session.get("customer_email")
 
-    # Filter users where details.email matches customer_email
     users = User.objects.filter(Q(details__email=customer_email))
 
     if users.exists():
         user = users.first()
         user.permission_level = "VIP"  # Update the permission level
+        user.stripe_customer_id = session.get("id")
+        user.stripe_customer_details = session
         user.save()
     else:
         # Handle case where no matching user is found
