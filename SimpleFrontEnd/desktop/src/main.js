@@ -6,7 +6,6 @@ import App from './App.vue'
 import OneSignalVue from 'onesignal-vue'
 import '@/styles/global.scss';
 
-
 import { createI18n } from 'vue-i18n';
 import { Quasar } from 'quasar/wrappers';
 import quasarUserOptions from './quasar-user-options';
@@ -15,7 +14,6 @@ import quasarUserOptions from './quasar-user-options';
 const app = createApp(App)
 console.log("🚀 ~ file: main.ts:8 ~ app:", app)
 const authStore = userStore();
-
 
 const i18n = createI18n({
     legacy: false, // Use Composition API
