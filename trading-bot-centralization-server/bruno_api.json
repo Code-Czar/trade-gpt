@@ -1,0 +1,173 @@
+{
+  "name": "Trade gpt",
+  "version": "1",
+  "items": [
+    {
+      "type": "http",
+      "name": "Users",
+      "seq": 1,
+      "request": {
+        "url": "{{url}}/users",
+        "method": "GET",
+        "headers": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "auth": {
+          "mode": "none",
+          "basic": {
+            "username": "",
+            "password": ""
+          },
+          "bearer": {
+            "token": ""
+          }
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "query": []
+      }
+    },
+    {
+      "type": "http",
+      "name": "Subscriptions",
+      "seq": 2,
+      "request": {
+        "url": "{{url}}/subscriptions/?customer={{customer_id}}",
+        "method": "GET",
+        "headers": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "auth": {
+          "mode": "none",
+          "basic": {
+            "username": "",
+            "password": ""
+          },
+          "bearer": {
+            "token": ""
+          }
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "query": [
+          {
+            "name": "customer",
+            "value": "{{customer_id}}",
+            "enabled": true
+          }
+        ]
+      }
+    },
+    {
+      "type": "http",
+      "name": "Check Subscriptions status",
+      "seq": 3,
+      "request": {
+        "url": "{{url}}/check-subscription-status/?customer_id={{customer_id}}",
+        "method": "GET",
+        "headers": [],
+        "body": {
+          "mode": "none",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "auth": {
+          "mode": "none",
+          "basic": {
+            "username": "",
+            "password": ""
+          },
+          "bearer": {
+            "token": ""
+          }
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "query": [
+          {
+            "name": "customer_id",
+            "value": "{{customer_id}}",
+            "enabled": true
+          },
+          {
+            "name": "email",
+            "value": "",
+            "enabled": true
+          }
+        ]
+      }
+    },
+    {
+      "type": "http",
+      "name": "Cancel subscription",
+      "seq": 4,
+      "request": {
+        "url": "{{url}}/cancel-subscription/",
+        "method": "GET",
+        "headers": [],
+        "body": {
+          "mode": "json",
+          "json": "{\n  \"subscriptionId\": \"{{subscription_id}}\"\n}",
+          "formUrlEncoded": [],
+          "multipartForm": []
+        },
+        "auth": {
+          "mode": "none",
+          "basic": {
+            "username": "",
+            "password": ""
+          },
+          "bearer": {
+            "token": ""
+          }
+        },
+        "script": {},
+        "vars": {},
+        "assertions": [],
+        "tests": "",
+        "query": []
+      }
+    }
+  ],
+  "activeEnvironmentUid": "ZYYf2VEiXN8ucK3BPe396",
+  "environments": [
+    {
+      "variables": [
+        {
+          "name": "url",
+          "value": "http://127.0.0.1:8000",
+          "enabled": true,
+          "secret": false,
+          "type": "text"
+        },
+        {
+          "name": "customer_id",
+          "value": "cus_PDPn74voVU9EjI",
+          "enabled": true,
+          "secret": false,
+          "type": "text"
+        },
+        {
+          "name": "subscription_id",
+          "value": "AAAAA",
+          "enabled": true,
+          "secret": false,
+          "type": "text"
+        }
+      ],
+      "name": "local"
+    }
+  ]
+}
