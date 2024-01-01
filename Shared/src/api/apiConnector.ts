@@ -39,8 +39,7 @@ export async function get(url: string, parameters = {}, headers = defaultHeaders
     };
 
     try {
-        console.log("🚀 ~ file: apiConnector.ts:47 ~ s: LOG");
-        console.log("🚀 ~ file: apiConnector.ts:102 ~ url:", url);
+        //console.log("🚀 ~ file: apiConnector.ts:102 ~ url:", url);
 
         const response = await fetch(url, {
             method: "GET",
