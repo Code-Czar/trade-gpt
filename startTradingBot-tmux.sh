@@ -34,7 +34,7 @@ do
     # Check if the component is the centralization server
     if [ "$component" == "trading-bot-centralization-server" ]; then
         # Start the centralization server with its specific commands
-        tmux send-keys -t $session.$pane_index "cd $component/trading_center && source env/bin/activate && python manage.py runserver" C-m
+        tmux send-keys -t $session.$pane_index "cd $component && source env/bin/activate && cd trading_center/ && python manage.py runserver" C-m
     else
         # Start other components with 'yarn start'
         tmux send-keys -t $session.$pane_index "cd $component && clear" C-m
