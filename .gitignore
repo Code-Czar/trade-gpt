@@ -1,4 +1,6 @@
 **/*.log
+**/logs
+*Log*
 **/node_modules
 **/out
 **/dist
@@ -9,3 +11,5 @@ __pycache__
 db.sqlite3
 trading-bot-position-manager/src/*.js
 **/notificationsLog.txt
+mochawesome-report
+.DS_Store

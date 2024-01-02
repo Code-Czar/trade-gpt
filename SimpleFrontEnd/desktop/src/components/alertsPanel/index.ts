@@ -1,1 +1,1 @@
-export { default as AlertsPanel } from './alertsPanel.vue'
+export { default as AlertsPanel } from './alertsPanel.vue';

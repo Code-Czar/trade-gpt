@@ -10,6 +10,7 @@
       "@/*": [
         "./src/*"
       ],
+      "@/types/*": ["src/types/*"],
       "*": [
         "../Shared"
       ],
@@ -132,7 +133,7 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/**/*.json"
-  ],
+, "../Shared/src/influxdb/InfluxDBWrapper.ts"  ],
   "allowImportingTsExtensions": true,
   "allowJs": true,
   "allowSyntheticDefaultImports": true

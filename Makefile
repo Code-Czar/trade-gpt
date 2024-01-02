@@ -53,6 +53,7 @@ link_shared_lib:
 	cd trading-bot-backend && yarn link "$(SHARED_LIB_NAME)"
 	cd SimpleFrontEnd/desktop && yarn add --force ../../Shared
 	cd trading-bot-strategy-analyzer && yarn link "$(SHARED_LIB_NAME)"
+	cd Testing && yarn link "$(SHARED_LIB_NAME)"
 
 install_backend: install_node link_shared_lib
 	cd trading-bot-backend && yarn install
@@ -76,3 +77,7 @@ deploy_staging:
 
 deploy_production:
 	./deployToServer.sh production
+
+tests:
+	cd SimpleFrontEnd/desktop && yarn cy:run
+	cd Testing && ./runTests.sh local

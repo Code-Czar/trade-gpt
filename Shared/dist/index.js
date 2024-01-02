@@ -20,4 +20,6 @@ __exportStar(require("./consts"), exports);
 __exportStar(require("./types"), exports);
 __exportStar(require("./calculations"), exports);
 __exportStar(require("./notifications"), exports);
+__exportStar(require("./utils"), exports);
+__exportStar(require("./influxdb"), exports);
 //# sourceMappingURL=index.js.map

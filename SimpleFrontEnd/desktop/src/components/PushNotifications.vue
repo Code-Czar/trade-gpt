@@ -16,52 +16,52 @@ const APP_ID = "c9f90795-f921-4717-92b2-3dd1e9405b30";
 const OneSignal = window.OneSignal
 
 
-OneSignal._notificationOpenedCallbacks.push(function (event) {
-    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal.on ~ event:", event)
+OneSignal?._notificationOpenedCallbacks.push(function (event) {
+    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal?.on ~ event:", event)
 
 });
-OneSignal.push(() => {
-    OneSignal.on('notificationClick', function (event) {
-        console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal.on ~ event:", event)
+OneSignal?.push(() => {
+    OneSignal?.on('notificationClick', function (event) {
+        console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal?.on ~ event:", event)
 
     });
-    OneSignal.on('change', function (event) {
-        console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal.on ~ event:", event)
+    OneSignal?.on('change', function (event) {
+        console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal?.on ~ event:", event)
 
     });
-    OneSignal.on('notificationDisplay', function (event) {
-        console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal.on ~ event:", event)
+    OneSignal?.on('notificationDisplay', function (event) {
+        console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal?.on ~ event:", event)
 
     });
-    OneSignal.on('notificationClick', function (event) {
-        console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal.on ~ event:", event)
+    OneSignal?.on('notificationClick', function (event) {
+        console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal?.on ~ event:", event)
 
     });
 
 })
 
-OneSignal.on('notificationClick', function (event) {
-    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal.on ~ event:", event)
+OneSignal?.on('notificationClick', function (event) {
+    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal?.on ~ event:", event)
 
 });
-OneSignal.on('change', function (event) {
-    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal.on ~ event:", event)
+OneSignal?.on('change', function (event) {
+    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal?.on ~ event:", event)
 
 });
-OneSignal.on('notificationDisplay', function (event) {
-    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal.on ~ event:", event)
+OneSignal?.on('notificationDisplay', function (event) {
+    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal?.on ~ event:", event)
 
 });
-OneSignal.on('notificationClick', function (event) {
-    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal.on ~ event:", event)
+OneSignal?.on('notificationClick', function (event) {
+    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal?.on ~ event:", event)
 
 });
 window.onmessage = function (event) {
-    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal.on ~ event:", event)
+    console.log("🚀 ~ file: PushNotifications.vue:23 EVEEENT ~ OneSignal?.on ~ event:", event)
 
 };
 
-window.OneSignal.on('change', function (event) {
+window.OneSignal?.on('change', function (event) {
     // Access the notification data
     const notificationData = event.notification.data;
 
@@ -77,7 +77,7 @@ window.OneSignal.on('change', function (event) {
     console.log('Notification Body:', notificationBody);
 });
 
-OneSignal.init({
+OneSignal?.init({
     appId: APP_ID,
     safari_web_id: "web.onesignal.auto.613528e9-2930-4b07-a098-5a9518822d98",
     notifyButton: {
