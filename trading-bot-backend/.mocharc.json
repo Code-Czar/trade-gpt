@@ -1,3 +1,7 @@
 {
-    "extension": ["ts", "tsx"]
+    "extension": [
+        "ts",
+        "tsx"
+    ],
+    "timeout": 10000
 }

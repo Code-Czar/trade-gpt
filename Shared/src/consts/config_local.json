@@ -1,4 +1,4 @@
 {
     "REMOTE_URL": "127.0.0.1",
-    "REMOTE_WSS": "wss://127.0.0.1"
+    "REMOTE_WSS": "ws://127.0.0.1"
 }

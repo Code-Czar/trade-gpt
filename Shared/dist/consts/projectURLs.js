@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.STRATEGY_ANALYZER_URLS = exports.CENTRALIZATION_API_URLS = exports.CENTRALIZATION_ENDPOINTS = exports.BACKEND_URLS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = exports.REMOTE_WSS_URL = exports.REMOTE_URL = void 0;
+exports.STRATEGY_ANALYZER_URLS = exports.STRATEGY_ANALYZER_ENDPOINTS = exports.CENTRALIZATION_API_URLS = exports.CENTRALIZATION_ENDPOINTS = exports.BACKEND_URLS = exports.BACKEND_ENDPOINTS = exports.PROJECT_URLS = exports.SERVER_PORTS = exports.REMOTE_WSS_URL = exports.REMOTE_URL = void 0;
 const config_json_1 = __importDefault(require("./config.json"));
 // Check if we are in a Node.js environment
 if (typeof process !== 'undefined' && process.versions && process.versions.node) {
@@ -20,7 +20,7 @@ else {
     exports.REMOTE_URL = config_json_1.default.REMOTE_URL;
     exports.REMOTE_WSS_URL = config_json_1.default.REMOTE_WSS;
 }
-console.log("🚀 ~ file: projectURLs.ts:19 ~ config:", config_json_1.default, exports.REMOTE_URL);
+console.log('🚀 ~ file: projectURLs.ts:19 ~ config:', config_json_1.default, exports.REMOTE_URL);
 exports.SERVER_PORTS = {
     BACKEND_PORT: 3000,
     STRATEGY_ANALYZER_PORT: 3002,
@@ -35,20 +35,33 @@ exports.PROJECT_URLS = {
     CENTRALIZATION_URL: 'centralization.' + exports.REMOTE_URL,
 };
 if (exports.REMOTE_URL.includes('127.0.0.1') || exports.REMOTE_URL.includes('localhost')) {
-    exports.PROJECT_URLS.CENTRALIZATION_URL = exports.REMOTE_URL + ":" + exports.SERVER_PORTS.CENTRALIZATION_PORT;
+    exports.PROJECT_URLS.CENTRALIZATION_URL = exports.REMOTE_URL + ':' + exports.SERVER_PORTS.CENTRALIZATION_PORT;
 }
 exports.BACKEND_ENDPOINTS = {
+    HEALTH: '/health',
+    CLEAR_DATABASE: '/clearDB',
+    FETCH_ALL_HISTORICAL_DATA: '/api/fetchAllHistoricalData',
+    FETCH_HISTORICAL_DATA: '/api/fetchHistoricalData',
+    GET_PAIR_DATA: '/api/getPairData',
     LEVERAGE_ENDPOINTS: {
         getLeverageSymbols: '/api/symbols/leverage',
-        getHistoricalDataForPair: '/api/fetchHistoricalDataForPair'
+        getHistoricalDataForPair: '/api/fetchHistoricalDataForPair',
     },
     RSI_ENDPOINTS: {
         getAllRSIValues: '/api/rsi/getValues',
-    }
+    },
+    DATA_STORE: {
+        getDataStore: '/api/getDataStore',
+    },
 };
 exports.BACKEND_URLS = {
     ROOT: exports.PROJECT_URLS.BACKEND_URL,
+    HEALTH: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.HEALTH,
     WEBSOCKET: exports.PROJECT_URLS.BACKEND_WEBSOCKET,
+    CLEAR_DATABASE: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.CLEAR_DATABASE,
+    FETCH_ALL_HISTORICAL_DATA: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.FETCH_ALL_HISTORICAL_DATA,
+    FETCH_HISTORICAL_DATA: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.FETCH_HISTORICAL_DATA,
+    GET_PAIR_DATA: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.GET_PAIR_DATA,
     LEVERAGE_URLS: {
         getLeverageSymbols: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getLeverageSymbols,
         getHistoricalDataForPair: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.LEVERAGE_ENDPOINTS.getHistoricalDataForPair,
@@ -56,25 +69,69 @@ exports.BACKEND_URLS = {
     RSI_URLS: {
         getAllRSIValues: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.RSI_ENDPOINTS.getAllRSIValues,
     },
+    DATA_STORE: {
+        getDataStore: exports.PROJECT_URLS.BACKEND_URL + exports.BACKEND_ENDPOINTS.DATA_STORE.getDataStore,
+    },
 };
 exports.CENTRALIZATION_ENDPOINTS = {
     USERS: '/users',
     STRIPE_CONFIG: '/config',
     STRIPE_PAYMENT_ATTEMPT: '/create-payment-intent',
     STRIPE_CREATE_CUSTOMER: '/create-customer',
-    STRIPE_CHECKOUT_SESSION: '/create_checkout_session'
+    STRIPE_CHECKOUT_SESSION: '/create_checkout_session',
 };
 exports.CENTRALIZATION_API_URLS = {
     USERS: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.USERS,
     STRIPE_CONFIG: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.STRIPE_CONFIG,
     STRIPE_PAYMENT_ATTEMPT: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.STRIPE_PAYMENT_ATTEMPT,
     STRIPE_CREATE_CUSTOMER: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.STRIPE_CREATE_CUSTOMER,
-    STRIPE_CHECKOUT_SESSION: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.STRIPE_CHECKOUT_SESSION
+    STRIPE_CHECKOUT_SESSION: exports.PROJECT_URLS.CENTRALIZATION_URL + exports.CENTRALIZATION_ENDPOINTS.STRIPE_CHECKOUT_SESSION,
+};
+exports.STRATEGY_ANALYZER_ENDPOINTS = {
+    HEALTH: '/health',
+    SIGNALS: {
+        EMA28_SIGNALS: '/api/getEMA28Signals',
+        RSI_SIGNALS: '/api/getRSISignals',
+    },
+    USERS_NOTIFICATIONS: {
+        getUsersNotifications: '/api/getUsersNotifications',
+        loadUserNotifications: '/api/loadUserNotifications',
+        saveUserNotifications: '/api/saveUserNotifications',
+        addNotification: '/api/addNotification',
+        removeNotification: '/api/removeNotification', // Removed URL parameters
+        updateNotification: '/api/updateNotification', // Removed URL parameters
+        getNotification: '/api/getNotification', // Removed URL parameters
+        getNotificationForPairAndTimeframe: '/api/getNotificationForPairAndTimeframe',
+        markNotificationAsSent: '/api/markNotificationAsSent', // Removed URL parameters
+        resetNotificationSentStatus: '/api/resetNotificationSentStatus', // Removed URL parameters
+    },
+    BACKTESTING: {
+        startBacktest: '/api/startBacktest',
+        getBacktestResults: '/api/getBacktestResults',
+    },
 };
 exports.STRATEGY_ANALYZER_URLS = {
+    HEALTH: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.HEALTH,
     SIGNALS: {
-        getEMA28Signals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getEMA28Signals',
-        getRSISignals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + '/api/getRSISignals',
-    }
+        getEMA28Signals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.SIGNALS.EMA28_SIGNALS,
+        getRSISignals: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.SIGNALS.RSI_SIGNALS,
+    },
+    USERS_NOTIFICATIONS: {
+        getUsersNotifications: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.getUsersNotifications,
+        loadUserNotifications: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.loadUserNotifications,
+        saveUserNotifications: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.saveUserNotifications,
+        addNotification: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.addNotification,
+        removeNotification: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.removeNotification,
+        updateNotification: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.updateNotification,
+        getNotification: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.getNotification,
+        getNotificationForPairAndTimeframe: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL +
+            exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.getNotificationForPairAndTimeframe,
+        markNotificationAsSent: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.markNotificationAsSent,
+        resetNotificationSentStatus: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.USERS_NOTIFICATIONS.resetNotificationSentStatus,
+    },
+    BACKTESTING: {
+        startBacktest: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.BACKTESTING.startBacktest,
+        getBacktestResults: exports.PROJECT_URLS.STRATEGY_ANALYZER_URL + exports.STRATEGY_ANALYZER_ENDPOINTS.BACKTESTING.getBacktestResults,
+    },
 };
 //# sourceMappingURL=projectURLs.js.map

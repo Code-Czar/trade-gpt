@@ -8,7 +8,9 @@
       <!-- Flex Container for Navigation Items -->
       <div class="flex-container">
         <span class="nav-menu-item">{{ $t('navigationMenu.homeHeader.home') }}</span>
-        <q-btn flat rounded dense class="nav-menu-item" @click="goToLogin"> {{ $t('buttons.login') }} </q-btn>
+        <q-btn id="header-login-button" flat rounded dense class="nav-menu-item" @click="goToLogin">
+          {{ $t('buttons.login') }}
+        </q-btn>
         <I18nProvider>
           <LanguageSwitchButton />
         </I18nProvider>

@@ -56,10 +56,23 @@ function send_ssh_key() {
 
 # Start services 
 alias startFront="cd trading-bot-frontend; yarn start"
-alias startBack="cd trading-bot-backend; yarn start"
+alias startbe="cd trading-bot-backend; yarn dev"
+alias startsa="cd trading-bot-strategy-analyzer; yarn dev"
+alias startca="cd trading-bot-centralization-server; source env/bin/activate; cd trading_center; python3 manage.py runserver"
+alias testgpt="cd Testing; ./runTests.sh local; cd -"
+
 alias startTelegraf="telegraf --config /usr/local/etc/telegraf.conf"
 alias startInfluxMac="brew services  restart influxdb"
 
 
 # Go to servers 
 alias gotoProduction="ssh -p2233 opDevUser@$PRODUCTION_IP"
+
+
+# Testing 
+function testapis() {
+    cd Testing && ./runTests.sh "$@" && cd -
+}
+
+
+alias testapis="testapis"

@@ -3,9 +3,21 @@ import { apiConnector, CENTRALIZATION_API_URLS } from 'trading-shared';
 import { LocalStorage } from 'quasar';
 
 
+const restoreUser = ()=>{
+  const storageUser = LocalStorage.getItem('user')
+  if(typeof storageUser ==="string"){
+    return JSON.parse(storageUser)
+  }
+  else if(!storageUser){
+    return {}
+  }
+  return storageUser as  CreateMutable<User>
+
+}
+
 export const userStore = defineStore('user', {
   state: () => ({
-    user: (LocalStorage.getItem('user') || {}) as CreateMutable<User>,
+    user: restoreUser(),
     session: null,
     persist: true
   }),

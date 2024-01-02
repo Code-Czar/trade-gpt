@@ -1,0 +1,33 @@
+{
+    "strategyName": "RSIDivergenceStrategy",
+    "description": "A strategy that buys when the RSI is low, applied to specific pairs and leverage levels.",
+    "parameters": {
+        "rsiPeriod": 14,
+        "buyThreshold": 30,
+        "sellThreshold": 70
+    },
+    "pairs": [
+        "BTC/USD",
+        "ETH/USD"
+    ],
+    "requiredFields": [
+        "open",
+        "high",
+        "low",
+        "close",
+        "rsi14"
+    ],
+    "timeframes": [
+        "1d",
+        "1h"
+    ],
+    "minLeverage": 50,
+    "riskManagement": {
+        "initialCapital": 100,
+        "stopLossPercentage": 5,
+        "takeProfitPercentage": 10,
+        "riskPerTradePercentage": 2,
+        "liquidationLevelPercentage": 50,
+        "appliedLeverage": 50
+    }
+}

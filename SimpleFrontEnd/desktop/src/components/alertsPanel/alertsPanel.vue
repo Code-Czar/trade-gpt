@@ -4,7 +4,7 @@
             <div class="accordion-grid">
                 <!-- RSI Below Threshold -->
                 <div class="accordion-card">
-                    <q-expansion-item label="RSI Below Threshold" icon="trending_down" class="q-flex q-flex-column"
+                    <q-expansion-item id="rsiThresholdPanel-toggleButton" label="RSI Threshold" icon="trending_down" class="q-flex q-flex-column"
                         :expanded="true">
                         <q-toggle v-model="rsiAlertEnabled" label="Enable Alert" />
                         <q-select v-model="selectedPairsRsi" :options="pairOptions" use-input input-debounce="300" multiple
@@ -54,14 +54,7 @@
                                             {{ value3?.type }} - {{ notificationUUID }}
                                             <q-btn flat icon="remove" @click="removeNotification(index)" />
                                         </div>
-
-
                                     </div>
-
-                                    <!-- {{ notif.type }} - Threshold: {{ notif.parameters.threshold }} - Pairs: {{
-                                        notif.pairName
-                                    }} -->
-                                    <!-- {{ pairName }} - {{ value }} -->
                                 </div>
                             </div>
                         </div>
