@@ -93,7 +93,7 @@ export class TradingBot {
 
             // Diagnostic logs
             // global.logger.info(`Last candle timestamp: ${ohlcvs[ohlcvs.length - 1][0]}, Start Time: ${lastCandleStartTime}`);
-            global.logger.info(`New item timestamp: ${newItem[0]}, Start Time: ${newItemStartTime}`);
+            //global.logger.info(`New item timestamp: ${newItem[0]}, Start Time: ${newItemStartTime}`);
 
             if (lastCandleStartTime === newItemStartTime) {
                 ohlcvs[ohlcvs.length - 1] = newItem

@@ -11,7 +11,7 @@ stripe.api_key = settings.STRIPE_SEC_KEY
 
 class GetConfigView(View):
     def get(self, request):
-        prices = stripe.Price.list(lookup_keys=["sample_basic", "sample_premium"])
+        prices = stripe.Price.list(lookup_keys=["subscription"])
         return JsonResponse(
             {
                 "publishableKey": settings.STRIPE_PUB_KEY,  # os.getenv('STRIPE_PUBLISHABLE_KEY'),
