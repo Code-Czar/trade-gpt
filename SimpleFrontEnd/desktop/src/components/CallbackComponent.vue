@@ -1,7 +1,7 @@
 <template>
     <div>Processing...</div>
 </template>
-  
+
 <script lang="ts" setup>
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
@@ -39,46 +39,30 @@ onMounted(() => {
     if (accessToken) {
         // You might want to securely store the accessToken and related data here
 
-        // Set the session in Supabase client
         supabase.auth.setSession({
             access_token: accessToken,
             token_type: tokenType,
             expires_at: expiresAt
         });
-        console.log("🚀 ~ file: CallbackComponent.vue:32 ~ accessToken:", accessToken);
-        console.log("🚀 ~ file: CallbackComponent.vue:34 ~ tokenType:", tokenType);
 
         supabase.auth.getUser(accessToken).then(async ({ data: { user } }) => {
             if (user) {
                 console.log("User details:", user);
 
-                // Store user details in your user store
                 store.setUserCredentials(user, accessToken);
                 await store.pushUserToBackend(user);
 
-                // You can access specific details like this:
-                console.log("User name:", user.user_metadata.name); // Example for name
-                console.log("User avatar UUID:", user.user_metadata.avatar_url); // Example for avatar URL
                 console.log("🚀 ~ file: CallbackComponent.vue:55 ~ user:", user);
-
-
                 console.log("🚀 ~ file: CallbackComponent.vue:58 ~ store:", store.user, store.user.role);
 
                 if (store.user.role !== "Dev" && store.user.role !== "Admin") {
                     router.push('/beta')
                 }
                 else {
-                    // Redirect to the desired page
                     router.push('/app');
-
                 }
-
             }
         })
-
-
-
-
 
         // router.push('/app');  // Redirect to the desired page
     } else {
@@ -87,4 +71,3 @@ onMounted(() => {
     }
 });
 </script>
-  

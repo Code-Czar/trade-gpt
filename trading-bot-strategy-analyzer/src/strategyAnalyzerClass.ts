@@ -157,13 +157,13 @@ export class StrategyAnalyzer {
             }
 
             const userPairs = this.usersNotifications[symbolName];
-            console.log("🚀 ~ file: strategyAnalyzerClass.ts:131 ~  this.usersNotification:", userPairs);
+            //console.log("🚀 ~ file: strategyAnalyzerClass.ts:131 ~  this.usersNotification:", userPairs);
             if (userPairs && userPairs[timeframe]) {
-                console.log("🚀 ~ file: strategyAnalyzerClass.ts:132 ~ userPairs:", userPairs[timeframe]);
+                //console.log("🚀 ~ file: strategyAnalyzerClass.ts:132 ~ userPairs:", userPairs[timeframe]);
                 const notifications = userPairs[timeframe]['RSI_Low_Alert'];
                 for (const notificationId in notifications) {
                     const notification = notifications[notificationId];
-                    console.log("🚀 ~ file: strategyAnalyzerClass.ts:135 ~ notification:", notificationId, notifications);
+                    //console.log("🚀 ~ file: strategyAnalyzerClass.ts:135 ~ notification:", notificationId, notifications);
                     if (notification.preferences.status !== 'active') continue;
 
                     const userId = notification.userId;
